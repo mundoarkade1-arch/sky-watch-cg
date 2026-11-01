@@ -59,8 +59,8 @@ cd android-app
 | TM-001 | `SyncMetadataDaoTest.testSyncMetadataInsertAndRead` | **Sucesso (Aprovado)** | Valida inserção e leitura de metadados de sincronização. |
 | TM-002 | `SyncMetadataDaoTest.testSyncMetadataUpdate` | **Sucesso (Aprovado)** | Valida atualização dos metadados (upsert com chave primária fixa id=1). |
 | TM-003 | `SyncMetadataDaoTest.testSyncMetadataSingleRowEnforced` | **Sucesso (Aprovado)** | Confirma que apenas um registro de metadados existe (id=1). |
-| TM-004 | `SyncMetadataDaoTest.testSyncMetadataRejectId2` | **Sucesso (Aprovado)** | Comprova rejeição de `id = 2` por violação da constraint `CHECK (id = 1)`. |
-| TM-005 | `SyncMetadataDaoTest.testSyncMetadataRejectId3` | **Sucesso (Aprovado)** | Comprova rejeição de `id = 3` por violação da constraint `CHECK (id = 1)`. |
+| TM-004 | `SyncMetadataDaoTest.testSyncMetadataRejectId2` | **Sucesso (Aprovado)** | Comprova rejeição de `id = 2` por violação da constraint `CHECK (id = 1)`. Ressalva: o teste recria a tabela sync_metadata manualmente, com CHECK (id = 1), dentro do próprio setup (o banco em memória não executa migração). Prova o comportamento do CHECK no SQLite, mas não que o banco real do app o possua; isso depende do teste instrumentado da migração, ainda não executado. |
+| TM-005 | `SyncMetadataDaoTest.testSyncMetadataRejectId3` | **Sucesso (Aprovado)** | Comprova rejeição de `id = 3` por violação da constraint `CHECK (id = 1)`. Ressalva: o teste recria a tabela sync_metadata manualmente, com CHECK (id = 1), dentro do próprio setup (o banco em memória não executa migração). Prova o comportamento do CHECK no SQLite, mas não que o banco real do app o possua; isso depende do teste instrumentado da migração, ainda não executado. |
 | TM-006 | `AppDatabaseMigrationTest.migrate1To2PreservesFlights` | **Pendente (sem dispositivo/emulador)** | Teste de migração Room v1→v2 usando `MigrationTestHelper`: insere voos na v1, migra para v2, verifica preservação total dos dados na tabela `flights`. Requer dispositivo/emulador Android conectado. |
 
 > **Nota:** Os testes unitários (TM-001 a TM-005) foram executados e aprovados via `testDebugUnitTest` em 2026-11-01. O teste instrumentado TM-006 permanece pendente por falta de dispositivo/emulador Android disponível.
@@ -88,9 +88,17 @@ cd android-app
 | TSB-003 | `testParseStreamWithoutBomIso88591` | **Sucesso (Aprovado)** | Valida retrocompatibilidade sem BOM (ISO-8859-1). |
 | TSR-001 | `parseRealCsvStreamingCountsRecordsAndKeepsMemoryFlat` | **Sucesso (Aprovado / Condicional)** | Executado com o arquivo real de ~25 MB. Resultados: total_lines=65477, records=65475, sbcg=867, baseline_mb=10, peak_live_mb=10, growth_mb=0, elapsed_ms=966. (A memória é amostrada a cada 50.000 registros, indicando consumo estável sem acúmulo). |
 
+**Testes Instrumentados (01/11/2026):**
+- `FlightDaoTest.kt`: todos os métodos `@Test` ajustados para `runBlocking` (o `FlightDao` tem métodos `suspend`).
+- `AppDatabaseMigrationTest.kt`: reescrito sem `MigrationTestHelper`/`room-testing` (ausentes no projeto). Cria banco "v1 provável" (tabela `flights` igual ao schema atual), aplica `MIGRATION_1_2`, verifica: `sync_metadata` existe, voo antigo sobrevive, `CHECK (id = 1)` rejeita `id = 2`.
+- **Compilação:** `compileDebugAndroidTestKotlin` = `BUILD SUCCESSFUL`.
+- **Execução:** NÃO realizada (sem aparelho Android real; emulador não viável com 7,9 GB RAM). **Não declarar como aprovados.**
+
 **Pendências NÃO validados:**
-- teste instrumentado da migração v1 para v2 (TM-006, sem dispositivo ou emulador);
+- execução de `connectedDebugAndroidTest` em celular Android real via depuração USB (validar migração v1→v2 e DAO);
 - ingestão remota (download, syncFromRemote, WorkManager) ainda não implementada, a Fase 6.3 não foi autorizada.
+
+**Ponto em aberto (Room):** em instalações NOVAS (schema v2), o Room cria a tabela sync_metadata SEM a restrição CHECK (id = 1). Somente bancos que passaram pela MIGRATION_1_2 têm o CHECK. Ou seja, o CHECK não vale em todos os bancos. Nenhum código foi alterado por causa disso; a decisão fica para depois.
 
 
 ## Resumo da Execução Unitária (testDebugUnitTest) - 01/11/2026

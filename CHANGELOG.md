@@ -23,7 +23,7 @@
 - **Corrigida condição de corrida de corrotinas** no `FlightListViewModel`: adicionado controle `loadJob?.cancel()` antes de iniciar nova consulta, garantindo que apenas a consulta mais recente atualize o estado da interface. Preservado carregamento automático no `init` e funcionamento do botão refresh.
 - **Sincronização dos Testes Unitários (Etapa 5 resolvida em 01/11/2026):** Os 3 testes que falhavam em `FlightListViewModelTest` passaram com sucesso. A causa era que os testes liam o estado logo depois de `advanceUntilIdle()`, mas a consulta do Room roda em uma thread que o relógio de teste não controla. A correção foi adicionar `viewModel.uiState.first { it !is FlightUiState.Loading }` nos três testes, sem alterar o código de produção.
 ### Fase 6.1 (Revisada): Restrição de Registro Único em `sync_metadata` (2026-11-01)
-- **Correção da restrição de banco de dados:** Adicionada a restrição `CHECK (id = 1)` na instrução SQL da migração `MIGRATION_1_2` em `AppDatabase.kt`, garantindo no próprio nível do SQLite que a tabela `sync_metadata` rejeite qualquer tentativa de inserir registros com IDs diferentes de 1.
+- **Correção da restrição de banco de dados:** Adicionada a restrição `CHECK (id = 1)` na instrução SQL da migração `MIGRATION_1_2` em `AppDatabase.kt`, garantindo no próprio nível do SQLite que a tabela `sync_metadata` rejeite qualquer tentativa de inserir registros com IDs diferentes de 1 (o CHECK existe apenas em bancos migrados da v1; instalações novas criadas pelo Room não o têm).
 - **Novos testes de rejeição:** Adicionados os testes unitários `testSyncMetadataRejectId2` e `testSyncMetadataRejectId3` em `SyncMetadataDaoTest.kt`, que verificam e comprovam com sucesso que inserções com `id = 2` ou `id = 3` lançam `SQLiteConstraintException` por violação da constraint.
 - **Resultado:** 19 unitários executados e aprovados (`BUILD SUCCESSFUL`).
 
@@ -35,10 +35,11 @@
   3. Removidos dois `return@Test` inválidos em `SyncMetadataDaoTest.kt`.
 - **Correção de codificação (01/11/2026):** O CSV real do SIROS (24.7 MB, baixado em 01/11/2026) está em UTF-8 COM BOM (`EF BB BF`), não em ISO-8859-1. Causa do bug: o parser lia como ISO-8859-1, nunca reconhecia o cabeçalho "Cód. Empresa" e devolvia 0 registros. Correção: função `openReader` em `SirosStreamParser.kt` detecta o BOM UTF-8 e lê em UTF-8; sem BOM mantém ISO-8859-1.
 - **Novos testes:** `SirosStreamParserBomTest` (3 testes: UTF-8 com BOM via `parseStream`, UTF-8 com BOM via `parseStreamWithCallback`, ISO-8859-1 sem BOM).
+- **Ajustes nos Testes Instrumentados (01/11/2026):** `FlightDaoTest.kt` e `AppDatabaseMigrationTest.kt` ajustados para usar `runBlocking` (métodos do `FlightDao` são `suspend`). `AppDatabaseMigrationTest.kt` foi reescrito sem `MigrationTestHelper` / `room-testing` (ausentes no projeto), simulando uma v1 provável. Compilação `compileDebugAndroidTestKotlin` bem-sucedida (`BUILD SUCCESSFUL`), mas os testes instrumentados NÃO foram executados (sem aparelho; emulador não é viável com 7,9 GB de RAM).
 - **Resultados dos testes unitários em 01/11/2026 (`testDebugUnitTest`):** `BUILD SUCCESSFUL`, 32 testes, 0 falhas, 0 erros (distribuídos em `SyncMetadataDaoTest` 5, `SirosCsvParserTest` 4, `SirosNormalizerTest` 4, `SirosRepositoryTest` 2, `SirosStreamParserBomTest` 3, `SirosStreamParserRealFileTest` 1, `SirosStreamParserTest` 9, `FlightListViewModelTest` 4).
 - **Medição real com CSV completo (`SirosStreamParserRealFileTest`):** total_lines=65477, records=65475, sbcg=867, baseline_mb=10, peak_live_mb=10, growth_mb=0, elapsed_ms=966. A memória é amostrada a cada 50.000 registros, então é indicação, não pico exato.
 - **Pendências da Fase 6.2 (Itens NÃO validados):**
-  - Teste instrumentado da migração v1 para v2 (pendente de dispositivo ou emulador físico/virtual).
+  - Execução de testes instrumentados (`connectedDebugAndroidTest` em celular Android real via USB).
   - Ingestão remota (`download`, `syncFromRemote`, `WorkManager`) ainda não implementada (Fase 6.3 não autorizada).
 
 ## 2026-10-31 — Módulo SIROS e Testes Unitários Implementados

@@ -3,6 +3,7 @@ package com.skywatch.cg.data.db
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.skywatch.cg.data.siros.OperationType
+import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
@@ -56,7 +57,7 @@ class FlightDaoTest {
     }
 
     @Test
-    fun testInsertAndGetByFlightId() {
+    fun testInsertAndGetByFlightId() = runBlocking {
         val flight = createTestFlight()
         dao.insert(flight)
 
@@ -69,7 +70,7 @@ class FlightDaoTest {
     }
 
     @Test
-    fun testInsertMultipleAndQueryAll() {
+    fun testInsertMultipleAndQueryAll() = runBlocking {
         val arrival = createTestFlight(
             flightId = "TEST-001-2024-01-15",
             operationType = OperationType.ARRIVAL,
@@ -93,7 +94,7 @@ class FlightDaoTest {
     }
 
     @Test
-    fun testGetFlightsByDate() {
+    fun testGetFlightsByDate() = runBlocking {
         val date1 = LocalDate.of(2024, 1, 15)
         val date2 = LocalDate.of(2024, 1, 16)
 
@@ -111,7 +112,7 @@ class FlightDaoTest {
     }
 
     @Test
-    fun testUpdateFlight() {
+    fun testUpdateFlight() = runBlocking {
         val flight = createTestFlight()
         dao.insert(flight)
 
@@ -123,7 +124,7 @@ class FlightDaoTest {
     }
 
     @Test
-    fun testDeleteFlight() {
+    fun testDeleteFlight() = runBlocking {
         val flight = createTestFlight()
         dao.insert(flight)
 
@@ -134,7 +135,7 @@ class FlightDaoTest {
     }
 
     @Test
-    fun testDeleteOldFlights() {
+    fun testDeleteOldFlights() = runBlocking {
         val oldDate = LocalDate.of(2023, 12, 31)
         val newDate = LocalDate.of(2024, 1, 15)
 
@@ -159,7 +160,7 @@ class FlightDaoTest {
     }
 
     @Test
-    fun testPreventDuplicatesByPrimaryKey() {
+    fun testPreventDuplicatesByPrimaryKey() = runBlocking {
         val flight1 = createTestFlight()
         val flight2 = flight1.copy(airline = "AZUL")
 
@@ -172,7 +173,7 @@ class FlightDaoTest {
     }
 
     @Test
-    fun testClearAll() {
+    fun testClearAll() = runBlocking {
         val flight1 = createTestFlight(flightId = "TEST-001-2024-01-15", sirosRecordId = "TEST-001")
         val flight2 = createTestFlight(flightId = "TEST-002-2024-01-15", sirosRecordId = "TEST-002")
 

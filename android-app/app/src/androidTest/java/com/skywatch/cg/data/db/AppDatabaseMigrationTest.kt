@@ -1,64 +1,96 @@
 package com.skywatch.cg.data.db
 
-import androidx.room.testing.MigrationTestHelper
-import androidx.sqlite.db.support.SupportSQLiteDatabase
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.platform.app.InstrumentationRegistry
+import android.database.sqlite.SQLiteConstraintException
+import androidx.room.Room
+import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.sqlite.db.SupportSQLiteOpenHelper
+import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
+import androidx.test.core.app.ApplicationProvider
+import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
-import org.junit.Rule
+import org.junit.Assert.fail
+import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
-import java.io.IOException
 
-@RunWith(AndroidJUnit4::class)
+// Valida MIGRATION_1_2 sobre uma "v1 provavel": tabela flights igual a gerada pelo Room hoje.
+// O schema real da v1 nunca foi exportado, entao isto NAO prova migracao de aparelho real com a v1 antiga.
 class AppDatabaseMigrationTest {
 
-    private val TEST_DB = "migration-test"
+    private val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+    private val dbName = "migration-test.db"
 
-    @get:Rule
-    val helper: MigrationTestHelper = MigrationTestHelper(
-        InstrumentationRegistry.getInstrumentation(),
-        AppDatabase::class.java.canonicalName,
-        androidx.room.testing.MigrationTestHelper.SQLiteDriverProvider()
-    )
+    private val createFlightsV1 =
+        "CREATE TABLE IF NOT EXISTS `flights` (`flightId` TEXT NOT NULL, `sirosRecordId` TEXT NOT NULL, `airline` TEXT NOT NULL, `flightNumber` TEXT NOT NULL, `equipment` TEXT, `origin` TEXT NOT NULL, `originName` TEXT, `originTimezone` TEXT NOT NULL, `destination` TEXT NOT NULL, `destinationName` TEXT, `destinationTimezone` TEXT NOT NULL, `operationType` TEXT NOT NULL, `scheduledDepartureUtc` TEXT NOT NULL, `scheduledArrivalUtc` TEXT NOT NULL, `flightDate` TEXT NOT NULL, `validFrom` TEXT NOT NULL, `validTo` TEXT NOT NULL, `serviceType` TEXT, `sirosStatus` TEXT NOT NULL, `operationalStatus` TEXT NOT NULL, `delayMinutes` INTEGER, `lastSyncAt` INTEGER NOT NULL, `statusUpdatedAt` INTEGER, PRIMARY KEY(`flightId`))"
+
+    private val insertFlightV1 =
+        "INSERT INTO flights (flightId, sirosRecordId, airline, flightNumber, origin, originTimezone, destination, destinationTimezone, operationType, scheduledDepartureUtc, scheduledArrivalUtc, flightDate, validFrom, validTo, sirosStatus, operationalStatus, lastSyncAt) VALUES ('OLD-1', 'OLD', 'GOL', '1234', 'SBGR', 'America/Sao_Paulo', 'SBCG', 'America/Campo_Grande', 'ARRIVAL', '10:00', '11:30', '2024-01-15', '2024-01-01', '2024-12-31', 'EM OPERACAO', 'UNKNOWN', 0)"
+
+    @Before
+    fun setUp() {
+        context.deleteDatabase(dbName)
+    }
+
+    @After
+    fun tearDown() {
+        context.deleteDatabase(dbName)
+    }
+
+    private fun createV1Database() {
+        val callback = object : SupportSQLiteOpenHelper.Callback(1) {
+            override fun onCreate(db: SupportSQLiteDatabase) {
+                db.execSQL(createFlightsV1)
+                db.execSQL(insertFlightV1)
+            }
+
+            override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {}
+        }
+        val config = SupportSQLiteOpenHelper.Configuration.builder(context)
+            .name(dbName)
+            .callback(callback)
+            .build()
+        val helper = FrameworkSQLiteOpenHelperFactory().create(config)
+        helper.writableDatabase
+        helper.close()
+    }
+
+    private fun openMigrated(): AppDatabase {
+        return Room.databaseBuilder(context, AppDatabase::class.java, dbName)
+            .addMigrations(AppDatabase.MIGRATION_1_2)
+            .allowMainThreadQueries()
+            .build()
+    }
 
     @Test
-    @Throws(IOException::class)
-    fun migrate1To2PreservesFlights() {
-        // Create database in version 1 and insert a flight
-        val db: SupportSQLiteDatabase = helper.createDatabase(TEST_DB, 1).apply {
-            execSQL(
-                """
-                INSERT INTO flights (
-                    flightId, sirosRecordId, airline, flightNumber, equipment,
-                    origin, originName, originTimezone, destination, destinationName,
-                    destinationTimezone, operationType, scheduledDepartureUtc, scheduledArrivalUtc,
-                    flightDate, validFrom, validTo, serviceType, sirosStatus,
-                    operationalStatus, delayMinutes, lastSyncAt, statusUpdatedAt
-                ) VALUES (
-                    'GLO-1234-2024-10-15', 'GLO-001', 'GOL', '1234', 'B738',
-                    'SBGR', 'GUARULHOS', 'America/Sao_Paulo', 'SBCG', 'CAMPO GRANDE',
-                    'America/Campo_Grande', 'ARRIVAL', '08:00', '09:30',
-                    '2024-10-15', '2024-10-01', '2025-03-31', 'REGULAR', 'Em Operação',
-                    'UNKNOWN', NULL, 1700000000000, NULL
-                )
-                """.trimIndent()
-            )
-            close()
+    fun migration1To2CreatesSyncMetadataAndKeepsFlights() = runBlocking {
+        createV1Database()
+        val database = openMigrated()
+        try {
+            val sqlite = database.openHelper.writableDatabase
+            sqlite.query("SELECT name FROM sqlite_master WHERE type='table' AND name='sync_metadata'").use { cursor ->
+                assertEquals(1, cursor.count)
+            }
+            assertNotNull(database.flightDao().getByFlightId("OLD-1"))
+        } finally {
+            database.close()
         }
+    }
 
-        // Open database with version 2 and apply MIGRATION_1_2
-        val migratedDb = helper.runMigrationsAndValidate(TEST_DB, 2, true, AppDatabase.MIGRATION_1_2)
-
-        // Verify that the flight data is fully preserved
-        val cursor = migratedDb.query("SELECT * FROM flights WHERE flightId = 'GLO-1234-2024-10-15'")
-        assertNotNull(cursor)
-        assertEquals(true, cursor.moveToFirst())
-        
-        val airlineIndex = cursor.getColumnIndex("airline")
-        assertEquals("GOL", cursor.getString(airlineIndex))
-        
-        cursor.close()
+    @Test
+    fun migratedSyncMetadataRejectsIdDifferentFromOne() {
+        createV1Database()
+        val database = openMigrated()
+        try {
+            val sqlite = database.openHelper.writableDatabase
+            try {
+                sqlite.execSQL("INSERT INTO sync_metadata (id, lastSuccessfulSyncAt, lastSyncStatus, recordsInserted) VALUES (2, 0, 'OK', 0)")
+                fail("CHECK (id = 1) deveria rejeitar id = 2")
+            } catch (expected: SQLiteConstraintException) {
+                // esperado
+            }
+        } finally {
+            database.close()
+        }
     }
 }
