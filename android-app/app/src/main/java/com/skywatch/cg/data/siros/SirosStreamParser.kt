@@ -3,6 +3,7 @@ package com.skywatch.cg.data.siros
 import java.io.BufferedReader
 import java.io.InputStream
 import java.io.InputStreamReader
+import java.io.PushbackInputStream
 import java.nio.charset.Charset
 
 object SirosStreamParser {
@@ -12,8 +13,29 @@ object SirosStreamParser {
     private const val HEADER_MARKER = "Cód. Empresa"
     private const val EXPECTED_FIELD_COUNT = 28
     private const val DELIMITER = ';'
-fun parseStream(inputStream: InputStream): Sequence<SirosRecord> = sequence {
-        BufferedReader(InputStreamReader(inputStream, Charset.forName(CHARSET_NAME))).use { reader ->
+
+    private fun openReader(inputStream: InputStream): BufferedReader {
+        val pushback = PushbackInputStream(inputStream, 3)
+        val head = ByteArray(3)
+        var read = 0
+        while (read < 3) {
+            val n = pushback.read(head, read, 3 - read)
+            if (n < 0) break
+            read += n
+        }
+        val hasBom = read == 3 &&
+            head[0] == 0xEF.toByte() &&
+            head[1] == 0xBB.toByte() &&
+            head[2] == 0xBF.toByte()
+        if (!hasBom && read > 0) {
+            pushback.unread(head, 0, read)
+        }
+        val charset = if (hasBom) Charsets.UTF_8 else Charset.forName(CHARSET_NAME)
+        return BufferedReader(InputStreamReader(pushback, charset))
+    }
+
+    fun parseStream(inputStream: InputStream): Sequence<SirosRecord> = sequence {
+        openReader(inputStream).use { reader ->
             var headerSkipped = false
 
             for (line in reader.lineSequence()) {
@@ -92,7 +114,7 @@ private fun splitLine(line: String): List<String> {
         onRecord: (SirosRecord) -> Unit,
         onError: ((Int, String) -> Unit)? = null
     ) {
-        val reader = BufferedReader(InputStreamReader(inputStream, Charset.forName(CHARSET_NAME)))
+        val reader = openReader(inputStream)
         var headerSkipped = false
         var lineNumber = 0
 

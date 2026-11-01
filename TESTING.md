@@ -67,6 +67,11 @@ cd android-app
 
 ## Resultados do Parser Streaming SIROS (Fase 6.2, em andamento) - 2026-11-01
 
+- **Correção de Codificação:** O CSV real do SIROS (24.723.185 bytes, baixado em 01/11/2026) está em **UTF-8 COM BOM** (`EF BB BF`), e não em ISO-8859-1. A função `openReader` em `SirosStreamParser.kt` foi implementada para detectar automaticamente o BOM UTF-8 e decodificar corretamente; sem BOM, mantém o comportamento ISO-8859-1.
+- **Novos Testes Unitários:** 
+  - `SirosStreamParserBomTest` (3 testes): validação de UTF-8 com BOM via `parseStream`, via `parseStreamWithCallback`, e verificação de ISO-8859-1 sem BOM.
+  - `SirosStreamParserRealFileTest` (1 teste): execução com o CSV real completo (`siros-registros.csv` em `Downloads`). O teste é executado apenas se o arquivo existir localmente (caso contrário, é ignorado via `Assume.assumeTrue`).
+
 | ID | Teste | Resultado | Detalhes |
 |---|---|---|---|
 | TSP-001 | `testParseStreamValidLine` | **Sucesso (Aprovado)** | Valida o parsing correto de linha válida do SIROS. |
@@ -78,17 +83,17 @@ cd android-app
 | TSP-007 | `testParseStreamLazyEvaluation` | **Sucesso (Aprovado)** | Confirma avaliação lazy com Sequence. |
 | TSP-008 | `testParseStreamLatin1Encoding` | **Sucesso (Aprovado)** | Valida suporte à codificação ISO-8859-1 (Latin1). |
 | TSP-009 | `testParseStreamWithCallback` | **Sucesso (Aprovado)** | Valida processamento via callback. |
+| TSB-001 | `testParseStreamWithUtf8Bom` | **Sucesso (Aprovado)** | Valida UTF-8 com BOM e acentuação. |
+| TSB-002 | `testParseStreamWithCallbackUtf8Bom` | **Sucesso (Aprovado)** | Valida callback com UTF-8 com BOM. |
+| TSB-003 | `testParseStreamWithoutBomIso88591` | **Sucesso (Aprovado)** | Valida retrocompatibilidade sem BOM (ISO-8859-1). |
+| TSR-001 | `parseRealCsvStreamingCountsRecordsAndKeepsMemoryFlat` | **Sucesso (Aprovado / Condicional)** | Executado com o arquivo real de ~25 MB. Resultados: total_lines=65477, records=65475, sbcg=867, baseline_mb=10, peak_live_mb=10, growth_mb=0, elapsed_ms=966. (A memória é amostrada a cada 50.000 registros, indicando consumo estável sem acúmulo). |
 
 **Pendências NÃO validados:**
-- teste do parser com o CSV real completo de cerca de 25 MB;
-- medição de consumo de memória com o arquivo completo;
 - teste instrumentado da migração v1 para v2 (TM-006, sem dispositivo ou emulador);
 - ingestão remota (download, syncFromRemote, WorkManager) ainda não implementada, a Fase 6.3 não foi autorizada.
 
-Validado em 01/11/2026: constantes acentuadas de SirosStreamParser.kt conferidas em UTF-8. Os testes atuais do parser usam apenas amostras pequenas.
 
-
-## Resumo da Execução Unitária (testDebugUnitTest) - 2026-11-01
+## Resumo da Execução Unitária (testDebugUnitTest) - 01/11/2026
 
 | Suite de Testes | Testes | Falhas | Erros | Status |
 |---|---|---|---|---|
@@ -98,8 +103,13 @@ Validado em 01/11/2026: constantes acentuadas de SirosStreamParser.kt conferidas
 | `SirosCsvParserTest` | 4 | 0 | 0 | ✅ Aprovado |
 | `SirosNormalizerTest` | 4 | 0 | 0 | ✅ Aprovado |
 | `SirosStreamParserTest` | 9 | 0 | 0 | ✅ Aprovado |
-| **TOTAL** | **28** | **0** | **0** | **✅ TODOS APROVADOS** |
+| `SirosStreamParserBomTest` | 3 | 0 | 0 | ✅ Aprovado |
+| `SirosStreamParserRealFileTest` | 1 | 0 | 0 | ✅ Aprovado (pulado se CSV ausente) |
+| **TOTAL** | **32** | **0** | **0** | **✅ TODOS APROVADOS** |
 
-**Comando executado:** `cd android-app; .\gradlew.bat testDebugUnitTest --console=plain`
-**Resultado:** BUILD SUCCESSFUL
-Atenção: este resultado cobre apenas testes unitários com amostras pequenas. Continuam pendentes o teste com o CSV real, a medição de memória e o teste instrumentado de migração (TM-006).
+**Comando executado para garantir execução limpa (evitando cache do Gradle):** 
+```powershell
+cmd /c "cd android-app && gradlew.bat cleanTestDebugUnitTest testDebugUnitTest --console=plain"
+```
+**Resultado:** BUILD SUCCESSFUL, 32 testes, 0 falhas, 0 erros.
+Atenção: a Fase 6.2 ainda NÃO está totalmente concluída. O parser foi validado com o CSV real e testes unitários passando, mas o teste instrumentado da migração Room v1→v2 (TM-006) segue pendente por falta de dispositivo ou emulador conectado.
