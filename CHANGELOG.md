@@ -27,19 +27,22 @@
 - **Novos testes de rejeição:** Adicionados os testes unitários `testSyncMetadataRejectId2` e `testSyncMetadataRejectId3` em `SyncMetadataDaoTest.kt`, que verificam e comprovam com sucesso que inserções com `id = 2` ou `id = 3` lançam `SQLiteConstraintException` por violação da constraint.
 - **Resultado:** 19 unitários executados e aprovados (`BUILD SUCCESSFUL`).
 
-### Fase 6.2 (Em Andamento / Não Concluída) - 2026-11-01
+### Fase 6.2 (Concluída com Ressalvas) - 2026-11-01
 - **Criação de `SirosStreamParser.kt`:** Parser streaming implementado com `Sequence` e com callback.
 - **Correções de compilação aplicadas:**
   1. `yield` dentro de `forEachLine` foi corrigido (trocado por loop `for` com `lineSequence()` dentro de `use`).
   2. Removido um caractere `}` sobrando em `SirosStreamParserTest.kt`.
   3. Removidos dois `return@Test` inválidos em `SyncMetadataDaoTest.kt`.
 - **Correção de codificação (01/11/2026):** O CSV real do SIROS (24.7 MB, baixado em 01/11/2026) está em UTF-8 COM BOM (`EF BB BF`), não em ISO-8859-1. Causa do bug: o parser lia como ISO-8859-1, nunca reconhecia o cabeçalho "Cód. Empresa" e devolvia 0 registros. Correção: função `openReader` em `SirosStreamParser.kt` detecta o BOM UTF-8 e lê em UTF-8; sem BOM mantém ISO-8859-1.
-- **Novos testes:** `SirosStreamParserBomTest` (3 testes: UTF-8 com BOM via `parseStream`, UTF-8 com BOM via `parseStreamWithCallback`, ISO-8859-1 sem BOM).
-- **Ajustes nos Testes Instrumentados (01/11/2026):** `FlightDaoTest.kt` e `AppDatabaseMigrationTest.kt` ajustados para usar `runBlocking` (métodos do `FlightDao` são `suspend`). `AppDatabaseMigrationTest.kt` foi reescrito sem `MigrationTestHelper` / `room-testing` (ausentes no projeto), simulando uma v1 provável. Compilação `compileDebugAndroidTestKotlin` bem-sucedida (`BUILD SUCCESSFUL`), mas os testes instrumentados NÃO foram executados (sem aparelho; emulador não é viável com 7,9 GB de RAM).
+- **Novos testes:** `SirosStreamParserBomTest` (3 testes: UTF-8 com BOM via `parseStream`, UTF-8 com BOM via `parseStreamWithCallback`, ISO-8859-1 sem BOM). `SirosStreamParserRealFileTest` (1 teste com CSV real de ~25 MB).
+- **Ajustes nos Testes Instrumentados (01/11/2026):** `FlightDaoTest.kt` e `AppDatabaseMigrationTest.kt` ajustados para usar `runBlocking` (métodos do `FlightDao` são `suspend`). `AppDatabaseMigrationTest.kt` reescrito sem `MigrationTestHelper` / `room-testing` (ausentes no projeto), simulando uma v1 provável.
+- **Execução de Testes Instrumentados (01/11/2026):** `connectedDebugAndroidTest` em Poco X5 Pro (modelo 22101320G, Android 14, USB): 10 testes, 0 falhas, 0 erros, 0 pulados (`AppDatabaseMigrationTest` 2, `FlightDaoTest` 8). Comando: `cmd /c "cd android-app && gradlew.bat connectedDebugAndroidTest --console=plain"` (exige aparelho com depuração USB; emulador não viável com 7,9 GB RAM).
+- **Ressalvas:**
+  1. A migração foi validada sobre uma "v1 provável" (tabela `flights` idêntica ao schema atual gerado pelo Room). O schema real da v1 nunca foi exportado e não é recuperável do Git (arquivos só existem a partir do commit 5385fe2), portanto o teste não prova a migração de um aparelho real rodando a v1 antiga.
+  2. Em instalações novas (schema v2), o Room cria `sync_metadata` SEM `CHECK (id = 1)`; apenas bancos migrados da v1 possuem o CHECK. Decisão em aberto.
 - **Resultados dos testes unitários em 01/11/2026 (`testDebugUnitTest`):** `BUILD SUCCESSFUL`, 32 testes, 0 falhas, 0 erros (distribuídos em `SyncMetadataDaoTest` 5, `SirosCsvParserTest` 4, `SirosNormalizerTest` 4, `SirosRepositoryTest` 2, `SirosStreamParserBomTest` 3, `SirosStreamParserRealFileTest` 1, `SirosStreamParserTest` 9, `FlightListViewModelTest` 4).
 - **Medição real com CSV completo (`SirosStreamParserRealFileTest`):** total_lines=65477, records=65475, sbcg=867, baseline_mb=10, peak_live_mb=10, growth_mb=0, elapsed_ms=966. A memória é amostrada a cada 50.000 registros, então é indicação, não pico exato.
 - **Pendências da Fase 6.2 (Itens NÃO validados):**
-  - Execução de testes instrumentados (`connectedDebugAndroidTest` em celular Android real via USB).
   - Ingestão remota (`download`, `syncFromRemote`, `WorkManager`) ainda não implementada (Fase 6.3 não autorizada).
 
 ## 2026-10-31 — Módulo SIROS e Testes Unitários Implementados

@@ -61,11 +61,10 @@ cd android-app
 | TM-003 | `SyncMetadataDaoTest.testSyncMetadataSingleRowEnforced` | **Sucesso (Aprovado)** | Confirma que apenas um registro de metadados existe (id=1). |
 | TM-004 | `SyncMetadataDaoTest.testSyncMetadataRejectId2` | **Sucesso (Aprovado)** | Comprova rejeição de `id = 2` por violação da constraint `CHECK (id = 1)`. Ressalva: o teste recria a tabela sync_metadata manualmente, com CHECK (id = 1), dentro do próprio setup (o banco em memória não executa migração). Prova o comportamento do CHECK no SQLite, mas não que o banco real do app o possua; isso depende do teste instrumentado da migração, ainda não executado. |
 | TM-005 | `SyncMetadataDaoTest.testSyncMetadataRejectId3` | **Sucesso (Aprovado)** | Comprova rejeição de `id = 3` por violação da constraint `CHECK (id = 1)`. Ressalva: o teste recria a tabela sync_metadata manualmente, com CHECK (id = 1), dentro do próprio setup (o banco em memória não executa migração). Prova o comportamento do CHECK no SQLite, mas não que o banco real do app o possua; isso depende do teste instrumentado da migração, ainda não executado. |
-| TM-006 | `AppDatabaseMigrationTest.migrate1To2PreservesFlights` | **Pendente (sem dispositivo/emulador)** | Teste de migração Room v1→v2 usando `MigrationTestHelper`: insere voos na v1, migra para v2, verifica preservação total dos dados na tabela `flights`. Requer dispositivo/emulador Android conectado. |
 
-> **Nota:** Os testes unitários (TM-001 a TM-005) foram executados e aprovados via `testDebugUnitTest` em 2026-11-01. O teste instrumentado TM-006 permanece pendente por falta de dispositivo/emulador Android disponível.
+> **Nota:** TM-001 a TM-005 são testes unitários (testDebugUnitTest); TM-006 e TM-007 são testes instrumentados listados na seção "Testes Instrumentados Executados em Aparelho Real".
 
-## Resultados do Parser Streaming SIROS (Fase 6.2, em andamento) - 2026-11-01
+## Resultados do Parser Streaming SIROS (Fase 6.2, Concluída com Ressalvas) - 2026-11-01
 
 - **Correção de Codificação:** O CSV real do SIROS (24.723.185 bytes, baixado em 01/11/2026) está em **UTF-8 COM BOM** (`EF BB BF`), e não em ISO-8859-1. A função `openReader` em `SirosStreamParser.kt` foi implementada para detectar automaticamente o BOM UTF-8 e decodificar corretamente; sem BOM, mantém o comportamento ISO-8859-1.
 - **Novos Testes Unitários:** 
@@ -88,14 +87,40 @@ cd android-app
 | TSB-003 | `testParseStreamWithoutBomIso88591` | **Sucesso (Aprovado)** | Valida retrocompatibilidade sem BOM (ISO-8859-1). |
 | TSR-001 | `parseRealCsvStreamingCountsRecordsAndKeepsMemoryFlat` | **Sucesso (Aprovado / Condicional)** | Executado com o arquivo real de ~25 MB. Resultados: total_lines=65477, records=65475, sbcg=867, baseline_mb=10, peak_live_mb=10, growth_mb=0, elapsed_ms=966. (A memória é amostrada a cada 50.000 registros, indicando consumo estável sem acúmulo). |
 
-**Testes Instrumentados (01/11/2026):**
-- `FlightDaoTest.kt`: todos os métodos `@Test` ajustados para `runBlocking` (o `FlightDao` tem métodos `suspend`).
-- `AppDatabaseMigrationTest.kt`: reescrito sem `MigrationTestHelper`/`room-testing` (ausentes no projeto). Cria banco "v1 provável" (tabela `flights` igual ao schema atual), aplica `MIGRATION_1_2`, verifica: `sync_metadata` existe, voo antigo sobrevive, `CHECK (id = 1)` rejeita `id = 2`.
-- **Compilação:** `compileDebugAndroidTestKotlin` = `BUILD SUCCESSFUL`.
-- **Execução:** NÃO realizada (sem aparelho Android real; emulador não viável com 7,9 GB RAM). **Não declarar como aprovados.**
+**Testes Instrumentados Executados em Aparelho Real (01/11/2026):**
+- **Dispositivo:** Poco X5 Pro (modelo 22101320G, Android 14, depuração USB).
+- **Comando executado:** 
+  ```powershell
+  cmd /c "cd android-app && gradlew.bat connectedDebugAndroidTest --console=plain"
+  ```
+  *(Nota: exige aparelho Android real conectado via USB; o emulador não é viável com 7,9 GB de RAM).*
+- **Resultado lido do XML de testes:** 10 testes, 0 falhas, 0 erros, 0 pulados (`AppDatabaseMigrationTest` 2, `FlightDaoTest` 8).
+
+**FlightDaoTest — 8 testes instrumentados aprovados no Poco X5 Pro:**
+
+| ID | Teste | Resultado | Detalhes |
+|---|---|---|---|
+| FDT-001 | `testInsertAndGetByFlightId` | **Sucesso (Aprovado) no Poco X5 Pro** | Inserção e recuperação por flightId. |
+| FDT-002 | `testInsertMultipleAndQueryAll` | **Sucesso (Aprovado) no Poco X5 Pro** | Inserção múltipla e consulta de chegadas/partidas. |
+| FDT-003 | `testGetFlightsByDate` | **Sucesso (Aprovado) no Poco X5 Pro** | Filtro por data de voo. |
+| FDT-004 | `testUpdateFlight` | **Sucesso (Aprovado) no Poco X5 Pro** | Atualização (upsert) de voo existente. |
+| FDT-005 | `testDeleteFlight` | **Sucesso (Aprovado) no Poco X5 Pro** | Exclusão de voo único. |
+| FDT-006 | `testDeleteOldFlights` | **Sucesso (Aprovado) no Poco X5 Pro** | Exclusão de voos antigos por data. |
+| FDT-007 | `testPreventDuplicatesByPrimaryKey` | **Sucesso (Aprovado) no Poco X5 Pro** | Prevenção de duplicatas por chave primária. |
+| FDT-008 | `testClearAll` | **Sucesso (Aprovado) no Poco X5 Pro** | Limpeza total da tabela. |
+
+**AppDatabaseMigrationTest — 2 testes instrumentados aprovados no Poco X5 Pro:**
+
+| ID | Teste | Resultado | Detalhes |
+|---|---|---|---|
+| TM-006 | `AppDatabaseMigrationTest.migration1To2CreatesSyncMetadataAndKeepsFlights` | **Sucesso (Aprovado) no Poco X5 Pro (22101320G, Android 14), 01/11/2026** | Cria banco "v1 provável" (flights igual ao schema atual, uma linha de voo), aplica MIGRATION_1_2, confere que sync_metadata existe e que o voo antigo foi preservado. Ressalva: não prova a migração de um aparelho com a v1 real antiga (schema nunca exportado). |
+| TM-007 | `AppDatabaseMigrationTest.migratedSyncMetadataRejectsIdDifferentFromOne` | **Sucesso (Aprovado) no Poco X5 Pro (22101320G, Android 14), 01/11/2026** | Após aplicar MIGRATION_1_2 sobre a "v1 provável", tenta inserir id = 2 em sync_metadata e confirma que o SQLite rejeita com SQLiteConstraintException (CHECK (id = 1)). Ressalva: não prova a migração de um aparelho com a v1 real antiga (schema nunca exportado). |
+
+- **Ressalvas importantes:**
+  1. `AppDatabaseMigrationTest.kt` valida a migração v1→v2 sobre uma "v1 provável" (tabela `flights` idêntica ao schema atual gerado pelo Room). Como o schema real da v1 nunca foi exportado e não é recuperável do Git (arquivos só existem a partir do commit 5385fe2), o teste prova o comportamento da migração para o schema simulado, mas não para a v1 antiga real de um aparelho de produção.
+  2. Em instalações novas (schema v2), o Room cria `sync_metadata` SEM a restrição `CHECK (id = 1)`. A restrição existe apenas em bancos que passaram pela `MIGRATION_1_2`. Decisão sobre padronização futura deixada em aberto.
 
 **Pendências NÃO validados:**
-- execução de `connectedDebugAndroidTest` em celular Android real via depuração USB (validar migração v1→v2 e DAO);
 - ingestão remota (download, syncFromRemote, WorkManager) ainda não implementada, a Fase 6.3 não foi autorizada.
 
 **Ponto em aberto (Room):** em instalações NOVAS (schema v2), o Room cria a tabela sync_metadata SEM a restrição CHECK (id = 1). Somente bancos que passaram pela MIGRATION_1_2 têm o CHECK. Ou seja, o CHECK não vale em todos os bancos. Nenhum código foi alterado por causa disso; a decisão fica para depois.
@@ -120,4 +145,4 @@ cd android-app
 cmd /c "cd android-app && gradlew.bat cleanTestDebugUnitTest testDebugUnitTest --console=plain"
 ```
 **Resultado:** BUILD SUCCESSFUL, 32 testes, 0 falhas, 0 erros.
-Atenção: a Fase 6.2 ainda NÃO está totalmente concluída. O parser foi validado com o CSV real e testes unitários passando, mas o teste instrumentado da migração Room v1→v2 (TM-006) segue pendente por falta de dispositivo ou emulador conectado.
+A Fase 6.2 está concluída COM RESSALVAS: migração validada sobre uma "v1 provável"; em instalações novas o Room cria sync_metadata sem CHECK (id = 1). A Fase 6.3 não está autorizada.
