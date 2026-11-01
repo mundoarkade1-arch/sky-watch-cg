@@ -81,6 +81,12 @@ dependencies {
     implementation("androidx.room:room-ktx:$room_version")
     kapt("androidx.room:room-compiler:$room_version")
 
+    // Network - OkHttp for SIROS CSV download (Phase 6.3)
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+    // WorkManager for periodic sync (Phase 6.3.4)
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+
     // Tooling
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")

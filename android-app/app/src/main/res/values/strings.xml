@@ -7,6 +7,9 @@
     <string name="tab_departures">Partidas</string>
     <string name="airport_subtitle">Aeroporto Internacional de Campo Grande (CGR / SBCG)</string>
     <string name="disclaimer_siros">Horários programados (SIROS/ANAC). Não constituem confirmação de operação em tempo real.</string>
+    <string name="last_update_prefix">Última atualização (SIROS):</string>
+    <string name="never_updated">Nunca sincronizado</string>
+
     <string name="empty_flights">Nenhum voo programado encontrado para esta data ou banco vazio.</string>
     <string name="loading_flights">Carregando voos...</string>
     <string name="error_loading">Erro ao carregar os dados dos voos.</string>

@@ -42,7 +42,26 @@ class FlightListViewModel(
     private val _selectedDate = MutableStateFlow(LocalDate.now())
     val selectedDate: StateFlow<LocalDate> = _selectedDate.asStateFlow()
 
+    private val _syncMetadata = MutableStateFlow<com.skywatch.cg.data.db.SyncMetadata?>(null)
+    val syncMetadata: StateFlow<com.skywatch.cg.data.db.SyncMetadata?> = _syncMetadata.asStateFlow()
+
     private var loadJob: Job? = null
+
+    init {
+        Log.d("FlightListViewModelDiag", "ViewModel created. Calling init loadFlights()")
+        loadFlights()
+        loadSyncMetadata()
+    }
+
+    fun loadSyncMetadata() {
+        viewModelScope.launch {
+            try {
+                _syncMetadata.value = repository.getSyncMetadata()
+            } catch (e: Exception) {
+                Log.e("FlightListViewModel", "Erro ao carregar sync metadata: ${e.message}")
+            }
+        }
+    }
 
     init {
         Log.d("FlightListViewModelDiag", "ViewModel created. Calling init loadFlights()")
@@ -78,10 +97,13 @@ class FlightListViewModel(
             }
         }
     }
-
     fun refresh() {
         Log.d("FlightListViewModelDiag", "refresh() called with current selectedDate: ${_selectedDate.value}")
-        loadFlights(_selectedDate.value)
+        viewModelScope.launch {
+            repository.syncFromRemote()
+            loadSyncMetadata()
+            loadFlights(_selectedDate.value)
+        }
     }
 
     fun setDate(date: LocalDate) {

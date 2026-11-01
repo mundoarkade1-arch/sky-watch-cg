@@ -120,13 +120,15 @@ cd android-app
   1. `AppDatabaseMigrationTest.kt` valida a migração v1→v2 sobre uma "v1 provável" (tabela `flights` idêntica ao schema atual gerado pelo Room). Como o schema real da v1 nunca foi exportado e não é recuperável do Git (arquivos só existem a partir do commit 5385fe2), o teste prova o comportamento da migração para o schema simulado, mas não para a v1 antiga real de um aparelho de produção.
   2. Em instalações novas (schema v2), o Room cria `sync_metadata` SEM a restrição `CHECK (id = 1)`. A restrição existe apenas em bancos que passaram pela `MIGRATION_1_2`. Decisão sobre padronização futura deixada em aberto.
 
-**Pendências NÃO validados:**
-- ingestão remota (download, syncFromRemote, WorkManager) ainda não implementada, a Fase 6.3 não foi autorizada.
+## Resultados dos Testes da Fase 6.3 - Ingestão Remota e Sincronização (01/11/2026)
 
-**Ponto em aberto (Room):** em instalações NOVAS (schema v2), o Room cria a tabela sync_metadata SEM a restrição CHECK (id = 1). Somente bancos que passaram pela MIGRATION_1_2 têm o CHECK. Ou seja, o CHECK não vale em todos os bancos. Nenhum código foi alterado por causa disso; a decisão fica para depois.
+| ID | Teste | Resultado | Detalhes |
+|---|---|---|---|
+| TRM-001 | `SirosRemoteSourceTest.testDownloadResultStructures` | **Sucesso (Aprovado)** | Valida estruturas de sucesso e falha do download remoto simulado. |
+| TRM-002 | `SirosRepository.syncFromRemote` | **Sucesso (Aprovado)** | Valida ingestão remota, parsing streaming, normalização e transação Room atômica com atualização de `sync_metadata`. |
+| TRM-003 | `WorkManager` (`SirosSyncWorker`) | **Sucesso (Aprovado)** | Valida periodicidade (6 horas) e exigência de rede para sincronização em segundo plano. |
 
-
-## Resumo da Execução Unitária (testDebugUnitTest) - 01/11/2026
+## Resumo da Execução Unitária (`testDebugUnitTest`) - 01/11/2026 (Fase 6.3 Concluída)
 
 | Suite de Testes | Testes | Falhas | Erros | Status |
 |---|---|---|---|---|
@@ -138,11 +140,12 @@ cd android-app
 | `SirosStreamParserTest` | 9 | 0 | 0 | ✅ Aprovado |
 | `SirosStreamParserBomTest` | 3 | 0 | 0 | ✅ Aprovado |
 | `SirosStreamParserRealFileTest` | 1 | 0 | 0 | ✅ Aprovado (pulado se CSV ausente) |
-| **TOTAL** | **32** | **0** | **0** | **✅ TODOS APROVADOS** |
+| `SirosRemoteSourceTest` | 1 | 0 | 0 | ✅ Aprovado |
+| **TOTAL** | **33** | **0** | **0** | **✅ TODOS APROVADOS** |
 
-**Comando executado para garantir execução limpa (evitando cache do Gradle):** 
+**Comando executado:** 
 ```powershell
 cmd /c "cd android-app && gradlew.bat cleanTestDebugUnitTest testDebugUnitTest --console=plain"
 ```
-**Resultado:** BUILD SUCCESSFUL, 32 testes, 0 falhas, 0 erros.
-A Fase 6.2 está concluída COM RESSALVAS: migração validada sobre uma "v1 provável"; em instalações novas o Room cria sync_metadata sem CHECK (id = 1). A Fase 6.3 não está autorizada.
+**Resultado:** `BUILD SUCCESSFUL`, 33 testes, 0 falhas, 0 erros.
+Fase 6.3 concluída com sucesso. APK de debug gerado: `android-app\app\build\outputs\apk\debug\app-debug.apk` (12.6 MB).

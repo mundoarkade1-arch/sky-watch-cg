@@ -22,10 +22,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.skywatch.cg.R
+import com.skywatch.cg.data.db.SyncMetadata
 import com.skywatch.cg.data.siros.NormalizedFlight
 import com.skywatch.cg.data.siros.OperationType
 import com.skywatch.cg.ui.viewmodel.FlightListViewModel
 import com.skywatch.cg.ui.viewmodel.FlightUiState
+import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
@@ -36,6 +38,15 @@ sealed class Screen(val route: String, val titleRes: Int) {
 
 private val campoGrandeZone = ZoneId.of("America/Campo_Grande")
 private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+private val localDateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm").withZone(ZoneId.of("America/Campo_Grande"))
+
+private fun SyncMetadata.getDisplayLastUpdate(): String {
+    return if (lastSuccessfulSyncAt > 0) {
+        localDateTimeFormatter.format(Instant.ofEpochMilli(lastSuccessfulSyncAt))
+    } else {
+        "Nunca sincronizado"
+    }
+}
 
 private fun NormalizedFlight.getDisplayTime(isArrival: Boolean): String {
     val utcTime = if (isArrival) scheduledArrivalUtc else scheduledDepartureUtc
@@ -50,6 +61,8 @@ private fun NormalizedFlight.getDisplayTime(isArrival: Boolean): String {
 fun MainScreen(viewModel: FlightListViewModel) {
     val navController = rememberNavController()
     val uiState by viewModel.uiState.collectAsState()
+    val syncMetadata by viewModel.syncMetadata.collectAsState()
+
     val items = listOf(Screen.Arrivals, Screen.Departures)
 
     Scaffold(
@@ -106,6 +119,15 @@ fun MainScreen(viewModel: FlightListViewModel) {
                         fontSize = 11.sp,
                         color = MaterialTheme.colorScheme.onErrorContainer
                     )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    syncMetadata?.let { metadata ->
+                        Text(
+                            text = "${stringResource(id = R.string.last_update_prefix)} ${metadata.getDisplayLastUpdate()}",
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    }
                 }
             }
         },

@@ -28,3 +28,7 @@ android-app/build_log.txt
 android-app/build_test_log.txt
 android-app/test_output*.txt
 create_bat.py
+
+# Logs de build e teste gerados localmente
+gradle-output.log
+gradle-assemble.log
