@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">SKY WATCH CG</string>
+    <string name="welcome_message">Acompanhe voos comerciais em Campo Grande (CGR/SBCG)</string>
+    <string name="version_info">Versão 1.0.0</string>
+    
+    <string name="tab_arrivals">Chegadas</string>
+    <string name="tab_departures">Partidas</string>
+    <string name="airport_subtitle">Aeroporto Internacional de Campo Grande (CGR / SBCG)</string>
+    <string name="disclaimer_siros">Horários programados (SIROS/ANAC). Não constituem confirmação de operação em tempo real.</string>
+    <string name="empty_flights">Nenhum voo programado encontrado para esta data ou banco vazio.</string>
+    <string name="loading_flights">Carregando voos...</string>
+    <string name="error_loading">Erro ao carregar os dados dos voos.</string>
+    <string name="refresh">Recarregar</string>
+<string name="refresh_description">Recarregar dados do armazenamento local</string>
+    <string name="flight_number">Voo</string>
+    <string name="airline">Companhia</string>
+    <string name="origin">Origem</string>
+    <string name="destination">Destino</string>
+    <string name="scheduled_time">Horário Previsto</string>
+    <string name="equipment">Aeronave</string>
+</resources>

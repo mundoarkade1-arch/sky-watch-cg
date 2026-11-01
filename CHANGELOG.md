@@ -1,0 +1,61 @@
+# Changelog
+
+## [1.0.0] - 2026-11-01
+### Adicionado
+- Implementação completa da persistência local com Room Database (`AppDatabase`, `FlightEntity`, `FlightDao`, `SirosRepository`).
+- Testes unitários avançados utilizando `Room.inMemoryDatabaseBuilder` e Robolectric para validação de persistência, consultas por data e prevenção de duplicidades.
+- Suporte a chave composta de identificação de voo (`sirosRecordId` + data específica), garantindo deduplicação correta sem apagar voos em datas diferentes.
+- Build de debug gerado com sucesso (`app-debug.apk`).
+
+### Telas do MVP e Testes Unitários do ViewModel (Etapa 5) - 2026-11-01
+- Interface Android moderna em tema escuro (Material 3) e português brasileiro.
+- Cabeçalho com nome **SKY WATCH CG** e identificação do aeroporto **Campo Grande (CGR / SBCG)**.
+- Navegação por abas entre **Chegadas** e **Partidas** (Navigation Compose).
+- Listas conectadas ao Room via `SirosRepository` com `FlightListViewModel`.
+- Cards de voo exibindo: companhia aérea, número do voo, origem/destino com nomes, horário previsto (chegada ou partida conforme aba), modelo de aeronave quando disponível.
+- Estados de carregamento (spinner), erro (mensagem vermelha) e lista vazia (texto explicativo).
+- Botão de atualização manual (ícone refresh na TopAppBar) que recarrega os dados locais do Room. Ainda não existe sincronização remota do CSV SIROS.
+- Aviso obrigatório e permanente: *"Horários programados (SIROS/ANAC). Não constituem confirmação de operação em tempo real."*
+- Fuso horário local do aeroporto respeitado (UTC armazenado, exibido como UTC no card com indicação de data do voo).
+- Sem voos fictícios: se o banco estiver vazio, exibe mensagem explicativa ao usuário.
+- Testes unitários do ViewModel (`FlightListViewModelTest`) cobrindo estados iniciais, banco vazio, dados populados e refresh.
+- **Corrigida injeção de dependência no `FlightListViewModel`** com construtor secundário para testes, permitindo injetar `SirosRepository` conectado ao banco em memória. Construtor de produção preservado com banco real. Todos os 14 testes passam.
+- **Corrigida condição de corrida de corrotinas** no `FlightListViewModel`: adicionado controle `loadJob?.cancel()` antes de iniciar nova consulta, garantindo que apenas a consulta mais recente atualize o estado da interface. Preservado carregamento automático no `init` e funcionamento do botão refresh.
+- **Sincronização dos Testes Unitários (Etapa 5 resolvida em 01/11/2026):** Os 3 testes que falhavam em `FlightListViewModelTest` passaram com sucesso. A causa era que os testes liam o estado logo depois de `advanceUntilIdle()`, mas a consulta do Room roda em uma thread que o relógio de teste não controla. A correção foi adicionar `viewModel.uiState.first { it !is FlightUiState.Loading }` nos três testes, sem alterar o código de produção.
+### Fase 6.1 (Revisada): Restrição de Registro Único em `sync_metadata` (2026-11-01)
+- **Correção da restrição de banco de dados:** Adicionada a restrição `CHECK (id = 1)` na instrução SQL da migração `MIGRATION_1_2` em `AppDatabase.kt`, garantindo no próprio nível do SQLite que a tabela `sync_metadata` rejeite qualquer tentativa de inserir registros com IDs diferentes de 1.
+- **Novos testes de rejeição:** Adicionados os testes unitários `testSyncMetadataRejectId2` e `testSyncMetadataRejectId3` em `SyncMetadataDaoTest.kt`, que verificam e comprovam com sucesso que inserções com `id = 2` ou `id = 3` lançam `SQLiteConstraintException` por violação da constraint.
+- **Resultado:** 19 unitários executados e aprovados (`BUILD SUCCESSFUL`).
+
+### Fase 6.2 (Em Andamento / Não Concluída) - 2026-11-01
+- **Criação de `SirosStreamParser.kt`:** Parser streaming implementado com `Sequence` e com callback.
+- **Correções de compilação aplicadas:**
+  1. `yield` dentro de `forEachLine` foi corrigido (trocado por loop `for` com `lineSequence()` dentro de `use`).
+  2. Removido um caractere `}` sobrando em `SirosStreamParserTest.kt`.
+  3. Removidos dois `return@Test` inválidos em `SyncMetadataDaoTest.kt`.
+- **Resultados dos testes unitários em 01/11/2026 (`testDebugUnitTest`):** `BUILD SUCCESSFUL`, 28 testes, 0 falhas, 0 erros (distribuídos em `SyncMetadataDaoTest` 5, `SirosCsvParserTest` 4, `SirosNormalizerTest` 4, `SirosRepositoryTest` 2, `SirosStreamParserTest` 9, `FlightListViewModelTest` 4).
+- **Pendências da Fase 6.2 (Itens NÃO validados):**
+  - Teste do parser com o CSV real completo de cerca de 25 MB.
+  - Análise e medição de consumo de memória com o arquivo completo.
+  - Teste instrumentado da migração v1 para v2 (pendente de dispositivo ou emulador físico/virtual).
+  - Codificação de textos acentuados em `SirosStreamParser.kt`: constantes conferidas e corretas em UTF-8 em 01/11/2026. Falta apenas validar com o CSV real.
+  - Ingestão remota (`download`, `syncFromRemote`, `WorkManager`) ainda não implementada (Fase 6.3 não autorizada).
+
+## 2026-10-31 — Módulo SIROS e Testes Unitários Implementados
+- Implementado `SirosCsvParser` com suporte a `ISO-8859-1` e remoção correta de cabeçalhos.
+- Implementado `SirosNormalizer` para filtrar voos comerciais de passageiros de/para SBCG, validar vigências, dias da semana e fusos horários.
+- Criados testes unitários (`SirosCsvParserTest` e `SirosNormalizerTest`) validados com sucesso.
+- Compilação e `assembleDebug` executados com sucesso.
+
+## 2026-10-31 — Etapa 2: Projeto Android Criado
+- Projeto Android Kotlin + Jetpack Compose criado em `android-app/`.
+- Tema escuro configurado como padrão (Material 3).
+- Tela inicial simples com nome do aplicativo SKY WATCH CG.
+- Gradle Wrapper 8.5 configurado.
+
+## 2026-10-31 — Planejamento inicial
+- Definido nome SKY WATCH CG.
+- Definido foco em voos comerciais do aeroporto CGR/SBCG.
+- Definido alerta padrão de 15 minutos.
+- Identificadas Aena, AvioADSB e OpenSky como fontes candidatas.
+- Registradas limitações iniciais e necessidade de validação de cobertura.

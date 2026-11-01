@@ -1,0 +1,91 @@
+package com.skywatch.cg.ui.viewmodel
+
+import android.app.Application
+import android.util.Log
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.skywatch.cg.data.db.AppDatabase
+import com.skywatch.cg.data.siros.NormalizedFlight
+import com.skywatch.cg.data.siros.SirosRepository
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import java.time.LocalDate
+
+sealed interface FlightUiState {
+    object Loading : FlightUiState
+    data class Success(
+        val arrivals: List<NormalizedFlight>,
+        val departures: List<NormalizedFlight>,
+        val selectedDate: LocalDate
+    ) : FlightUiState
+    data class Error(val message: String) : FlightUiState
+}
+
+class FlightListViewModel(
+    application: Application,
+    private val repository: SirosRepository
+) : AndroidViewModel(application) {
+
+    // Construtor de produção (usa banco real)
+    constructor(application: Application) : this(
+        application,
+        SirosRepository(AppDatabase.getDatabase(application))
+    )
+
+    private val _uiState = MutableStateFlow<FlightUiState>(FlightUiState.Loading)
+    val uiState: StateFlow<FlightUiState> = _uiState.asStateFlow()
+
+    private val _selectedDate = MutableStateFlow(LocalDate.now())
+    val selectedDate: StateFlow<LocalDate> = _selectedDate.asStateFlow()
+
+    private var loadJob: Job? = null
+
+    init {
+        Log.d("FlightListViewModelDiag", "ViewModel created. Calling init loadFlights()")
+        loadFlights()
+    }
+
+    fun loadFlights(date: LocalDate = _selectedDate.value) {
+        val previousJobActive = loadJob?.isActive == true
+        Log.d("FlightListViewModelDiag", "loadFlights called with date: $date. Previous job active: $previousJobActive")
+        loadJob?.cancel()
+        Log.d("FlightListViewModelDiag", "Previous job cancelled (if any). Launching new coroutine for date: $date")
+        loadJob = viewModelScope.launch {
+            Log.d("FlightListViewModelDiag", "Coroutine started for date: $date. Setting state to Loading.")
+            _uiState.value = FlightUiState.Loading
+            _selectedDate.value = date
+            try {
+                Log.d("FlightListViewModelDiag", "Repository fetching arrivals and departures for date: $date")
+                val arrivals = repository.getArrivalsForUi(date)
+                val departures = repository.getDeparturesForUi(date)
+                Log.d("FlightListViewModelDiag", "Repository returned ${arrivals.size} arrivals and ${departures.size} departures for date: $date. Setting Success.")
+                _uiState.value = FlightUiState.Success(
+                    arrivals = arrivals,
+                    departures = departures,
+                    selectedDate = date
+                )
+            } catch (e: Exception) {
+                if (e !is CancellationException) {
+                    Log.d("FlightListViewModelDiag", "Exception caught in loadFlights for date: $date: ${e.message}. Setting Error.")
+                    _uiState.value = FlightUiState.Error(e.localizedMessage ?: "Erro desconhecido")
+                } else {
+                    Log.d("FlightListViewModelDiag", "CancellationException caught for date: $date (job cancelled normally).")
+                }
+            }
+        }
+    }
+
+    fun refresh() {
+        Log.d("FlightListViewModelDiag", "refresh() called with current selectedDate: ${_selectedDate.value}")
+        loadFlights(_selectedDate.value)
+    }
+
+    fun setDate(date: LocalDate) {
+        Log.d("FlightListViewModelDiag", "setDate() called with date: $date")
+        loadFlights(date)
+    }
+}

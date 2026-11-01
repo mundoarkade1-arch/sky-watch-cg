@@ -1,0 +1,30 @@
+# Compilação e cache do Gradle
+build/
+.gradle/
+gradle-8.5-bin.zip
+
+# Configuração local do computador
+local.properties
+
+# Chaves e segredos (nunca enviar)
+*.jks
+*.keystore
+.env
+google-services.json
+
+# Arquivos gerados
+*.apk
+*.aab
+captures/
+
+# Editor
+.idea/
+*.iml
+
+# Arquivos temporários e registros de tentativas anteriores
+*.tmp
+android-app/assemble_output.txt
+android-app/build_log.txt
+android-app/build_test_log.txt
+android-app/test_output*.txt
+create_bat.py

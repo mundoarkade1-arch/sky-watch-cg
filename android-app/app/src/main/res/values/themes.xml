@@ -1,0 +1,5 @@
+<resources>
+    <!-- Tema nativo do Android sem ActionBar. O visual é 100% Jetpack Compose -->
+    <style name="Theme.SkyWatchCG" parent="android:style/Theme.Material.NoActionBar">
+    </style>
+</resources>
