@@ -27,7 +27,7 @@
 - [x] **Fase 6.1 (SyncMetadata) validada nos testes unitários:** entidade `SyncMetadata`, `SyncMetadataDao`, migração Room v1→v2 com restrição `CHECK (id = 1)` e testes unitários do DAO (5 testes passando). O teste instrumentado da migração real v1→v2 continua pendente (sem dispositivo ou emulador).
 - [ ] **Fase 6.2 (Em andamento / Não concluída):** Criação de `SirosStreamParser.kt` (parser streaming com Sequence e callback). Correções de compilação aplicadas. Itens pendentes: teste do parser com CSV real completo (~25 MB), consumo de memória, teste instrumentado de migração v1 para v2 (sem dispositivo/emulador) e ingestão remota (`syncFromRemote`, `WorkManager`). Já validado em 01/11/2026: 28 testes unitários passando e constantes acentuadas do parser conferidas em UTF-8. Fase 6.3 não autorizada.
 - [ ] Implementar sistema de alertas locais com AlarmManager/WorkManager e tratamento de reinicialização do dispositivo.
-- [ ] Ligar a pasta local ao repositório GitHub privado (mundoarkade1-arch/sky-watch-cg): o repositório remoto existe, mas a pasta local ainda não é um repositório Git.
+- [x] Pasta local ligada ao repositório GitHub privado (mundoarkade1-arch/sky-watch-cg) em 01/11/2026: primeiro envio feito, com .gitignore para build, local.properties, chaves e arquivos de log. A partir daqui o trabalho é versionado com git add, git commit e git push.
 
 ## Bloqueios e riscos
 - SIROS CSV: Requer download periódico e tratamento correto da codificação Latin1 e delimitador ;.
