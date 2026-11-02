@@ -21,6 +21,7 @@ import com.skywatch.cg.worker.SirosSyncWorker
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
@@ -89,10 +90,11 @@ class MainActivity : ComponentActivity() {
             alertWorkRequest
         )
         android.util.Log.d("MainActivity", "WorkManager: verificação de alertas agendada (15 min)")
+    }
 
     private fun checkForAppUpdates() {
-        val currentVersion = com.skywatch.cg.BuildConfig.VERSION_NAME
-        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+        val currentVersion = BuildConfig.VERSION_NAME
+        CoroutineScope(Dispatchers.IO).launch {
             try {
                 val url = java.net.URL("https://api.github.com/repos/mundoarkade1-arch/sky-watch-cg/releases/latest")
                 val connection = url.openConnection() as java.net.HttpURLConnection
@@ -112,7 +114,7 @@ class MainActivity : ComponentActivity() {
                     if (matchResult != null) {
                         val latestTag = matchResult.groupValues[1]
                         if (latestTag != "v$currentVersion" && latestTag != currentVersion) {
-                            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                            withContext(Dispatchers.Main) {
                                 showUpdateDialog(latestTag)
                             }
                         }
@@ -141,8 +143,6 @@ class MainActivity : ComponentActivity() {
         } catch (e: Exception) {
             android.util.Log.e("MainActivity", "Erro ao exibir diálogo de atualização: ${e.message}")
         }
-    }
-
     }
 }
 
