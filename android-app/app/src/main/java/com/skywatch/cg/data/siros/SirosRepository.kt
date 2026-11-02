@@ -121,7 +121,7 @@ class SirosRepository(
                         return@withContext SyncResult.Failure(currentError)
                     }
 
-                    val normalizedFlights = SirosNormalizer.normalize(sbcgRecords)
+                    val normalizedFlights = SirosNormalizer.normalize(sbcgRecords, LocalDate.now())
                     Log.d("SirosRepository", "Parsed e normalizados ${normalizedFlights.size} voos para SBCG")
 
                     if (normalizedFlights.isEmpty()) {

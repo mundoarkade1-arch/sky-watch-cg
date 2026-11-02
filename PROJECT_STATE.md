@@ -46,4 +46,6 @@
 - **Ponto em aberto (Room):** em instalações NOVAS (schema v2), o Room cria a tabela sync_metadata SEM a restrição CHECK (id = 1). Somente bancos que passaram pela MIGRATION_1_2 têm o CHECK. Ou seja, o CHECK não vale em todos os bancos. Nenhum código foi alterado por causa disso; a decisão fica para depois.
 
 ## Próxima etapa
+- [x] **Fase 6.4 (Notificações Locais):** `NotificationHelper`, `FlightAlertWorker` e `BootReceiver` (BOOT_COMPLETED) implementados e integrados para alertas de voos nas próximas 2 horas.
+
 - Iniciar a implementação do sistema de alertas locais com AlarmManager/WorkManager.

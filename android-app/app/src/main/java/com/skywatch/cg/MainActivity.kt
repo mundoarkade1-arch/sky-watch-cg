@@ -19,6 +19,9 @@ import com.skywatch.cg.ui.viewmodel.FlightListViewModel
 import com.skywatch.cg.worker.FlightAlertWorker
 import com.skywatch.cg.worker.SirosSyncWorker
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
 
@@ -38,6 +41,9 @@ class MainActivity : ComponentActivity() {
         // Agenda sincronização periódica via WorkManager (a cada 6 horas, requer rede)
         schedulePeriodicSync()
         
+        // Verifica atualizações no GitHub Releases
+        checkForAppUpdates()
+
         setContent {
             MaterialTheme(
                 colorScheme = darkColorScheme()
@@ -83,6 +89,60 @@ class MainActivity : ComponentActivity() {
             alertWorkRequest
         )
         android.util.Log.d("MainActivity", "WorkManager: verificação de alertas agendada (15 min)")
+
+    private fun checkForAppUpdates() {
+        val currentVersion = com.skywatch.cg.BuildConfig.VERSION_NAME
+        kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
+            try {
+                val url = java.net.URL("https://api.github.com/repos/mundoarkade1-arch/sky-watch-cg/releases/latest")
+                val connection = url.openConnection() as java.net.HttpURLConnection
+                connection.requestMethod = "GET"
+                connection.setRequestProperty("User-Agent", "SkyWatchCG-App")
+                connection.connectTimeout = 5000
+                connection.readTimeout = 5000
+
+                if (connection.responseCode == 200) {
+                    val reader = java.io.BufferedReader(java.io.InputStreamReader(connection.inputStream))
+                    val response = reader.readText()
+                    reader.close()
+
+                    // Parse simples de tag_name (ex: "tag_name":"v1.0.1")
+                    val tagRegex = "\"tag_name\"\\s*:\\s*\"([^\"]+)\"".toRegex()
+                    val matchResult = tagRegex.find(response)
+                    if (matchResult != null) {
+                        val latestTag = matchResult.groupValues[1]
+                        if (latestTag != "v$currentVersion" && latestTag != currentVersion) {
+                            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                                showUpdateDialog(latestTag)
+                            }
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("MainActivity", "Erro ao verificar atualização: ${e.message}")
+            }
+        }
+    }
+
+    private fun showUpdateDialog(newVersion: String) {
+        try {
+            android.app.AlertDialog.Builder(this)
+                .setTitle("Nova versão disponível ($newVersion)")
+                .setMessage("Uma nova versão do Sky Watch CG está disponível no GitHub. Deseja baixar e atualizar agora?")
+                .setPositiveButton("Atualizar") { _, _ ->
+                    val intent = android.content.Intent(
+                        android.content.Intent.ACTION_VIEW,
+                        android.net.Uri.parse("https://github.com/mundoarkade1-arch/sky-watch-cg/releases/latest")
+                    )
+                    startActivity(intent)
+                }
+                .setNegativeButton("Depois", null)
+                .show()
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Erro ao exibir diálogo de atualização: ${e.message}")
+        }
+    }
+
     }
 }
 
