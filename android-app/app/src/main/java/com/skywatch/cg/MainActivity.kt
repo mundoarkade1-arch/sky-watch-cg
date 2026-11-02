@@ -93,7 +93,12 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun checkForAppUpdates() {
-        val currentVersion = BuildConfig.VERSION_NAME
+        val currentVersion = try {
+            val pInfo = packageManager.getPackageInfo(packageName, 0)
+            pInfo.versionName ?: "1.0.0"
+        } catch (e: Exception) {
+            "1.0.0"
+        }
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val url = java.net.URL("https://api.github.com/repos/mundoarkade1-arch/sky-watch-cg/releases/latest")
