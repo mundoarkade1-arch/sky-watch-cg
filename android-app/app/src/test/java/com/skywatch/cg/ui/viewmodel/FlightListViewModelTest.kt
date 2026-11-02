@@ -184,4 +184,85 @@ class FlightListViewModelTest {
         assertNotNull(finalState)
         assertTrue(finalState is FlightUiState.Success || finalState is FlightUiState.Error)
     }
+
+    @Test
+    fun testGoToPreviousDayChangesDateAndLoadsFlights() = runTest(testDispatcher) {
+        val testDate = LocalDate.of(2024, 10, 15)
+        
+        // First load initial date
+        viewModel.loadFlights(testDate)
+        testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.uiState.first { it !is FlightUiState.Loading }
+        
+        val initialDate = viewModel.selectedDate.value
+        assertEquals(testDate, initialDate)
+        
+        // Navigate to previous day
+        viewModel.goToPreviousDay()
+        testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.uiState.first { it !is FlightUiState.Loading }
+        
+        val prevDate = viewModel.selectedDate.value
+        assertEquals(testDate.minusDays(1), prevDate)
+        
+        val finalState = viewModel.uiState.value
+        assertNotNull(finalState)
+        assertTrue(finalState is FlightUiState.Success || finalState is FlightUiState.Error)
+        if (finalState is FlightUiState.Success) {
+            assertEquals(testDate.minusDays(1), finalState.selectedDate)
+        }
+    }
+
+    @Test
+    fun testGoToTodayChangesDateAndLoadsFlights() = runTest(testDispatcher) {
+        val testDate = LocalDate.of(2024, 10, 15)
+        
+        // First load a different date
+        viewModel.loadFlights(testDate)
+        testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.uiState.first { it !is FlightUiState.Loading }
+        
+        // Navigate to today
+        viewModel.goToToday()
+        testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.uiState.first { it !is FlightUiState.Loading }
+        
+        val today = viewModel.selectedDate.value
+        assertEquals(LocalDate.now(), today)
+        
+        val finalState = viewModel.uiState.value
+        assertNotNull(finalState)
+        assertTrue(finalState is FlightUiState.Success || finalState is FlightUiState.Error)
+        if (finalState is FlightUiState.Success) {
+            assertEquals(LocalDate.now(), finalState.selectedDate)
+        }
+    }
+
+    @Test
+    fun testGoToNextDayChangesDateAndLoadsFlights() = runTest(testDispatcher) {
+        val testDate = LocalDate.of(2024, 10, 15)
+        
+        // First load initial date
+        viewModel.loadFlights(testDate)
+        testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.uiState.first { it !is FlightUiState.Loading }
+        
+        val initialDate = viewModel.selectedDate.value
+        assertEquals(testDate, initialDate)
+        
+        // Navigate to next day
+        viewModel.goToNextDay()
+        testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.uiState.first { it !is FlightUiState.Loading }
+        
+        val nextDate = viewModel.selectedDate.value
+        assertEquals(testDate.plusDays(1), nextDate)
+        
+        val finalState = viewModel.uiState.value
+        assertNotNull(finalState)
+        assertTrue(finalState is FlightUiState.Success || finalState is FlightUiState.Error)
+        if (finalState is FlightUiState.Success) {
+            assertEquals(testDate.plusDays(1), finalState.selectedDate)
+        }
+    }
 }

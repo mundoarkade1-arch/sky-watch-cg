@@ -8,7 +8,7 @@ Lista de pendências e itens futuros do projeto **SKY WATCH CG**:
 
 2. **Navegação por Data na Interface**:
    - Validação completa da seleção de datas diferentes no calendário da interface principal e sua integração reativa com o `FlightListViewModel`.
-   - **Pendente (Etapa A Item 2)**: Implementar navegação por data (dia anterior, hoje, próximo) na tela + teste do ViewModel.
+   - **Concluído (Etapa A Item 2)**: Implementados métodos no `FlightListViewModel` (`goToPreviousDay()`, `goToToday()`, `goToNextDay()`) e 3 testes unitários em `FlightListViewModelTest` (`testGoToPreviousDayChangesDateAndLoadsFlights`, `testGoToTodayChangesDateAndLoadsFlights`, `testGoToNextDayChangesDateAndLoadsFlights`) — todos passando.
    - **Pendente (Etapa A Item 3)**: Virada do dia UTC: voo exibido na data LOCAL (UTC-4) e ordenado pelo horário local. Escrever primeiro um teste que falhe com um voo de 02:00 UTC e depois corrigir.
 
 3. **Instalações Novas vs. Migradas do Room**:

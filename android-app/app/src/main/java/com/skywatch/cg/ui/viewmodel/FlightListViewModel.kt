@@ -137,4 +137,22 @@ class FlightListViewModel(
         Log.d("FlightListViewModelDiag", "setDate() called with date: $date")
         loadFlights(date)
     }
+
+    fun goToPreviousDay() {
+        val newDate = _selectedDate.value.minusDays(1)
+        Log.d("FlightListViewModelDiag", "goToPreviousDay() -> $newDate")
+        loadFlights(newDate)
+    }
+
+    fun goToToday() {
+        val today = LocalDate.now()
+        Log.d("FlightListViewModelDiag", "goToToday() -> $today")
+        loadFlights(today)
+    }
+
+    fun goToNextDay() {
+        val newDate = _selectedDate.value.plusDays(1)
+        Log.d("FlightListViewModelDiag", "goToNextDay() -> $newDate")
+        loadFlights(newDate)
+    }
 }
