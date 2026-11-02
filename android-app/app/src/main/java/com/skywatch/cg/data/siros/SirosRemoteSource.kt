@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit
  * Fonte remota para download do CSV de registros vigentes do SIROS/ANAC.
  * Endpoint: https://siros.anac.gov.br/siros/registros/registros/registros.csv
  */
-class SirosRemoteSource(
+open class SirosRemoteSource(
     private val url: String = DEFAULT_URL,
     private val client: OkHttpClient = DEFAULT_CLIENT
 ) {
@@ -32,6 +32,9 @@ class SirosRemoteSource(
             .writeTimeout(DOWNLOAD_TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .build()
 
+        // Exposed for testing
+        internal val TEST_CLIENT = DEFAULT_CLIENT
+
         val INSTANCE = SirosRemoteSource()
 
         suspend fun downloadCsvToFile(tempFile: File): DownloadResult {
@@ -39,7 +42,7 @@ class SirosRemoteSource(
         }
     }
 
-    suspend fun downloadCsvToFileInstance(tempFile: File): DownloadResult {
+    open suspend fun downloadCsvToFileInstance(tempFile: File): DownloadResult {
         return withContext(Dispatchers.IO) {
             val startTime = System.currentTimeMillis()
             var response: Response? = null
