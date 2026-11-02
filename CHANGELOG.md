@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-02 — Correção e Conclusão da Etapa A (36 testes verdes)
+- **Correção em `FlightListViewModelTest` (`testRefreshStateEmitsRefreshing`):** O teste falhava inicialmente por tentar ler o estado logo após `viewModel.refresh()` sem ceder a execução à corrotina, além de tentar acessar a rede real. A solução pontual consistiu em injetar uma fonte remota simulada (`SirosRemoteSource` apontando para `http://localhost:0/dummy.csv`) via o construtor do `SirosRepository`, permitindo que o teste valide a emissão do estado `Refreshing` e a conclusão bem-sucedida sem dependência de rede externa.
+- **Resultado Gradle (`testDebugUnitTest`):** 36 testes executados, 0 falhas, 0 erros (`BUILD SUCCESSFUL`). Timestamp do XML atualizado e confirmado.
+- **Git Amend:** Commit local `ea18f99` atualizado via `git commit --amend` e enviado com sucesso (`git push origin main`). Nenhum `push --force` foi necessário.
+
 ## [1.0.0] - 2026-11-01
 ### Adicionado
 - Implementação completa da persistência local com Room Database (`AppDatabase`, `FlightEntity`, `FlightDao`, `SirosRepository`).

@@ -36,6 +36,19 @@
 | TV-003 | `testLoadFlightsWithData` | Sucesso (Aprovado) | Insere voos de chegada e partida via repositório injetado e verifica se ambos aparecem corretamente nas listas filtradas. |
 | TV-004 | `testRefreshCallsLoadFlights` | Sucesso (Aprovado) | Verifica que o método `refresh()` dispara novo carregamento e retorna estado válido (`Success` ou `Error`). |
 
+## Resultados dos Testes da Etapa A (ViewModel Refreshing) - 02/11/2026
+
+| ID | Teste | Resultado | Detalhes |
+|---|---|---|---|
+| TV-005 | `testRefreshStateEmitsRefreshing` | **Sucesso (Aprovado)** | Valida que a chamada a `refresh()` emite o estado `Refreshing` (com spinner/mantendo dados anteriores) e conclui com sucesso simulando uma fonte remota local sem acesso à internet real. |
+
+**Resumo da Execução Unitária (`testDebugUnitTest`) — 02/11/2026 (36 testes):**
+- Total de testes: **36**
+- Falhas: **0**
+- Erros: **0**
+- Ignorados: **0**
+- `BUILD SUCCESSFUL`
+
 ## Correção de Concorrência e Sincronização nos Testes (Etapa 5) - 2026-11-01
 
 **Problema:** os testes liam o estado logo depois de advanceUntilIdle(), mas a consulta do Room roda em uma thread própria, que o relógio de teste não controla. Nos logs, a consulta aparecia como iniciada mas nunca como concluída, e o estado ainda era Loading quando a verificação rodava. O carregamento automático do init não era a causa: ele é cancelado corretamente por loadJob?.cancel().
