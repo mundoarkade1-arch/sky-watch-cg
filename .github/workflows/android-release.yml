@@ -19,11 +19,10 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Build Debug APK using Gradle Wrapper
+      - name: Build Debug APK using Gradle
         run: |
           cd android-app
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          gradle assembleDebug --no-daemon
 
       - name: Upload APK to Release
         uses: softprops/action-gh-release@v1
@@ -31,6 +30,7 @@ jobs:
           files: android-app/app/build/outputs/apk/debug/app-debug.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 
 
 
