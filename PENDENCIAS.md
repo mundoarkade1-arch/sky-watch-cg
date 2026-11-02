@@ -19,9 +19,11 @@ Lista de pendências e itens futuros do projeto **SKY WATCH CG**:
    - Em instalações novas (schema v2), o Room cria a tabela `sync_metadata` sem a restrição `CHECK (id = 1)` (presente apenas em bancos migrados da v1). Avaliar se é necessário unificar via script de criação inicial.
 
 4. **SirosSyncWorker (Etapa A Item 5)**:
-   - Não adicionar dependência `androidx.work:work-testing` sem autorização. Registrado para futura implementação.
+   - Worker implementado com retentativa (max 5 tentativas, `Result.retry()`/`Result.failure()`).
+   - Agendamento periódico via `MainActivity.schedulePeriodicSync()` (6 horas, constraint `NetworkType.CONNECTED`, `ExistingPeriodicWorkPolicy.KEEP`).
+   - **BOOT_COMPLETED**: Adicionado `BootReceiver` + permissão `RECEIVE_BOOT_COMPLETED` no Manifest para re-agendar após reinicialização.
+   - Testes unitários validados (WorkManager não requer dependência `work-testing` adicional).
 
-## Próxima Fase - Fase 6.3/6.4 (WorkManager + Notificações)
-- **Fase 6.3**: Sincronização periódica em background com `WorkManager` (`SirosSyncWorker` com política de retentativa, `BackoffPolicy.EXPONENTIAL`, max 5 tentativas, constraint de rede).
-- **Fase 6.4**: Agendamento de notificações locais (`AlarmManager`/`WorkManager`) para alertas de voo (ex: "Seu voo GOL 1234 parte em 2h"). Tratamento de reinicialização via `BOOT_COMPLETED` receiver.
-- **Testes em dispositivo real** e geração de APK de debug.
+## Próxima Fase - Fase 6.4 (Notificações Locais)
+- **Fase 6.4**: Agendamento de notificações locais (`AlarmManager`/`WorkManager`) para alertas de voo (ex: "Seu voo GOL 1234 parte em 2h"). 
+- **Testes em dispositivo real** (Poco X5 Pro) e geração de APK de debug (`assembleDebug`).
