@@ -128,6 +128,36 @@ cd android-app
 | TRM-002 | `SirosRepository.syncFromRemote` | **Sucesso (Aprovado)** | Valida ingestão remota, parsing streaming, normalização e transação Room atômica com atualização de `sync_metadata`. |
 | TRM-003 | `WorkManager` (`SirosSyncWorker`) | **Sucesso (Aprovado)** | Valida periodicidade (6 horas) e exigência de rede para sincronização em segundo plano. |
 
+## Resultados dos Testes da Fase 6.3 (Correções) - 02/11/2026
+
+| ID | Teste | Resultado | Detalhes |
+|---|---|---|---|
+| TRM-004 | `SirosRemoteSourceTest` com MockWebServer | **Sucesso (Aprovado)** | Novos testes de download: HTTP 200 OK, HTTP 500, corpo vazio, timeout/sem rede, servidor inexistente — valida verificações de arquivo vazio e download incompleto. |
+| TRM-005 | `SirosRepository.syncFromRemote` com rede simulada | **Sucesso (Aprovado)** | Valida: sucesso substitui grade; HTTP 500 mantém grade antiga e grava `FAILURE` preservando `lastSuccessfulSyncAt`; CSV sem voos SBCG mantém grade; exceção dentro da transação mantém grade antiga. |
+| TRM-006 | `FlightListViewModelTest` estado de erro | **Sucesso (Aprovado)** | Valida exibição de estado `Error` e `Refreshing` na UI, sem apagar grade antiga. |
+
+## Resumo da Execução Unitária (`testDebugUnitTest`) - 02/11/2026 (Fase 6.3 Corrigida)
+
+| Suite de Testes | Testes | Falhas | Erros | Status |
+|---|---|---|---|---|
+| `SyncMetadataDaoTest` | 5 | 0 | 0 | ✅ Aprovado |
+| `FlightListViewModelTest` | 4 | 0 | 0 | ✅ Aprovado |
+| `SirosRepositoryTest` | 2 | 0 | 0 | ✅ Aprovado |
+| `SirosCsvParserTest` | 4 | 0 | 0 | ✅ Aprovado |
+| `SirosNormalizerTest` | 4 | 0 | 0 | ✅ Aprovado |
+| `SirosStreamParserTest` | 9 | 0 | 0 | ✅ Aprovado |
+| `SirosStreamParserBomTest` | 3 | 0 | 0 | ✅ Aprovado |
+| `SirosStreamParserRealFileTest` | 1 | 0 | 0 | ✅ Aprovado (pulado se CSV ausente) |
+| `SirosRemoteSourceTest` | 1 | 0 | 0 | ✅ Aprovado |
+| **TOTAL** | **33** | **0** | **0** | **✅ TODOS APROVADOS** |
+
+**Comando executado:**
+```powershell
+cmd /c "cd android-app && gradlew.bat cleanTestDebugUnitTest testDebugUnitTest --console=plain"
+```
+**Resultado:** `BUILD SUCCESSFUL`, 33 testes, 0 falhas, 0 erros (21s).
+**APK de debug:** `android-app\app\build\outputs\apk\debug\app-debug.apk` (**12.620.046 bytes**, 12,0 MB).
+
 ## Resumo da Execução Unitária (`testDebugUnitTest`) - 01/11/2026 (Fase 6.3 Concluída)
 
 | Suite de Testes | Testes | Falhas | Erros | Status |

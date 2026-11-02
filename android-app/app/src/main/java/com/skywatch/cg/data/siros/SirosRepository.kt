@@ -67,9 +67,11 @@ class SirosRepository(
     /**
      * Sincronização remota transacional:
      * 1. Baixa o CSV para arquivo temporário (via SirosRemoteSource).
-     * 2. Faz o parsing streaming e normalização para SBCG (Aeroporto de Campo Grande).
-     * 3. Substitui transacionalmente a grade de voos no banco (Room transaction) e atualiza sync_metadata.
+     * 2. Faz o parsing streaming e normalização filtrando SBCG (sem acumular tudo).
+     * 3. Se 0 voos de SBCG -> Failure sem tocar na grade.
+     * 4. Substitui transacionalmente a grade de voos no banco (Room transaction) e atualiza sync_metadata.
      * Se falhar a qualquer momento, o banco antigo permanece intacto.
+     * Em qualquer Failure grava em sync_metadata (id=1) lastSyncStatus="FAILURE" preservando lastSuccessfulSyncAt e recordsInserted anteriores.
      */
     suspend fun syncFromRemote(): SyncResult = withContext(ioDispatcher) {
         val startTime = System.currentTimeMillis()
@@ -83,30 +85,48 @@ class SirosRepository(
             
             when (downloadResult) {
                 is SirosRemoteSource.DownloadResult.Failure -> {
-                    Log.e("SirosRepository", "Falha no download para sync: ${downloadResult.errorMessage}")
+                    Log.e("SirosRepository", "Falha no download: ${downloadResult.errorMessage}")
+                    writeSyncFailure(downloadResult.errorMessage, startTime)
                     return@withContext SyncResult.Failure(downloadResult.errorMessage)
                 }
                 is SirosRemoteSource.DownloadResult.Success -> {
-                    val records = mutableListOf<SirosRecord>()
-                    var parseError: String? = null
+                    var inputStream: FileInputStream? = null
+                    var currentError: String? = null
+                    var sbcgRecords = mutableListOf<SirosRecord>()
 
-                    SirosStreamParser.parseStreamWithCallback(
-                        FileInputStream(tempFile),
-                        onRecord = { records.add(it) },
-                        onError = { line, err -> parseError = "Linha $line: $err" }
-                    )
+                    try {
+                        inputStream = FileInputStream(tempFile)
+                        val sequence = SirosStreamParser.parseStream(inputStream)
 
-                    val currentError = parseError
+                        for (record in sequence) {
+                            // Filtra SBCG durante o parse sem acumular tudo
+                            if (record.codigoOrigem == "SBCG" || record.codigoDestino == "SBCG") {
+                                sbcgRecords.add(record)
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Log.e("SirosRepository", "Exceção no parse: ${e.message}")
+                        currentError = "Erro no parse: ${e.message}"
+                    } finally {
+                        inputStream?.close()
+                    }
+
                     if (currentError != null) {
-                        Log.e("SirosRepository", "Falha no parse para sync: $currentError")
+                        Log.e("SirosRepository", "Falha no parse: $currentError")
+                        writeSyncFailure(currentError, startTime)
                         return@withContext SyncResult.Failure(currentError)
                     }
 
-                    // Normaliza filtrando apenas para SBCG
-                    val normalizedFlights = SirosNormalizer.normalize(records)
+                    val normalizedFlights = SirosNormalizer.normalize(sbcgRecords)
                     Log.d("SirosRepository", "Parsed e normalizados ${normalizedFlights.size} voos para SBCG")
 
-                    // Executa transação Room com corrotina: limpa voos e insere novos, depois atualiza metadata
+                    if (normalizedFlights.isEmpty()) {
+                        val errorMsg = "Nenhum voo SBCG encontrado no CSV"
+                        Log.w("SirosRepository", errorMsg)
+                        writeSyncFailure(errorMsg, startTime)
+                        return@withContext SyncResult.Failure(errorMsg)
+                    }
+
                     database.withTransaction {
                         dao.deleteAll()
                         val entities = normalizedFlights.map { FlightEntity.fromNormalizedFlight(it) }
@@ -132,11 +152,28 @@ class SirosRepository(
             }
         } catch (e: Exception) {
             Log.e("SirosRepository", "Exceção em syncFromRemote: ${e.message}", e)
+            writeSyncFailure(e.localizedMessage ?: "Erro desconhecido", startTime)
             SyncResult.Failure(e.localizedMessage ?: "Erro desconhecido")
         } finally {
-            if (tempFile.exists()) {
-                tempFile.delete()
-            }
+            if (tempFile.exists()) tempFile.delete()
+        }
+    }
+
+    private suspend fun writeSyncFailure(errorMessage: String, startTime: Long) {
+        try {
+            val metadataDao = database.syncMetadataDao()
+            val existing = metadataDao.getSyncMetadata()
+            metadataDao.upsertSyncMetadata(
+                SyncMetadata(
+                    id = 1,
+                    lastSuccessfulSyncAt = existing?.lastSuccessfulSyncAt ?: 0L,
+                    lastSyncStatus = "FAILURE",
+                    lastSyncErrorMessage = errorMessage,
+                    recordsInserted = existing?.recordsInserted ?: 0
+                )
+            )
+        } catch (e: Exception) {
+            Log.e("SirosRepository", "Falha ao gravar FAILURE: ${e.message}")
         }
     }
 

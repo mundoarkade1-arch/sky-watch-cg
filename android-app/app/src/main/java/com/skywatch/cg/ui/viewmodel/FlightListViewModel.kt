@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.skywatch.cg.data.db.AppDatabase
+import com.skywatch.cg.data.db.SyncMetadata
 import com.skywatch.cg.data.siros.NormalizedFlight
 import com.skywatch.cg.data.siros.SirosRepository
 import kotlinx.coroutines.Job
@@ -23,6 +24,11 @@ sealed interface FlightUiState {
         val selectedDate: LocalDate
     ) : FlightUiState
     data class Error(val message: String) : FlightUiState
+    data class Refreshing(
+        val arrivals: List<NormalizedFlight>,
+        val departures: List<NormalizedFlight>,
+        val selectedDate: LocalDate
+    ) : FlightUiState
 }
 
 class FlightListViewModel(
@@ -42,8 +48,8 @@ class FlightListViewModel(
     private val _selectedDate = MutableStateFlow(LocalDate.now())
     val selectedDate: StateFlow<LocalDate> = _selectedDate.asStateFlow()
 
-    private val _syncMetadata = MutableStateFlow<com.skywatch.cg.data.db.SyncMetadata?>(null)
-    val syncMetadata: StateFlow<com.skywatch.cg.data.db.SyncMetadata?> = _syncMetadata.asStateFlow()
+    private val _syncMetadata = MutableStateFlow<SyncMetadata?>(null)
+    val syncMetadata: StateFlow<SyncMetadata?> = _syncMetadata.asStateFlow()
 
     private var loadJob: Job? = null
 
@@ -61,11 +67,6 @@ class FlightListViewModel(
                 Log.e("FlightListViewModel", "Erro ao carregar sync metadata: ${e.message}")
             }
         }
-    }
-
-    init {
-        Log.d("FlightListViewModelDiag", "ViewModel created. Calling init loadFlights()")
-        loadFlights()
     }
 
     fun loadFlights(date: LocalDate = _selectedDate.value) {
@@ -97,12 +98,38 @@ class FlightListViewModel(
             }
         }
     }
+
     fun refresh() {
         Log.d("FlightListViewModelDiag", "refresh() called with current selectedDate: ${_selectedDate.value}")
         viewModelScope.launch {
-            repository.syncFromRemote()
+            // Mostra estado de atualizando se já temos dados
+            val currentState = _uiState.value
+            if (currentState is FlightUiState.Success) {
+                _uiState.value = FlightUiState.Refreshing(
+                    arrivals = currentState.arrivals,
+                    departures = currentState.departures,
+                    selectedDate = currentState.selectedDate
+                )
+            } else if (currentState is FlightUiState.Refreshing) {
+                // Já está atualizando, mantém
+            } else {
+                _uiState.value = FlightUiState.Loading
+            }
+
+            val result = repository.syncFromRemote()
             loadSyncMetadata()
             loadFlights(_selectedDate.value)
+            
+            // O estado final será definido por loadFlights (Success ou Error)
+            // Mas podemos logar o resultado da sync
+            when (result) {
+                is SirosRepository.SyncResult.Success -> {
+                    Log.d("FlightListViewModel", "Sync manual bem-sucedida: ${result.totalSynced} voos")
+                }
+                is SirosRepository.SyncResult.Failure -> {
+                    Log.w("FlightListViewModel", "Sync manual falhou: ${result.errorMessage}")
+                }
+            }
         }
     }
 

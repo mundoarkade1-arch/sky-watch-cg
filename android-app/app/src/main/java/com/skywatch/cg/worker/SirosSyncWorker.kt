@@ -30,12 +30,23 @@ class SirosSyncWorker(
                 }
                 is SirosRepository.SyncResult.Failure -> {
                     Log.e("SirosSyncWorker", "Falha na sincronização periódica: ${result.errorMessage}")
-                    Result.retry()
+                    // Após 5 tentativas, falha definitivamente; antes, retry
+                    if (runAttemptCount >= 5) {
+                        Log.e("SirosSyncWorker", "Máximo de tentativas (5) atingido. Falha definitiva.")
+                        Result.failure()
+                    } else {
+                        Log.d("SirosSyncWorker", "Tentativa ${runAttemptCount}/5 falhou. Agendando retry.")
+                        Result.retry()
+                    }
                 }
             }
         } catch (e: Exception) {
             Log.e("SirosSyncWorker", "Exceção na sincronização periódica: ${e.message}", e)
-            Result.retry()
+            if (runAttemptCount >= 5) {
+                Result.failure()
+            } else {
+                Result.retry()
+            }
         }
     }
 }

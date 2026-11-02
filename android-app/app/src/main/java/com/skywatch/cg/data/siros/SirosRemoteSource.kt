@@ -17,29 +17,37 @@ import java.util.concurrent.TimeUnit
  * Fonte remota para download do CSV de registros vigentes do SIROS/ANAC.
  * Endpoint: https://siros.anac.gov.br/siros/registros/registros/registros.csv
  */
-object SirosRemoteSource {
+class SirosRemoteSource(
+    private val url: String = DEFAULT_URL,
+    private val client: OkHttpClient = DEFAULT_CLIENT
+) {
+    companion object {
+        const val DEFAULT_URL = "https://siros.anac.gov.br/siros/registros/registros/registros.csv"
+        private const val DOWNLOAD_TIMEOUT_SECONDS = 120L
+        private const val CONNECT_TIMEOUT_SECONDS = 30L
 
-    private const val SIROS_CSV_URL = "https://siros.anac.gov.br/siros/registros/registros/registros.csv"
-    private const val DOWNLOAD_TIMEOUT_SECONDS = 120L
-    private const val CONNECT_TIMEOUT_SECONDS = 30L
+        private val DEFAULT_CLIENT = OkHttpClient.Builder()
+            .connectTimeout(CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .readTimeout(DOWNLOAD_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .writeTimeout(DOWNLOAD_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+            .build()
 
-    private val client = OkHttpClient.Builder()
-        .connectTimeout(CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-        .readTimeout(DOWNLOAD_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-        .writeTimeout(DOWNLOAD_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-        .build()
+        val INSTANCE = SirosRemoteSource()
 
-    suspend fun downloadCsvToFile(tempFile: File): DownloadResult {
+        suspend fun downloadCsvToFile(tempFile: File): DownloadResult {
+            return INSTANCE.downloadCsvToFileInstance(tempFile)
+        }
+    }
+
+    suspend fun downloadCsvToFileInstance(tempFile: File): DownloadResult {
         return withContext(Dispatchers.IO) {
             val startTime = System.currentTimeMillis()
             var response: Response? = null
             var bytesDownloaded = 0L
 
             try {
-                Log.d("SirosRemoteSource", "Iniciando download do CSV SIROS: $SIROS_CSV_URL")
-
                 val request = Request.Builder()
-                    .url(SIROS_CSV_URL)
+                    .url(url)
                     .header("User-Agent", "SkyWatchCG/1.0 (Android)")
                     .build()
 
@@ -47,15 +55,15 @@ object SirosRemoteSource {
 
                 if (!response.isSuccessful) {
                     val errorMsg = "HTTP ${response.code}: ${response.message}"
-                    Log.e("SirosRemoteSource", "Falha no download: $errorMsg")
                     return@withContext DownloadResult.Failure(errorMsg, response.code)
                 }
 
                 val responseBody = response.body
                 if (responseBody == null) {
-                    Log.e("SirosRemoteSource", "Resposta HTTP sem corpo")
                     return@withContext DownloadResult.Failure("Resposta sem corpo", response.code)
                 }
+
+                val contentLength = responseBody.contentLength()
 
                 tempFile.parentFile?.mkdirs()
                 val inputStream = responseBody.byteStream()
@@ -74,25 +82,34 @@ object SirosRemoteSource {
                     inputStream.close()
                 }
 
+                if (bytesDownloaded == 0L) {
+                    if (tempFile.exists()) tempFile.delete()
+                    return@withContext DownloadResult.Failure("Arquivo vazio", response.code)
+                }
+
+                if (contentLength > 0 && contentLength != bytesDownloaded) {
+                    if (tempFile.exists()) tempFile.delete()
+                    return@withContext DownloadResult.Failure("Download incompleto", response.code)
+                }
+
                 val elapsedMs = System.currentTimeMillis() - startTime
-                Log.d("SirosRemoteSource", "Download concluído: ${bytesDownloaded} bytes em ${elapsedMs}ms")
                 DownloadResult.Success(bytesDownloaded, elapsedMs, response.code)
 
             } catch (e: UnknownHostException) {
                 val elapsedMs = System.currentTimeMillis() - startTime
-                Log.e("SirosRemoteSource", "Erro de DNS/sem internet: ${e.message}")
+                if (tempFile.exists()) tempFile.delete()
                 DownloadResult.Failure("Sem conexão com a internet", 0, elapsedMs)
             } catch (e: SocketTimeoutException) {
                 val elapsedMs = System.currentTimeMillis() - startTime
-                Log.e("SirosRemoteSource", "Timeout no download: ${e.message}")
+                if (tempFile.exists()) tempFile.delete()
                 DownloadResult.Failure("Timeout ao baixar o CSV", 0, elapsedMs)
             } catch (e: IOException) {
                 val elapsedMs = System.currentTimeMillis() - startTime
-                Log.e("SirosRemoteSource", "Erro de I/O no download: ${e.message}")
+                if (tempFile.exists()) tempFile.delete()
                 DownloadResult.Failure("Erro de I/O: ${e.message}", 0, elapsedMs)
             } catch (e: Exception) {
                 val elapsedMs = System.currentTimeMillis() - startTime
-                Log.e("SirosRemoteSource", "Erro inesperado no download: ${e.message}")
+                if (tempFile.exists()) tempFile.delete()
                 DownloadResult.Failure("Erro inesperado: ${e.message}", 0, elapsedMs)
             } finally {
                 response?.close()

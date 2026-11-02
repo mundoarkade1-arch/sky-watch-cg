@@ -65,6 +65,13 @@ fun MainScreen(viewModel: FlightListViewModel) {
 
     val items = listOf(Screen.Arrivals, Screen.Departures)
 
+    val isRefreshing = uiState is FlightUiState.Refreshing
+    val lastSyncError = syncMetadata?.let {
+        if (it.lastSyncStatus == "FAILURE" && !it.lastSyncErrorMessage.isNullOrBlank()) {
+            it.lastSyncErrorMessage
+        } else null
+    }
+
     Scaffold(
         topBar = {
             Column(
@@ -88,17 +95,49 @@ fun MainScreen(viewModel: FlightListViewModel) {
                         }
                     },
                     actions = {
-                        IconButton(onClick = { viewModel.refresh() }) {
-                            Icon(
-                                imageVector = Icons.Default.Refresh,
-                                contentDescription = stringResource(id = R.string.refresh_description)
-                            )
+                        IconButton(
+                            onClick = { viewModel.refresh() },
+                            enabled = !isRefreshing
+                        ) {
+                            if (isRefreshing) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
+                                    strokeWidth = 2.dp,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.Refresh,
+                                    contentDescription = stringResource(id = R.string.refresh_description)
+                                )
+                            }
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant
                     )
                 )
+
+                // Última atualização
+                val currentSyncMeta = syncMetadata
+                if (currentSyncMeta != null) {
+                    Text(
+                        text = stringResource(id = R.string.last_update_prefix) + " " + currentSyncMeta.getDisplayLastUpdate(),
+                        fontSize = 10.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                    )
+                }
+
+                // Último erro de sincronização
+                if (lastSyncError != null) {
+                    Text(
+                        text = "Última falha: $lastSyncError",
+                        fontSize = 10.sp,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                    )
+                }
 
                 Row(
                     modifier = Modifier
@@ -120,9 +159,10 @@ fun MainScreen(viewModel: FlightListViewModel) {
                         color = MaterialTheme.colorScheme.onErrorContainer
                     )
                     Spacer(modifier = Modifier.width(16.dp))
-                    syncMetadata?.let { metadata ->
+                    val metadata = syncMetadata
+                    metadata?.let {
                         Text(
-                            text = "${stringResource(id = R.string.last_update_prefix)} ${metadata.getDisplayLastUpdate()}",
+                            text = "${stringResource(id = R.string.last_update_prefix)} ${it.getDisplayLastUpdate()}",
                             fontSize = 11.sp,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onErrorContainer
@@ -184,6 +224,34 @@ fun FlightListContent(uiState: FlightUiState, operationType: OperationType) {
                     CircularProgressIndicator()
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(text = stringResource(id = R.string.loading_flights))
+                }
+            }
+        }
+        is FlightUiState.Refreshing -> {
+            val flights = if (operationType == OperationType.ARRIVAL) uiState.arrivals else uiState.departures
+            if (flights.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        CircularProgressIndicator()
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(text = stringResource(id = R.string.loading_flights))
+                    }
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(flights) { flight ->
+                        FlightCard(flight = flight)
+                    }
+                }
+                // Indicador de atualização
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.padding(bottom = 16.dp),
+                        strokeWidth = 3.dp
+                    )
                 }
             }
         }
