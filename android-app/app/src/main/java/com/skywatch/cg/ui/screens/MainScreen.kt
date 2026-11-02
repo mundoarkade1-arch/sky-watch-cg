@@ -158,16 +158,6 @@ fun MainScreen(viewModel: FlightListViewModel) {
                         fontSize = 11.sp,
                         color = MaterialTheme.colorScheme.onErrorContainer
                     )
-                    Spacer(modifier = Modifier.width(16.dp))
-                    val metadata = syncMetadata
-                    metadata?.let {
-                        Text(
-                            text = "${stringResource(id = R.string.last_update_prefix)} ${it.getDisplayLastUpdate()}",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onErrorContainer
-                        )
-                    }
                 }
             }
         },
