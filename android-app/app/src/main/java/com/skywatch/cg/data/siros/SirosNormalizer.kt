@@ -63,7 +63,9 @@ object SirosNormalizer {
         val inicio = parseDate(record.inicioOperacao)
         val fim = parseDate(record.fimOperacao)
         if (inicio == null || fim == null) return false
-        return !fim.isBefore(referenceDate) && !inicio.isAfter(fim)
+        val minDate = referenceDate.minusDays(1)
+        val maxDate = referenceDate.plusDays(45)
+        return !fim.isBefore(minDate) && !inicio.isAfter(maxDate) && !inicio.isAfter(fim)
     }
 
     private fun parseDaysOfWeek(record: SirosRecord): Set<Int> {
@@ -144,3 +146,4 @@ object SirosNormalizer {
         return null
     }
 }
+

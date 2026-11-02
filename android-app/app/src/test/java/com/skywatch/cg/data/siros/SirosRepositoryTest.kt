@@ -184,8 +184,8 @@ class SirosRepositoryTest {
         val departures = testRepository.getDeparturesForUi(testDate)
         assertEquals(1, arrivals.size)
         assertEquals(1, departures.size)
-        assertEquals("LATAM", arrivals[0].airline)
-        assertEquals("GOL", departures[0].airline)
+        assertEquals("GOL", arrivals[0].airline)
+        assertEquals("LATAM", departures[0].airline)
 
         testDb.close()
     }

@@ -15,7 +15,7 @@ Validar fontes gratuitas e permitidas de dados antes de implementar a interface 
 - Prioridade: fontes gratuitas
 
 ## Estado atual
-Projeto em planejamento técnico. Fontes candidatas identificadas; cobertura real ADS-B na região ainda precisa ser testada. Nenhum dado de voo deve ser inventado ou apresentado como confirmado sem evidência.
+Projeto em desenvolvimento ativo. Fase 0 concluída (limpeza, verdade, correção de normalização e documentação).
 
 ## Estrutura
 - `AGENTS.md`: regras para agentes de IA
@@ -25,8 +25,8 @@ Projeto em planejamento técnico. Fontes candidatas identificadas; cobertura rea
 - `TESTING.md`: plano e resultados de testes
 - `docs/API_SOURCES.md`: fontes e limitações
 - `docs/ARCHITECTURE.md`: arquitetura proposta
-- `android-app/`: aplicativo Android (a implementar)
-- `backend/`: integração e normalização de dados (a implementar)
+- `android-app/`: aplicativo Android Jetpack Compose
+
 
 ## Aviso
 Este aplicativo é um projeto de observação/entretenimento. Não é ferramenta de navegação, controle de tráfego aéreo ou segurança operacional. Horários e posições podem estar incompletos, atrasados ou indisponíveis.

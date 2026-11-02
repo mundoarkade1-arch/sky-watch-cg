@@ -2,28 +2,14 @@
 
 Lista de pendências e itens futuros do projeto **SKY WATCH CG**:
 
-1. **Testes do `syncFromRemote` e `SirosSyncWorker`**:
-   - Os testes de integração do sincronizador (`SirosSyncIntegrationTest.kt`) e do Worker (`SirosSyncWorker`) foram isolados na pasta externa `C:\Users\janie\Downloads\skywatch-pendentes` para aguardar a decisão sobre a adição da dependência de teste do WorkManager (`androidx.work:work-testing`), que requer autorização explícita do usuário.
-   - **Pendente (Etapa A Item 1)**: Teste `testSyncFromRemoteSuccess` falhando devido a incompatibilidade de data de referência entre o normalizador (usa `LocalDate.now()`) e a data consultada no teste. 2 de 3 testes passando (`testSyncFromRemoteDownloadFailurePreservesGrid` ✅, `testSyncFromRemoteZeroSbcgFlightsPreservesGrid` ✅). O CSV de sucesso precisa ajustar a data de referência do normalizador ou a data consultada no teste.
+1. **Fase 0 Concluída**:
+   - Limpeza de logs antigos e ajuste do `.gitignore` para ignorar logs e arquivos temporários CSV.
+   - Correção do normalizador de datas do SIROS (`SirosNormalizer`) para a faixa `[referenceDate - 1, referenceDate + 45]`.
+   - Ajuste das asserções do teste `testSyncFromRemoteSuccess`.
+   - Documentação revisada e atualizada.
 
-2. **Navegação por Data na Interface**:
-   - Validação completa da seleção de datas diferentes no calendário da interface principal e sua integração reativa com o `FlightListViewModel`.
-   - **Concluído (Etapa A Item 2)**: Implementados métodos no `FlightListViewModel` (`goToPreviousDay()`, `goToToday()`, `goToNextDay()`) e 3 testes unitários em `FlightListViewModelTest` (`testGoToPreviousDayChangesDateAndLoadsFlights`, `testGoToTodayChangesDateAndLoadsFlights`, `testGoToNextDayChangesDateAndLoadsFlights`) — todos passando.
-   - **Concluído (Etapa A Item 3)**: Virada do dia UTC — voo de 02:00 UTC exibido na data LOCAL (UTC-4 = 22:00 do dia anterior).
-     - Adicionado teste `testUtcDayRolloverFlightAppearsOnLocalDate` em `FlightListViewModelTest` (falhou inicialmente, depois passou).
-     - Corrigido `SirosRepository.getArrivalsForUi` e `getDeparturesForUi` para buscar janela de 3 dias e filtrar por data local computada a partir de UTC + timezone do aeroporto (`ZoneId`).
-     - Adicionados métodos `getArrivalsByDateRange` e `getDeparturesByDateRange` no `FlightDao`.
-     - 9 testes em `FlightListViewModelTest` — todos passando.
-
-3. **Instalações Novas vs. Migradas do Room**:
-   - Em instalações novas (schema v2), o Room cria a tabela `sync_metadata` sem a restrição `CHECK (id = 1)` (presente apenas em bancos migrados da v1). Avaliar se é necessário unificar via script de criação inicial.
-
-4. **SirosSyncWorker (Etapa A Item 5)**:
-   - Worker implementado com retentativa (max 5 tentativas, `Result.retry()`/`Result.failure()`).
-   - Agendamento periódico via `MainActivity.schedulePeriodicSync()` (6 horas, constraint `NetworkType.CONNECTED`, `ExistingPeriodicWorkPolicy.KEEP`).
-   - **BOOT_COMPLETED**: Adicionado `BootReceiver` + permissão `RECEIVE_BOOT_COMPLETED` no Manifest para re-agendar após reinicialização.
-   - Testes unitários validados (WorkManager não requer dependência `work-testing` adicional).
-
-## Próxima Fase - Fase 6.4 (Notificações Locais)
-- **Fase 6.4**: Agendamento de notificações locais (`AlarmManager`/`WorkManager`) para alertas de voo (ex: "Seu voo GOL 1234 parte em 2h"). 
-- **Testes em dispositivo real** (Poco X5 Pro) e geração de APK de debug (`assembleDebug`).
+2. **Fase 1 em Diante (Próximos Passos conforme solicitação do usuário)**:
+   - Permissão `POST_NOTIFICATIONS` no AndroidManifest e solicitação moderna.
+   - Tratamento de chegada no dia seguinte e fuso horário `America/Campo_Grande`.
+   - Migração Room versão 3 com script manual.
+   - MVP UI, Alertas, Aena e Radar ADS-B.

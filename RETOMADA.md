@@ -1,18 +1,16 @@
 # RETOMADA - SKY WATCH CG
 
-## Última atualização: 02/11/2026 02:30 UTC
+## Última atualização: 02/11/2026 18:00 UTC
 
-### ✅ Concluído (com hash do commit)
-- **Fase 6.3 corrigida e validada**: commit `a1b2c3d` (pendente push)
-  - `SirosRemoteSource`: URL e OkHttpClient como parâmetros, verificações de arquivo vazio (0 bytes) e download incompleto
-  - `SirosRepository.syncFromRemote`: fechamento de streams, filtro SBCG streaming, 0 voos SBCG = Failure sem tocar grade, gravação FAILURE preservando lastSuccessfulSyncAt
-  - `SirosSyncWorker`: limite de 5 tentativas (runAttemptCount >= 5 -> Result.failure())
-  - UI: botão "Atualizar agora" com estado Refreshing (spinner), exibição de último erro sem apagar grade
-  - Testes: 33 testes unitários aprovados (0 falhas, 0 ignorados) — BUILD SUCCESSFUL
-  - APK de debug: `android-app\app\build\outputs\apk\debug\app-debug.apk` (12.620.046 bytes)
+### ✅ Concluído
+- **Fase 0 - Limpeza e Verdade** (commit a ser feito):
+  - `.gitignore` atualizado: logs, build-logs/, siros_temp_*.csv, *.csv
+  - `SirosNormalizer`: faixa de datas corrigida para `referenceDate - 1` até `referenceDate + 45`
+  - Teste `testSyncFromRemoteSuccess`: corrigido (data de referência compatível com CSV de teste)
+  - Documentação atualizada: ROADMAP (fases reais), README (pasta backend/ removida), TESTING (contagem real de testes)
 
 ### 📋 Em andamento
-- Atualização de documentação e commit final
+- Fase 1 - Correção de erros (permissões, fuso horário, Room v3, Workers, etc.)
 
 ### 📝 Último comando Gradle e linha do log
 ```powershell
