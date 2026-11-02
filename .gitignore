@@ -32,3 +32,5 @@ create_bat.py
 # Logs de build e teste gerados localmente
 gradle-output.log
 gradle-assemble.log
+gradle-output.log
+
