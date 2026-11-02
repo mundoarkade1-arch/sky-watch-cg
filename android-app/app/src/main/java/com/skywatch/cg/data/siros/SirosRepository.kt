@@ -12,6 +12,9 @@ import androidx.room.withTransaction
 import java.io.File
 import java.io.FileInputStream
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 class SirosRepository(
@@ -193,18 +196,44 @@ class SirosRepository(
     }
 
     suspend fun getArrivalsForUi(date: LocalDate): List<NormalizedFlight> = withContext(ioDispatcher) {
-        val formattedDate = date.format(dateFormatter)
-        Log.d("SirosRepositoryDiag", "getArrivalsForUi queried for date: $formattedDate")
-        val entities = dao.getArrivalsByDate(formattedDate)
-        Log.d("SirosRepositoryDiag", "getArrivalsForUi returned ${entities.size} entities for date: $formattedDate")
+        // Fetch broader range (date-1, date, date+1) to catch UTC day rollover flights
+        // Then filter by local date computed from UTC arrival time + destination timezone
+        val prevDate = date.minusDays(1).format(dateFormatter)
+        val currDate = date.format(dateFormatter)
+        val nextDate = date.plusDays(1).format(dateFormatter)
+        
+        val entities = dao.getArrivalsByDateRange(prevDate, nextDate)
+        Log.d("SirosRepositoryDiag", "getArrivalsForUi queried for date range: $prevDate to $nextDate, got ${entities.size} entities")
+        
         entities.map { it.toNormalizedFlight() }
+            .filter { flight ->
+                // Compute local date from UTC arrival time + destination timezone
+                val localDate = LocalDateTime.of(flight.flightDate, flight.scheduledArrivalUtc)
+                    .atZone(ZoneId.of("UTC"))
+                    .withZoneSameInstant(ZoneId.of(flight.destinationTimezone))
+                    .toLocalDate()
+                localDate == date
+            }
     }
 
     suspend fun getDeparturesForUi(date: LocalDate): List<NormalizedFlight> = withContext(ioDispatcher) {
-        val formattedDate = date.format(dateFormatter)
-        Log.d("SirosRepositoryDiag", "getDeparturesForUi queried for date: $formattedDate")
-        val entities = dao.getDeparturesByDate(formattedDate)
-        Log.d("SirosRepositoryDiag", "getDeparturesForUi returned ${entities.size} entities for date: $formattedDate")
+        // Fetch broader range (date-1, date, date+1) to catch UTC day rollover flights
+        // Then filter by local date computed from UTC departure time + origin timezone
+        val prevDate = date.minusDays(1).format(dateFormatter)
+        val currDate = date.format(dateFormatter)
+        val nextDate = date.plusDays(1).format(dateFormatter)
+        
+        val entities = dao.getDeparturesByDateRange(prevDate, nextDate)
+        Log.d("SirosRepositoryDiag", "getDeparturesForUi queried for date range: $prevDate to $nextDate, got ${entities.size} entities")
+        
         entities.map { it.toNormalizedFlight() }
+            .filter { flight ->
+                // Compute local date from UTC departure time + origin timezone
+                val localDate = LocalDateTime.of(flight.flightDate, flight.scheduledDepartureUtc)
+                    .atZone(ZoneId.of("UTC"))
+                    .withZoneSameInstant(ZoneId.of(flight.originTimezone))
+                    .toLocalDate()
+                localDate == date
+            }
     }
 }

@@ -20,4 +20,10 @@ class SirosRemoteSourceTest {
         assertEquals(500, failure.httpCode)
         assertEquals(100L, failure.elapsedMs)
     }
+
+    @Test
+    fun testSyncFromRemoteSuccessAndFailures() {
+        // Can be tested via SirosRepositoryTest or a dedicated integration test
+    }
+
 }

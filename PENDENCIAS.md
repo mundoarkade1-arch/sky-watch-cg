@@ -9,7 +9,11 @@ Lista de pendências e itens futuros do projeto **SKY WATCH CG**:
 2. **Navegação por Data na Interface**:
    - Validação completa da seleção de datas diferentes no calendário da interface principal e sua integração reativa com o `FlightListViewModel`.
    - **Concluído (Etapa A Item 2)**: Implementados métodos no `FlightListViewModel` (`goToPreviousDay()`, `goToToday()`, `goToNextDay()`) e 3 testes unitários em `FlightListViewModelTest` (`testGoToPreviousDayChangesDateAndLoadsFlights`, `testGoToTodayChangesDateAndLoadsFlights`, `testGoToNextDayChangesDateAndLoadsFlights`) — todos passando.
-   - **Pendente (Etapa A Item 3)**: Virada do dia UTC: voo exibido na data LOCAL (UTC-4) e ordenado pelo horário local. Escrever primeiro um teste que falhe com um voo de 02:00 UTC e depois corrigir.
+   - **Concluído (Etapa A Item 3)**: Virada do dia UTC — voo de 02:00 UTC exibido na data LOCAL (UTC-4 = 22:00 do dia anterior).
+     - Adicionado teste `testUtcDayRolloverFlightAppearsOnLocalDate` em `FlightListViewModelTest` (falhou inicialmente, depois passou).
+     - Corrigido `SirosRepository.getArrivalsForUi` e `getDeparturesForUi` para buscar janela de 3 dias e filtrar por data local computada a partir de UTC + timezone do aeroporto (`ZoneId`).
+     - Adicionados métodos `getArrivalsByDateRange` e `getDeparturesByDateRange` no `FlightDao`.
+     - 9 testes em `FlightListViewModelTest` — todos passando.
 
 3. **Instalações Novas vs. Migradas do Room**:
    - Em instalações novas (schema v2), o Room cria a tabela `sync_metadata` sem a restrição `CHECK (id = 1)` (presente apenas em bancos migrados da v1). Avaliar se é necessário unificar via script de criação inicial.

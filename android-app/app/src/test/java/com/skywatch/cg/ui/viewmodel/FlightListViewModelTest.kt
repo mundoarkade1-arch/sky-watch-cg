@@ -265,4 +265,54 @@ class FlightListViewModelTest {
             assertEquals(testDate.plusDays(1), finalState.selectedDate)
         }
     }
+
+    @Test
+    fun testUtcDayRolloverFlightAppearsOnLocalDate() = runTest(testDispatcher) {
+        // Flight at 02:00 UTC on 2024-10-15 = 22:00 on 2024-10-14 in UTC-4 (America/Campo_Grande)
+        // Should appear on LOCAL date 2024-10-14, not 2024-10-15
+        val utcFlightDate = LocalDate.of(2024, 10, 15)
+        val localExpectedDate = LocalDate.of(2024, 10, 14)
+        
+        val departureAt0200Utc = NormalizedFlight(
+            flightId = "GLO-9999-2024-10-15",
+            sirosRecordId = "GLO-999",
+            airline = "GOL",
+            flightNumber = "9999",
+            equipment = "B738",
+            origin = "SBCG",
+            originName = "CAMPO GRANDE",
+            originTimezone = "America/Campo_Grande", // UTC-4
+            destination = "SBGR",
+            destinationName = "GUARULHOS",
+            destinationTimezone = "America/Sao_Paulo",
+            operationType = OperationType.DEPARTURE,
+            scheduledDepartureUtc = LocalTime.of(2, 0), // 02:00 UTC
+            scheduledArrivalUtc = LocalTime.of(3, 30),
+            flightDate = utcFlightDate,
+            daysOfWeek = listOf(1, 2, 3, 4, 5, 6, 7),
+            validFrom = LocalDate.of(2024, 10, 1),
+            validTo = LocalDate.of(2025, 3, 31),
+            serviceType = "REGULAR DE PASSAGEIROS",
+            sirosStatus = "Em Operação"
+        )
+        
+        val repository = com.skywatch.cg.data.siros.SirosRepository(db, testDispatcher)
+        repository.saveNormalizedFlights(listOf(departureAt0200Utc))
+        
+        // Load flights for the LOCAL date (14th) - should include the 02:00 UTC flight
+        viewModel.loadFlights(localExpectedDate)
+        testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.uiState.first { it !is FlightUiState.Loading }
+        
+        val finalState = viewModel.uiState.value
+        assertNotNull(finalState)
+        assertTrue(finalState is FlightUiState.Success)
+        val success = finalState as FlightUiState.Success
+        
+        // Flight should appear on 14th (local date), not 15th
+        assertEquals(localExpectedDate, success.selectedDate)
+        assertEquals(1, success.departures.size)
+        assertEquals("GLO-9999-2024-10-15", success.departures[0].flightId)
+        assertEquals(LocalTime.of(2, 0), success.departures[0].scheduledDepartureUtc)
+    }
 }
