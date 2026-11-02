@@ -27,6 +27,8 @@ import com.skywatch.cg.data.siros.NormalizedFlight
 import com.skywatch.cg.data.siros.OperationType
 import com.skywatch.cg.ui.viewmodel.FlightListViewModel
 import com.skywatch.cg.ui.viewmodel.FlightUiState
+import com.skywatch.cg.util.getDisplayLastUpdate
+import com.skywatch.cg.util.getDisplayTime
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -34,26 +36,6 @@ import java.time.format.DateTimeFormatter
 sealed class Screen(val route: String, val titleRes: Int) {
     object Arrivals : Screen("arrivals", R.string.tab_arrivals)
     object Departures : Screen("departures", R.string.tab_departures)
-}
-
-private val campoGrandeZone = ZoneId.of("America/Campo_Grande")
-private val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
-private val localDateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm").withZone(ZoneId.of("America/Campo_Grande"))
-
-private fun SyncMetadata.getDisplayLastUpdate(): String {
-    return if (lastSuccessfulSyncAt > 0) {
-        localDateTimeFormatter.format(Instant.ofEpochMilli(lastSuccessfulSyncAt))
-    } else {
-        "Nunca sincronizado"
-    }
-}
-
-private fun NormalizedFlight.getDisplayTime(isArrival: Boolean): String {
-    val utcTime = if (isArrival) scheduledArrivalUtc else scheduledDepartureUtc
-    val flightDateTime = flightDate.atTime(utcTime)
-    val utcZoned = flightDateTime.atZone(ZoneId.of("UTC"))
-    val localZoned = utcZoned.withZoneSameInstant(campoGrandeZone)
-    return localZoned.format(timeFormatter)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -121,13 +103,13 @@ fun MainScreen(viewModel: FlightListViewModel) {
                 // Última atualização
                 val currentSyncMeta = syncMetadata
                 if (currentSyncMeta != null) {
-                    Text(
-                        text = stringResource(id = R.string.last_update_prefix) + " " + currentSyncMeta.getDisplayLastUpdate(),
-                        fontSize = 10.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-                    )
-                }
+                        Text(
+                            text = stringResource(id = R.string.last_update_prefix) + " " + currentSyncMeta.lastSuccessfulSyncAt.getDisplayLastUpdate(),
+                            fontSize = 10.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                        )
+                    }
 
                 // Último erro de sincronização
                 if (lastSyncError != null) {
