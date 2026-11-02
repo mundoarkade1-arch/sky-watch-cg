@@ -27,7 +27,7 @@ class SirosRepositoryTest {
         db = Room.inMemoryDatabaseBuilder(context, AppDatabase::class.java)
             .allowMainThreadQueries()
             .build()
-        repository = SirosRepository(db, Dispatchers.IO)
+        repository = SirosRepository(db, Dispatchers.IO, SirosRemoteSource.INSTANCE)
     }
 
     @After

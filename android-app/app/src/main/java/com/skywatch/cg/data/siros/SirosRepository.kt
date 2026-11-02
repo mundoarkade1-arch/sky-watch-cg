@@ -16,7 +16,8 @@ import java.time.format.DateTimeFormatter
 
 class SirosRepository(
     private val database: AppDatabase,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val remoteSource: SirosRemoteSource = SirosRemoteSource.INSTANCE
 ) {
 
     private val dao = database.flightDao()
@@ -81,7 +82,7 @@ class SirosRepository(
 
         try {
             Log.d("SirosRepository", "Iniciando syncFromRemote...")
-            val downloadResult = SirosRemoteSource.downloadCsvToFile(tempFile)
+            val downloadResult = remoteSource.downloadCsvToFileInstance(tempFile)
             
             when (downloadResult) {
                 is SirosRemoteSource.DownloadResult.Failure -> {
@@ -159,7 +160,7 @@ class SirosRepository(
         }
     }
 
-    private suspend fun writeSyncFailure(errorMessage: String, startTime: Long) {
+    private suspend fun writeSyncFailure(errorMessage: String, startTime: Long = 0) {
         try {
             val metadataDao = database.syncMetadataDao()
             val existing = metadataDao.getSyncMetadata()

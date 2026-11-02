@@ -150,6 +150,45 @@ class FlightListViewModelTest {
     }
 
     @Test
+    @Test
+    fun testRefreshStateEmitsRefreshing() = runTest(testDispatcher) {
+        val testDate = LocalDate.of(2024, 10, 15)
+        val testRemoteSource = com.skywatch.cg.data.siros.SirosRemoteSource("http://localhost:0/dummy.csv")
+        val testRepository = com.skywatch.cg.data.siros.SirosRepository(db, testDispatcher, testRemoteSource)
+        viewModel = FlightListViewModel(ApplicationProvider.getApplicationContext(), testRepository)
+
+        viewModel.loadFlights(testDate)
+        testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.uiState.first { it !is FlightUiState.Loading }
+
+        // Trigger refresh
+        viewModel.refresh()
+        testDispatcher.scheduler.yield()
+        val refreshingState = viewModel.uiState.value
+        assertTrue(refreshingState is FlightUiState.Refreshing)
+        
+        testDispatcher.scheduler.advanceUntilIdle()
+        val finalState = viewModel.uiState.value
+        assertTrue(finalState is FlightUiState.Success || finalState is FlightUiState.Error || finalState is FlightUiState.Refreshing)
+    }
+    fun testRefreshStateEmitsRefreshing() = runTest(testDispatcher) {
+        val testDate = LocalDate.of(2024, 10, 15)
+        viewModel.loadFlights(testDate)
+        testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.uiState.first { it !is FlightUiState.Loading }
+
+        // Trigger refresh
+        viewModel.refresh()
+        val refreshingState = viewModel.uiState.value
+        assertTrue(refreshingState is FlightUiState.Refreshing)
+        
+        testDispatcher.scheduler.advanceUntilIdle()
+        val finalState = viewModel.uiState.value
+        assertTrue(finalState is FlightUiState.Success || finalState is FlightUiState.Refreshing)
+    }
+
+
+    @Test
     fun testRefreshCallsLoadFlights() = runTest(testDispatcher) {
         viewModel.refresh()
         testDispatcher.scheduler.advanceUntilIdle()
