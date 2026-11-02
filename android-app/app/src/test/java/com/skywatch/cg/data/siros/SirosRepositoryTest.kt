@@ -160,8 +160,8 @@ class SirosRepositoryTest {
         val testCsv = """
             Importante: Horários em UTC
             Cód. Empresa;Empresa;Nº Voo;Equip.;Seg;Ter;Qua;Qui;Sex;Sáb;Dom;Quant. Assentos;Nº SIROS;Situação SIROS;Data Registro;Início Operação;Fim Operação;Natureza Operação;Nº Etapa;Cód. Origem;Arpt Origem;Cód Destino;Arpt Destino;Horário Partida;Horário Chegada;Tipo Serviço;Objeto Transporte;Codeshare
-            GLO;GOL LINHAS AEREAS;1234;B738;1;2;3;4;5;6;7;186;GLO-001;Em Operação;01/01/2024 10:00:00;2024-10-01;2025-03-31;DOMÉSTICA;1;SBGR;CAMPO GRANDE;SBCG;GUARULHOS;10:00;11:30;REGULAR DE PASSAGEIROS;PASSAGEIROS;
-            TAM;LATAM AIRLINES;3500;A320;1;2;3;4;5;6;7;180;TAM-001;Em Operação;01/01/2024 10:00:00;2024-10-01;2025-03-31;DOMÉSTICA;1;SBCG;CAMPO GRANDE;SBGR;GUARULHOS;08:00;09:15;REGULAR DE PASSAGEIROS;PASSAGEIROS;
+            GLO;GOL LINHAS AEREAS;1234;B738;1;2;3;4;5;6;7;186;GLO-001;Em Operação;01/01/2024 10:00:00;2024-10-01;2030-03-31;DOMÉSTICA;1;SBGR;CAMPO GRANDE;SBCG;GUARULHOS;10:00;11:30;REGULAR DE PASSAGEIROS;PASSAGEIROS;
+            TAM;LATAM AIRLINES;3500;A320;1;2;3;4;5;6;7;180;TAM-001;Em Operação;01/01/2024 10:00:00;2024-10-01;2030-03-31;DOMÉSTICA;1;SBCG;CAMPO GRANDE;SBGR;GUARULHOS;08:00;09:15;REGULAR DE PASSAGEIROS;PASSAGEIROS;
         """.trimIndent()
 
         val testDb = Room.inMemoryDatabaseBuilder(

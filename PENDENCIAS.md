@@ -4,7 +4,7 @@ Lista de pendências e itens futuros do projeto **SKY WATCH CG**:
 
 1. **Testes do `syncFromRemote` e `SirosSyncWorker`**:
    - Os testes de integração do sincronizador (`SirosSyncIntegrationTest.kt`) e do Worker (`SirosSyncWorker`) foram isolados na pasta externa `C:\Users\janie\Downloads\skywatch-pendentes` para aguardar a decisão sobre a adição da dependência de teste do WorkManager (`androidx.work:work-testing`), que requer autorização explícita do usuário.
-   - **Pendente (Etapa A Item 1)**: Teste `testSyncFromRemoteSuccess` falhando devido a formato de CSV - 2 de 3 testes passando (`testSyncFromRemoteDownloadFailurePreservesGrid` ✅, `testSyncFromRemoteZeroSbcgFlightsPreservesGrid` ✅). O CSV de sucesso precisa ajustar o formato exato esperado pelo parser SIROS.
+   - **Pendente (Etapa A Item 1)**: Teste `testSyncFromRemoteSuccess` falhando devido a incompatibilidade de data de referência entre o normalizador (usa `LocalDate.now()`) e a data consultada no teste. 2 de 3 testes passando (`testSyncFromRemoteDownloadFailurePreservesGrid` ✅, `testSyncFromRemoteZeroSbcgFlightsPreservesGrid` ✅). O CSV de sucesso precisa ajustar a data de referência do normalizador ou a data consultada no teste.
 
 2. **Navegação por Data na Interface**:
    - Validação completa da seleção de datas diferentes no calendário da interface principal e sua integração reativa com o `FlightListViewModel`.
@@ -20,3 +20,8 @@ Lista de pendências e itens futuros do projeto **SKY WATCH CG**:
 
 4. **SirosSyncWorker (Etapa A Item 5)**:
    - Não adicionar dependência `androidx.work:work-testing` sem autorização. Registrado para futura implementação.
+
+## Próxima Fase - Fase 6.3/6.4 (WorkManager + Notificações)
+- **Fase 6.3**: Sincronização periódica em background com `WorkManager` (`SirosSyncWorker` com política de retentativa, `BackoffPolicy.EXPONENTIAL`, max 5 tentativas, constraint de rede).
+- **Fase 6.4**: Agendamento de notificações locais (`AlarmManager`/`WorkManager`) para alertas de voo (ex: "Seu voo GOL 1234 parte em 2h"). Tratamento de reinicialização via `BOOT_COMPLETED` receiver.
+- **Testes em dispositivo real** e geração de APK de debug.
