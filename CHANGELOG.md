@@ -44,12 +44,12 @@
 - **Medição real com CSV completo (`SirosStreamParserRealFileTest`):** total_lines=65477, records=65475, sbcg=867, baseline_mb=10, peak_live_mb=10, growth_mb=0, elapsed_ms=966. A memória é amostrada a cada 50.000 registros, então é indicação, não pico exato.
 - **Pendências da Fase 6.2 (Itens NÃO validados):**
   - Ingestão remota (`download`, `syncFromRemote`, `WorkManager`) ainda não implementada (Fase 6.3 não autorizada).
-### Fase 6.3 (Corrigida): Ingestão Remota, Transação Atômica, UI e WorkManager (2026-11-02)
-- **6.3.1 Download HTTP do CSV SIROS (`SirosRemoteSource`):** Adicionada flexibilidade com construtor aceitando URL e OkHttpClient customizados. Implementadas verificações para arquivo vazio (0 bytes) e download incompleto (Content-Length divergente), ambos removendo o arquivo temporário e retornando `DownloadResult.Failure`.
-- **6.3.2 Sincronização Transacional (`SirosRepository.syncFromRemote`):** Garantido fechamento de `FileInputStream`. Filtro de registros SBCG executado em tempo de streaming sem acumular todo o CSV na memória. Se o CSV não contiver voos para SBCG, retorna `Failure` e não altera o banco. Em qualquer falha, grava `SyncMetadata` com `lastSyncStatus="FAILURE"` mantendo a data da última sincronização bem-sucedida (`lastSuccessfulSyncAt`) e `recordsInserted`.
-- **6.3.3 Interface (`MainScreen` e `FlightListViewModel`):** Botão "Atualizar agora" com estado de carregamento visível (spinner rotativo) durante o refresh. Exibição de mensagem de erro/falha da última sincronização quando houver, sem apagar a grade de voos exibida. Mantido o aviso obrigatório de horários programados.
-- **6.3.4 WorkManager (`SirosSyncWorker`):** Adicionado limite de 5 tentativas (`runAttemptCount >= 5 -> Result.failure()`), evitando retentativas infinitas em falha permanente de rede.
-- **6.3.5 Dependência e APK:** Adicionada dependência `testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")` para testes de rede simulada. APK de debug compilado e verificado com sucesso em `android-app\app\build\outputs\apk\debug\app-debug.apk` (**12.620.046 bytes**).
+### 2026-11-02 — Correções: AndroidManifest, SirosNormalizer, MainScreen (35 testes verdes)
+- **AndroidManifest.xml:** Adicionada permissão `android.permission.INTERNET` (obrigatória para download do CSV SIROS).
+- **SirosNormalizer (`parseDaysOfWeek`):** Corrigido mapeamento dos dias da semana para o formato real do CSV SIROS — seg=1, ter=2, qua=3, qui=4, sex=5, sab=6, dom=7 (0 = não opera). Antes comparava tudo com "1", funcionando apenas para segunda-feira.
+- **Testes expandidos em `SirosNormalizerTest`:** +2 testes: (a) `testNormalizeOnlySaturday` — registro com apenas sab="6" gera voos apenas nos 4 sábados de outubro 2024; (b) `testNormalizeAllDaysOfWeek` — registro com "1".."7" gera 7 voos (um por dia) na semana 1–7/10/2024. Fixtures atualizadas para usar valores reais do CSV.
+- **MainScreen:** Removida duplicata "Última atualização" dentro do Row do aviso (disclaimer), que quebrava linha e cortava espaço da lista de voos. Mantido o Text "Última atualização" acima do Row.
+- **Resultado:** 35 testes unitários aprovados, 0 falhas (`BUILD SUCCESSFUL` em 15s). APK inalterado (12.6 MB).
 
 ## 2026-10-31 — Módulo SIROS e Testes Unitários Implementados
 - Implementado `SirosCsvParser` com suporte a `ISO-8859-1` e remoção correta de cabeçalhos.
