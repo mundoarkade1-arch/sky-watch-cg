@@ -69,12 +69,12 @@ object SirosNormalizer {
     private fun parseDaysOfWeek(record: SirosRecord): Set<Int> {
         val days = mutableSetOf<Int>()
         if (record.seg == "1") days.add(1)
-        if (record.ter == "1") days.add(2)
-        if (record.qua == "1") days.add(3)
-        if (record.qui == "1") days.add(4)
-        if (record.sex == "1") days.add(5)
-        if (record.sab == "1") days.add(6)
-        if (record.dom == "1") days.add(7)
+        if (record.ter == "2") days.add(2)
+        if (record.qua == "3") days.add(3)
+        if (record.qui == "4") days.add(4)
+        if (record.sex == "5") days.add(5)
+        if (record.sab == "6") days.add(6)
+        if (record.dom == "7") days.add(7)
         return days
     }
 
