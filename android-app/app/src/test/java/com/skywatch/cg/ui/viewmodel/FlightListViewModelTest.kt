@@ -98,6 +98,7 @@ class FlightListViewModelTest {
             scheduledDepartureUtc = LocalTime.of(8, 0),
             scheduledArrivalUtc = LocalTime.of(9, 30),
             flightDate = testDate,
+            arrivalDate = testDate.plusDays(1),
             daysOfWeek = listOf(1, 2, 3, 4, 5, 6, 7),
             validFrom = LocalDate.of(2024, 10, 1),
             validTo = LocalDate.of(2025, 3, 31),
@@ -121,6 +122,7 @@ class FlightListViewModelTest {
             scheduledDepartureUtc = LocalTime.of(10, 0),
             scheduledArrivalUtc = LocalTime.of(11, 30),
             flightDate = testDate,
+            arrivalDate = testDate,
             daysOfWeek = listOf(1, 2, 3, 4, 5, 6, 7),
             validFrom = LocalDate.of(2024, 10, 1),
             validTo = LocalDate.of(2025, 3, 31),
@@ -289,6 +291,7 @@ class FlightListViewModelTest {
             scheduledDepartureUtc = LocalTime.of(2, 0), // 02:00 UTC
             scheduledArrivalUtc = LocalTime.of(3, 30),
             flightDate = utcFlightDate,
+            arrivalDate = utcFlightDate,
             daysOfWeek = listOf(1, 2, 3, 4, 5, 6, 7),
             validFrom = LocalDate.of(2024, 10, 1),
             validTo = LocalDate.of(2025, 3, 31),

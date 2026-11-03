@@ -1,0 +1,216 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 3,
+    "identityHash": "d386d4f093dbcf7abe45911e5e5caace",
+    "entities": [
+      {
+        "tableName": "flights",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`flightId` TEXT NOT NULL, `sirosRecordId` TEXT NOT NULL, `airline` TEXT NOT NULL, `flightNumber` TEXT NOT NULL, `equipment` TEXT, `origin` TEXT NOT NULL, `originName` TEXT, `originTimezone` TEXT NOT NULL, `destination` TEXT NOT NULL, `destinationName` TEXT, `destinationTimezone` TEXT NOT NULL, `operationType` TEXT NOT NULL, `scheduledDepartureUtc` TEXT NOT NULL, `scheduledArrivalUtc` TEXT NOT NULL, `flightDate` TEXT NOT NULL, `arrivalDate` TEXT NOT NULL, `validFrom` TEXT NOT NULL, `validTo` TEXT NOT NULL, `serviceType` TEXT, `sirosStatus` TEXT NOT NULL, `operationalStatus` TEXT NOT NULL, `delayMinutes` INTEGER, `lastSyncAt` INTEGER NOT NULL, `statusUpdatedAt` INTEGER, PRIMARY KEY(`flightId`))",
+        "fields": [
+          {
+            "fieldPath": "flightId",
+            "columnName": "flightId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sirosRecordId",
+            "columnName": "sirosRecordId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "airline",
+            "columnName": "airline",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "flightNumber",
+            "columnName": "flightNumber",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "equipment",
+            "columnName": "equipment",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "origin",
+            "columnName": "origin",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "originName",
+            "columnName": "originName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "originTimezone",
+            "columnName": "originTimezone",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "destination",
+            "columnName": "destination",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "destinationName",
+            "columnName": "destinationName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "destinationTimezone",
+            "columnName": "destinationTimezone",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "operationType",
+            "columnName": "operationType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scheduledDepartureUtc",
+            "columnName": "scheduledDepartureUtc",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "scheduledArrivalUtc",
+            "columnName": "scheduledArrivalUtc",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "flightDate",
+            "columnName": "flightDate",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "arrivalDate",
+            "columnName": "arrivalDate",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "validFrom",
+            "columnName": "validFrom",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "validTo",
+            "columnName": "validTo",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "serviceType",
+            "columnName": "serviceType",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "sirosStatus",
+            "columnName": "sirosStatus",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "operationalStatus",
+            "columnName": "operationalStatus",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "delayMinutes",
+            "columnName": "delayMinutes",
+            "affinity": "INTEGER",
+            "notNull": false
+          },
+          {
+            "fieldPath": "lastSyncAt",
+            "columnName": "lastSyncAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "statusUpdatedAt",
+            "columnName": "statusUpdatedAt",
+            "affinity": "INTEGER",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "flightId"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "sync_metadata",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `lastSuccessfulSyncAt` INTEGER NOT NULL, `lastSyncStatus` TEXT NOT NULL, `lastSyncErrorMessage` TEXT, `recordsInserted` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastSuccessfulSyncAt",
+            "columnName": "lastSuccessfulSyncAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastSyncStatus",
+            "columnName": "lastSyncStatus",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastSyncErrorMessage",
+            "columnName": "lastSyncErrorMessage",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "recordsInserted",
+            "columnName": "recordsInserted",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "views": [],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd386d4f093dbcf7abe45911e5e5caace')"
+    ]
+  }
+}

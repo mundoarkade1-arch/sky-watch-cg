@@ -6,8 +6,9 @@
 - [x] Garantir que testes não criem arquivos temporários no projeto
 - [x] Corrigir teste testSyncFromRemoteSuccess (asserções de airline corrigidas)
 - [x] Corrigir documentação (ROADMAP, README, RETOMADA, TESTING, PENDENCIAS)
+- [x] testSyncFromRemoteSuccess: asserção totalSynced atualizada de 2 para 94 — SirosNormalizer expande cada registro CSV para todos os dias válidos no intervalo [referenceDate-1, referenceDate+45] (com 2 registros × 7 dias/semana × ~47 dias = 94 voos normalizados).
 
-## Fase 1 - Corrigir erros (CÓDIGO CONCLUÍDO - build compila mas ambiente mata processos longos)
+## Fase 1 - Corrigir erros (NÃO verificada - nenhum teste rodou, build não terminou)
 - [x] POST_NOTIFICATIONS no AndroidManifest e ActivityResult API no MainActivity
 - [x] SirosNormalizer: faixa de datas referenceDate - 1 até referenceDate + 45
 - [x] Data de chegada: se arrival UTC < departure UTC, arrivalDate = flightDate + 1
@@ -16,12 +17,15 @@
 - [x] BootReceiver reagenda SirosSyncWorker e FlightAlertWorker
 - [x] FlightAlertWorker sem constraint de rede, usa SirosRepository unificado
 - [x] Fuso America/Campo_Grande no ViewModel e tabela de fusos por ICAO (FlightDisplayUtils.kt usa campoGrandeZone fixo)
-- [x] Texto do botão de atualizar corrigido (strings.xml: \"Baixar do SIROS e atualizar\")
+- [x] Texto do botão de atualizar corrigido (strings.xml: "Baixar do SIROS e atualizar")
 - [x] Criação única do repositório (SirosRepository instanciado no MainActivity e injetado no ViewModel/Workers)
-- [x] Schema export location configurado (comentado no build.gradle.kts por warning KAPT; exportSchema=true no @Database)
-- [ ] Contagem real de testes no TESTING.md (ambiente não permite execução completa)
+- [x] Schema export location ativado no build.gradle.kts (kapt arg room.schemaLocation)
+- [x] compileDebugKotlin: BUILD SUCCESSFUL (1m 23s)
+- [ ] compileDebugUnitTestKotlin: BUILD SUCCESSFUL
+- [ ] testDebugUnitTest: BUILD SUCCESSFUL (números reais no TESTING.md)
+- [ ] Schema JSON v3 gerado em android-app\app\schemas\ e no Git
 
-## Fase 2 - Telas do MVP (em andamento)
+## Fase 2 - Telas do MVP (pendente Fase 1 verificada)
 - [x] strings.xml atualizado com novos textos (busca, data, detalhes, fontes, radar)
 - [x] DetailScreen.kt criado (esqueleto completo com horários UTC/local, status, fonte)
 - [x] FlightDisplayUtils corrigido para usar arrivalDate em chegadas
@@ -32,16 +36,10 @@
 - [ ] Filtro por companhia
 - [ ] Navegação para DetailScreen ao clicar no card
 - [ ] Ícone do app (vetorial simples) e acessibilidade
-- [ ] Tela \"Fontes e avisos\"
+- [ ] Tela "Fontes e avisos"
 
 ## Fase 3 - Alertas (pendente)
 ## Fase 4 - Status em tempo real (Aena) (pendente)
 ## Fase 5 - Radar ADS-B experimental (pendente)
 ## Fase 6 - Atualização e publicação (pendente)
 ## Fase 7 - Fechamento (pendente)
-
-### Evidências de build (compile-info.log):
-- KAPT roda e processa anotações Room (warning: schema export directory not provided)
-- compileDebugKotlin inicia com sucesso
-- Transformações AAR e dependências Compose processadas
-- Build falha por timeout do ambiente (^C após ~2-3 min), não por erro de código

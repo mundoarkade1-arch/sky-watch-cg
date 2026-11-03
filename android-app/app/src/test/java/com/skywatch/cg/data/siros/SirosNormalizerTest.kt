@@ -156,15 +156,14 @@ class SirosNormalizerTest {
         val referenceDate = LocalDate.of(2024, 10, 15)
         val normalized = SirosNormalizer.normalize(listOf(recordOnlySaturday), referenceDate)
 
-        // Deve gerar voos apenas nos sábados da vigência (outubro 2024: 5, 12, 19, 26)
+        // Com clamp em [referenceDate-1, referenceDate+45] = [2024-10-14, 2024-11-29],
+        // a vigência 2024-10-01 a 2024-10-31 gera apenas sábados 19 e 26 (2 voos).
         assertTrue(normalized.isNotEmpty())
         for (flight in normalized) {
             assertEquals(OperationType.DEPARTURE, flight.operationType)
-            // dayOfWeek 6 = Sábado
             assertEquals(6, flight.flightDate.dayOfWeek.value)
         }
-        // 4 sábados em outubro 2024
-        assertEquals(4, normalized.size)
+        assertEquals(2, normalized.size)
     }
 
     @Test

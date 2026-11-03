@@ -53,11 +53,11 @@ android {
         }
     }
     // Room schema export location for migration testing
-    // kapt {
-    //     arguments {
-    //         arg("room.schemaLocation", "$projectDir/schemas")
-    //     }
-    // }
+    kapt {
+        arguments {
+            arg("room.schemaLocation", "$projectDir/schemas")
+        }
+    }
 }
 
 dependencies {

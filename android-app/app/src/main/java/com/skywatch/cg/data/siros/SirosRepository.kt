@@ -77,7 +77,7 @@ class SirosRepository(
      * Se falhar a qualquer momento, o banco antigo permanece intacto.
      * Em qualquer Failure grava em sync_metadata (id=1) lastSyncStatus="FAILURE" preservando lastSuccessfulSyncAt e recordsInserted anteriores.
      */
-    suspend fun syncFromRemote(): SyncResult = withContext(ioDispatcher) {
+    suspend fun syncFromRemote(referenceDate: LocalDate = LocalDate.now()): SyncResult = withContext(ioDispatcher) {
         val startTime = System.currentTimeMillis()
         val dbPath = database.openHelper.writableDatabase.path ?: "."
         val parentDir = File(dbPath).parentFile ?: File(".")
@@ -121,14 +121,23 @@ class SirosRepository(
                         return@withContext SyncResult.Failure(currentError)
                     }
 
-                    val normalizedFlights = SirosNormalizer.normalize(sbcgRecords, LocalDate.now())
-                    Log.d("SirosRepository", "Parsed e normalizados ${normalizedFlights.size} voos para SBCG")
+                    // Após o loop do parsing:
+                    Log.d("SirosRepository", "Total registros lidos: ${sbcgRecords.size}")
+                    sbcgRecords.forEach { r ->
+                        Log.d("SirosRepository", "Record: origem=${r.codigoOrigem} destino=${r.codigoDestino} inicio=${r.inicioOperacao} fim=${r.fimOperacao}")
+                    }
 
-                    if (normalizedFlights.isEmpty()) {
-                        val errorMsg = "Nenhum voo SBCG encontrado no CSV"
-                        Log.w("SirosRepository", errorMsg)
-                        writeSyncFailure(errorMsg, startTime)
-                        return@withContext SyncResult.Failure(errorMsg)
+                    if (sbcgRecords.isEmpty()) {
+                        val errorMessage = "Nenhum voo SBCG encontrado no CSV"
+                        Log.e("SirosRepository", errorMessage)
+                        writeSyncFailure(errorMessage, startTime)
+                        return@withContext SyncResult.Failure(errorMessage)
+                    }
+
+                    val normalizedFlights = SirosNormalizer.normalize(sbcgRecords, referenceDate)
+                    Log.d("SirosRepository", "Normalizados: ${normalizedFlights.size}")
+                    normalizedFlights.forEach { f ->
+                        Log.d("SirosRepository", "Normalized: ${f.flightId} date=${f.flightDate} validFrom=${f.validFrom} validTo=${f.validTo}")
                     }
 
                     database.withTransaction {

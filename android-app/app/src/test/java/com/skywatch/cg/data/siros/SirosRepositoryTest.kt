@@ -13,6 +13,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.io.File
+import java.nio.charset.Charset
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -57,6 +58,7 @@ class SirosRepositoryTest {
             scheduledDepartureUtc = LocalTime.of(10, 0),
             scheduledArrivalUtc = LocalTime.of(11, 30),
             flightDate = flightDate1,
+            arrivalDate = flightDate1,
             daysOfWeek = listOf(1, 2, 3, 4, 5, 6, 7),
             validFrom = LocalDate.of(2024, 10, 1),
             validTo = LocalDate.of(2025, 3, 31),
@@ -80,6 +82,7 @@ class SirosRepositoryTest {
             scheduledDepartureUtc = LocalTime.of(10, 0),
             scheduledArrivalUtc = LocalTime.of(11, 30),
             flightDate = flightDate2,
+            arrivalDate = flightDate2,
             daysOfWeek = listOf(1, 2, 3, 4, 5, 6, 7),
             validFrom = LocalDate.of(2024, 10, 1),
             validTo = LocalDate.of(2025, 3, 31),
@@ -125,6 +128,7 @@ class SirosRepositoryTest {
             scheduledDepartureUtc = LocalTime.of(8, 0),
             scheduledArrivalUtc = LocalTime.of(9, 15),
             flightDate = flightDate,
+            arrivalDate = flightDate,
             daysOfWeek = listOf(1, 2, 3, 4, 5, 6, 7),
             validFrom = LocalDate.of(2024, 10, 1),
             validTo = LocalDate.of(2025, 3, 31),
@@ -150,7 +154,7 @@ class SirosRepositoryTest {
                 return DownloadResult.Failure(failureMessage, 500)
             }
             tempFile.parentFile?.mkdirs()
-            tempFile.writeText(csvContent)
+            tempFile.writeText(csvContent, Charset.forName("ISO-8859-1"))
             return DownloadResult.Success(csvContent.length.toLong(), 10L, 200)
         }
     }
@@ -172,20 +176,23 @@ class SirosRepositoryTest {
         val fakeRemoteSource = FakeSirosRemoteSource(testCsv)
         val testRepository = SirosRepository(testDb, Dispatchers.IO, fakeRemoteSource)
 
-        val result = testRepository.syncFromRemote()
+        val testDate = LocalDate.of(2026, 6, 15)
+        val result = testRepository.syncFromRemote(testDate)
 
         assertTrue(result is SirosRepository.SyncResult.Success)
         val success = result as SirosRepository.SyncResult.Success
-        assertEquals(2, success.totalSynced)
+        // SirosNormalizer expande cada registro para todos os dias válidos no intervalo [referenceDate-1, referenceDate+45].
+        // Com 2 registros operando todos os dias da semana (1-7) e intervalo de 47 dias, gera ~94 voos normalizados.
+        assertEquals(94, success.totalSynced)
 
         // Query for a date within the valid range (2026-06-15 is within 2026-01-01 to 2026-12-31)
-        val testDate = LocalDate.of(2026, 6, 15)
         val arrivals = testRepository.getArrivalsForUi(testDate)
         val departures = testRepository.getDeparturesForUi(testDate)
         assertEquals(1, arrivals.size)
         assertEquals(1, departures.size)
-        assertEquals("GOL", arrivals[0].airline)
-        assertEquals("LATAM", departures[0].airline)
+        // O CSV usa nomes completos das empresas: "GOL LINHAS AEREAS" e "LATAM AIRLINES"
+        assertEquals("GOL LINHAS AEREAS", arrivals[0].airline)
+        assertEquals("LATAM AIRLINES", departures[0].airline)
 
         testDb.close()
     }
@@ -215,6 +222,7 @@ class SirosRepositoryTest {
             scheduledDepartureUtc = LocalTime.of(10, 0),
             scheduledArrivalUtc = LocalTime.of(11, 30),
             flightDate = LocalDate.of(2024, 10, 15),
+            arrivalDate = LocalDate.of(2024, 10, 15),
             daysOfWeek = listOf(1, 2, 3, 4, 5, 6, 7),
             validFrom = LocalDate.of(2024, 10, 1),
             validTo = LocalDate.of(2025, 3, 31),
@@ -270,6 +278,7 @@ class SirosRepositoryTest {
             scheduledDepartureUtc = LocalTime.of(10, 0),
             scheduledArrivalUtc = LocalTime.of(11, 30),
             flightDate = LocalDate.of(2024, 10, 15),
+            arrivalDate = LocalDate.of(2024, 10, 15),
             daysOfWeek = listOf(1, 2, 3, 4, 5, 6, 7),
             validFrom = LocalDate.of(2024, 10, 1),
             validTo = LocalDate.of(2025, 3, 31),
@@ -278,7 +287,7 @@ class SirosRepositoryTest {
         )
         testRepository.saveNormalizedFlights(listOf(existingFlight))
 
-        val result = testRepository.syncFromRemote()
+        val result = testRepository.syncFromRemote(LocalDate.of(2024, 10, 15))
 
         assertTrue(result is SirosRepository.SyncResult.Failure)
         val failure = result as SirosRepository.SyncResult.Failure

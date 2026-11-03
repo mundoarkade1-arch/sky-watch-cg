@@ -32,8 +32,13 @@ object SirosNormalizer {
             val validTo = parseDate(record.fimOperacao)
             if (validFrom == null || validTo == null) continue
 
-            var currentDate: LocalDate = validFrom
-            val endDate: LocalDate = validTo
+            // Clamp generation to referenceDate - 1 .. referenceDate + 45 (faixa de datas requerida)
+            val minDate = referenceDate.minusDays(1)
+            val maxDate = referenceDate.plusDays(45)
+
+            var currentDate: LocalDate = if (validFrom.isBefore(minDate)) minDate else validFrom
+            val endDate: LocalDate = if (validTo.isAfter(maxDate)) maxDate else validTo
+
             while (!currentDate.isAfter(endDate)) {
                 val dayOfWeek = currentDate.dayOfWeek.value
                 if (dayOfWeek in daysOfWeek) {
@@ -63,6 +68,7 @@ object SirosNormalizer {
         val inicio = parseDate(record.inicioOperacao)
         val fim = parseDate(record.fimOperacao)
         if (inicio == null || fim == null) return false
+        // The date range must overlap with [referenceDate - 1, referenceDate + 45]
         val minDate = referenceDate.minusDays(1)
         val maxDate = referenceDate.plusDays(45)
         return !fim.isBefore(minDate) && !inicio.isAfter(maxDate) && !inicio.isAfter(fim)
