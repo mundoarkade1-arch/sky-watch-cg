@@ -6,8 +6,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.ChevronLeft
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,6 +34,7 @@ import com.skywatch.cg.ui.viewmodel.FlightUiState
 import com.skywatch.cg.util.getDisplayLastUpdate
 import com.skywatch.cg.util.getDisplayTime
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
@@ -121,6 +126,9 @@ fun MainScreen(viewModel: FlightListViewModel) {
                     )
                 }
 
+                // Seletor de data
+                DatePickerRow(viewModel = viewModel)
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -189,6 +197,9 @@ fun MainScreen(viewModel: FlightListViewModel) {
 
 @Composable
 fun FlightListContent(uiState: FlightUiState, operationType: OperationType) {
+    var searchText by remember { mutableStateOf("") }
+    var filterAirline by remember { mutableStateOf("") }
+
     when (uiState) {
         is FlightUiState.Loading -> {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -201,6 +212,7 @@ fun FlightListContent(uiState: FlightUiState, operationType: OperationType) {
         }
         is FlightUiState.Refreshing -> {
             val flights = if (operationType == OperationType.ARRIVAL) uiState.arrivals else uiState.departures
+            val filteredFlights = filterFlights(flights, searchText, filterAirline)
             if (flights.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -210,20 +222,21 @@ fun FlightListContent(uiState: FlightUiState, operationType: OperationType) {
                     }
                 }
             } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(flights) { flight ->
-                        FlightCard(flight = flight)
-                    }
-                }
-                // Indicador de atualização
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.padding(bottom = 16.dp),
-                        strokeWidth = 3.dp
+                Column(modifier = Modifier.fillMaxSize()) {
+                    SearchAndFilterBar(
+                        searchText = searchText,
+                        onSearchTextChange = { searchText = it },
+                        filterAirline = filterAirline,
+                        onFilterAirlineChange = { filterAirline = it }
                     )
+                    FlightList(flights = filteredFlights)
+                    // Indicador de atualização
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.padding(bottom = 16.dp),
+                            strokeWidth = 3.dp
+                        )
+                    }
                 }
             }
         }
@@ -237,6 +250,7 @@ fun FlightListContent(uiState: FlightUiState, operationType: OperationType) {
         }
         is FlightUiState.Success -> {
             val flights = if (operationType == OperationType.ARRIVAL) uiState.arrivals else uiState.departures
+            val filteredFlights = filterFlights(flights, searchText, filterAirline)
             if (flights.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
                     Text(
@@ -255,6 +269,40 @@ fun FlightListContent(uiState: FlightUiState, operationType: OperationType) {
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun DatePickerRow(viewModel: FlightListViewModel) {
+    val selectedDate by viewModel.selectedDate.collectAsState()
+    val dateFormatter = remember { DateTimeFormatter.ofPattern("EEE, dd/MM/yyyy") }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = { viewModel.goToPreviousDay() }) {
+            Icon(Icons.Filled.ChevronLeft, contentDescription = "Anterior")
+        }
+        
+        TextButton(onClick = { viewModel.goToToday() }) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Filled.CalendarToday, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = selectedDate.format(dateFormatter),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+            }
+        }
+
+        IconButton(onClick = { viewModel.goToNextDay() }) {
+            Icon(Icons.Filled.ChevronRight, contentDescription = "Próximo")
         }
     }
 }
@@ -311,5 +359,77 @@ fun FlightCard(flight: NormalizedFlight) {
             Spacer(modifier = Modifier.height(4.dp))
             Text(text = "Status SIROS: ${flight.sirosStatus} (${flight.flightDate})", fontSize = 11.sp, color = MaterialTheme.colorScheme.outline)
         }
+    }
+}
+@Composable
+fun SearchAndFilterBar(
+    searchText: String,
+    onSearchTextChange: (String) -> Unit,
+    filterAirline: String,
+    onFilterAirlineChange: (String) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+        // Search field
+        OutlinedTextField(
+            value = searchText,
+            onValueChange = onSearchTextChange,
+            label = { Text(stringResource(id = R.string.search_hint)) },
+            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        // Filter field
+        OutlinedTextField(
+            value = filterAirline,
+            onValueChange = onFilterAirlineChange,
+            label = { Text(stringResource(id = R.string.filter_airline)) },
+            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
+            modifier = Modifier.fillMaxWidth(),
+            singleLine = true
+        )
+    }
+}
+
+@Composable
+fun FlightList(flights: List<NormalizedFlight>) {
+    if (flights.isEmpty()) {
+        Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
+            Text(
+                text = stringResource(id = R.string.empty_flights),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 14.sp
+            )
+        }
+    } else {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(flights) { flight ->
+                FlightCard(flight = flight)
+            }
+        }
+    }
+}
+
+fun filterFlights(
+    flights: List<NormalizedFlight>,
+    searchText: String,
+    filterAirline: String
+): List<NormalizedFlight> {
+    return flights.filter { flight ->
+        val searchLower = searchText.lowercase()
+        val filterLower = filterAirline.lowercase()
+        val matchesSearch = searchText.isBlank() ||
+            flight.airline.lowercase().contains(searchLower) ||
+            flight.flightNumber.lowercase().contains(searchLower) ||
+            flight.origin.lowercase().contains(searchLower) ||
+            flight.destination.lowercase().contains(searchLower) ||
+            flight.originName?.lowercase()?.contains(searchLower) == true ||
+            flight.destinationName?.lowercase()?.contains(searchLower) == true
+        val matchesAirline = filterAirline.isBlank() ||
+            flight.airline.lowercase().contains(filterLower)
+        matchesSearch && matchesAirline
     }
 }

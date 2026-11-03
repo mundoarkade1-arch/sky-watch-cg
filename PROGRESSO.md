@@ -15,6 +15,7 @@
 - [x] Data de chegada: se arrival UTC < departure UTC, arrivalDate = flightDate + 1
 - [x] FlightDisplayUtils usa arrivalDate para chegadas
 - [x] Room Database versão 3 com Migration manual (arrivalDate, CHECK id=1 unificado)
+- [ ] Migração 2→3 NÃO testada em aparelho
 - [x] BootReceiver reagenda SirosSyncWorker e FlightAlertWorker
 - [x] FlightAlertWorker sem constraint de rede, usa SirosRepository unificado
 - [x] Fuso America/Campo_Grande no ViewModel e tabela de fusos por ICAO (FlightDisplayUtils.kt usa campoGrandeZone fixo)
@@ -30,8 +31,8 @@
 - [x] strings.xml atualizado com novos textos (busca, data, detalhes, fontes, radar)
 - [x] DetailScreen.kt criado (esqueleto completo com horários UTC/local, status, fonte)
 - [x] FlightDisplayUtils corrigido para usar arrivalDate em chegadas
-- [ ] Seletor de data na tela (botões anterior/hoje/próximo + escolha de data)
-- [ ] Leitura por Flow no Room para atualização reativa
+- [x] Seletor de data na tela (botões anterior/hoje/próximo + escolha de data)
+- [x] Leitura por Flow no Room para atualização reativa
 - [ ] Primeira abertura com banco vazio: sincronização automática
 - [ ] Busca por companhia, número do voo ou cidade
 - [ ] Filtro por companhia

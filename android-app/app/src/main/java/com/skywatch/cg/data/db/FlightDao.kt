@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface FlightDao {
@@ -26,8 +27,14 @@ interface FlightDao {
     @Query("SELECT * FROM flights WHERE (operationType = 'ARRIVAL' AND arrivalDate = :date) OR (operationType = 'DEPARTURE' AND flightDate = :date) ORDER BY operationType, scheduledDepartureUtc")
     suspend fun getFlightsByDate(date: String): List<FlightEntity>
 
+    @Query("SELECT * FROM flights WHERE (operationType = 'ARRIVAL' AND arrivalDate = :date) OR (operationType = 'DEPARTURE' AND flightDate = :date) ORDER BY operationType, scheduledDepartureUtc")
+    fun getFlightsByDateFlow(date: String): Flow<List<FlightEntity>>
+
     @Query("SELECT * FROM flights WHERE operationType = 'ARRIVAL' AND arrivalDate = :date ORDER BY scheduledArrivalUtc")
     suspend fun getArrivalsByDate(date: String): List<FlightEntity>
+
+    @Query("SELECT * FROM flights WHERE operationType = 'ARRIVAL' AND arrivalDate = :date ORDER BY scheduledArrivalUtc")
+    fun getArrivalsByDateFlow(date: String): Flow<List<FlightEntity>>
 
     @Query("SELECT * FROM flights WHERE operationType = 'ARRIVAL' AND arrivalDate BETWEEN :startDate AND :endDate ORDER BY arrivalDate, scheduledArrivalUtc")
     suspend fun getArrivalsByDateRange(startDate: String, endDate: String): List<FlightEntity>
@@ -35,14 +42,23 @@ interface FlightDao {
     @Query("SELECT * FROM flights WHERE operationType = 'DEPARTURE' AND flightDate = :date ORDER BY scheduledDepartureUtc")
     suspend fun getDeparturesByDate(date: String): List<FlightEntity>
 
+    @Query("SELECT * FROM flights WHERE operationType = 'DEPARTURE' AND flightDate = :date ORDER BY scheduledDepartureUtc")
+    fun getDeparturesByDateFlow(date: String): Flow<List<FlightEntity>>
+
     @Query("SELECT * FROM flights WHERE operationType = 'DEPARTURE' AND flightDate BETWEEN :startDate AND :endDate ORDER BY flightDate, scheduledDepartureUtc")
     suspend fun getDeparturesByDateRange(startDate: String, endDate: String): List<FlightEntity>
 
     @Query("SELECT * FROM flights WHERE operationType = 'ARRIVAL' ORDER BY arrivalDate, scheduledArrivalUtc")
     suspend fun getAllArrivals(): List<FlightEntity>
 
+    @Query("SELECT * FROM flights WHERE operationType = 'ARRIVAL' ORDER BY arrivalDate, scheduledArrivalUtc")
+    fun getAllArrivalsFlow(): Flow<List<FlightEntity>>
+
     @Query("SELECT * FROM flights WHERE operationType = 'DEPARTURE' ORDER BY flightDate, scheduledDepartureUtc")
     suspend fun getAllDepartures(): List<FlightEntity>
+
+    @Query("SELECT * FROM flights WHERE operationType = 'DEPARTURE' ORDER BY flightDate, scheduledDepartureUtc")
+    fun getAllDeparturesFlow(): Flow<List<FlightEntity>>
 
     @Query("SELECT * FROM flights WHERE sirosRecordId = :recordId")
     suspend fun getBySirosRecordId(recordId: String): List<FlightEntity>

@@ -13,6 +13,11 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -42,61 +47,54 @@ class FlightListViewModel(
         SirosRepository(AppDatabase.getDatabase(application))
     )
 
-    private val _uiState = MutableStateFlow<FlightUiState>(FlightUiState.Loading)
-    val uiState: StateFlow<FlightUiState> = _uiState.asStateFlow()
-
     private val _selectedDate = MutableStateFlow(LocalDate.now())
     val selectedDate: StateFlow<LocalDate> = _selectedDate.asStateFlow()
 
-    private val _syncMetadata = MutableStateFlow<SyncMetadata?>(null)
-    val syncMetadata: StateFlow<SyncMetadata?> = _syncMetadata.asStateFlow()
+    // Flows from repository for reactive updates
+    private val arrivalsFlow = _selectedDate.flatMapLatest { date ->
+        repository.getArrivalsForUiFlow(date)
+    }.distinctUntilChanged()
+
+    private val departuresFlow = _selectedDate.flatMapLatest { date ->
+        repository.getDeparturesForUiFlow(date)
+    }.distinctUntilChanged()
+
+    private val syncMetadataFlow = repository.getSyncMetadataFlow().distinctUntilChanged()
+
+    private val _uiState = MutableStateFlow<FlightUiState>(FlightUiState.Loading)
+    val uiState: StateFlow<FlightUiState> = _uiState.asStateFlow()
+
+    val syncMetadata: StateFlow<SyncMetadata?> = syncMetadataFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
     private var loadJob: Job? = null
 
     init {
-        Log.d("FlightListViewModelDiag", "ViewModel created. Calling init loadFlights()")
-        loadFlights()
-        loadSyncMetadata()
+        Log.d("FlightListViewModelDiag", "ViewModel created. Starting reactive flows.")
+        observeFlights()
+        // loadSyncMetadata() no longer needed - using Flow
+    }
+
+    private fun observeFlights() {
+        viewModelScope.launch {
+            combine(arrivalsFlow, departuresFlow, _selectedDate) { arrivals, departures, date ->
+                FlightUiState.Success(arrivals, departures, date)
+            }.collect { state ->
+                _uiState.value = state
+            }
+        }
     }
 
     fun loadSyncMetadata() {
-        viewModelScope.launch {
-            try {
-                _syncMetadata.value = repository.getSyncMetadata()
-            } catch (e: Exception) {
-                Log.e("FlightListViewModel", "Erro ao carregar sync metadata: ${e.message}")
-            }
-        }
+        // Deprecated: using Flow now
     }
 
     fun loadFlights(date: LocalDate = _selectedDate.value) {
         val previousJobActive = loadJob?.isActive == true
         Log.d("FlightListViewModelDiag", "loadFlights called with date: $date. Previous job active: $previousJobActive")
         loadJob?.cancel()
-        Log.d("FlightListViewModelDiag", "Previous job cancelled (if any). Launching new coroutine for date: $date")
-        loadJob = viewModelScope.launch {
-            Log.d("FlightListViewModelDiag", "Coroutine started for date: $date. Setting state to Loading.")
-            _uiState.value = FlightUiState.Loading
-            _selectedDate.value = date
-            try {
-                Log.d("FlightListViewModelDiag", "Repository fetching arrivals and departures for date: $date")
-                val arrivals = repository.getArrivalsForUi(date)
-                val departures = repository.getDeparturesForUi(date)
-                Log.d("FlightListViewModelDiag", "Repository returned ${arrivals.size} arrivals and ${departures.size} departures for date: $date. Setting Success.")
-                _uiState.value = FlightUiState.Success(
-                    arrivals = arrivals,
-                    departures = departures,
-                    selectedDate = date
-                )
-            } catch (e: Exception) {
-                if (e !is CancellationException) {
-                    Log.d("FlightListViewModelDiag", "Exception caught in loadFlights for date: $date: ${e.message}. Setting Error.")
-                    _uiState.value = FlightUiState.Error(e.localizedMessage ?: "Erro desconhecido")
-                } else {
-                    Log.d("FlightListViewModelDiag", "CancellationException caught for date: $date (job cancelled normally).")
-                }
-            }
-        }
+        Log.d("FlightListViewModelDiag", "Previous job cancelled (if any). Updating selectedDate to: $date")
+        _selectedDate.value = date
     }
 
     fun refresh() {
