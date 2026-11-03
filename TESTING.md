@@ -36,16 +36,15 @@
 | TV-003 | `testLoadFlightsWithData` | Sucesso (Aprovado) | Insere voos de chegada e partida via repositório injetado e verifica se ambos aparecem corretamente nas listas filtradas. |
 | TV-004 | `testRefreshCallsLoadFlights` | Sucesso (Aprovado) | Verifica que o método `refresh()` dispara novo carregamento e retorna estado válido (`Success` ou `Error`). |
 
-## Resultados dos Testes da Etapa A (ViewModel Refreshing) - 02/11/2026
+## Resultados dos Testes de ViewModel (Fase 1 + Fase 2) - 03/11/2026
 
 | ID | Teste | Resultado | Detalhes |
 |---|---|---|---|
+| TV-001 | `testInitialStateIsLoading` | **Sucesso (Aprovado)** | Verifica que o estado inicial do ViewModel é `Loading`. |
+| TV-002 | `testLoadFlightsEmptyDatabase` | **Sucesso (Aprovado)** | Verifica que ao carregar com banco vazio retorna estado `Success` com listas vazias. |
+| TV-003 | `testLoadFlightsWithData` | **Sucesso (Aprovado)** | Insere voos de chegada e partida via repositório injetado e verifica se ambos aparecem corretamente nas listas filtradas. |
+| TV-004 | `testRefreshCallsLoadFlights` | **Sucesso (Aprovado)** | Verifica que o método `refresh()` dispara novo carregamento e retorna estado válido (`Success` ou `Error`). |
 | TV-005 | `testRefreshStateEmitsRefreshing` | **Sucesso (Aprovado)** | Valida que a chamada a `refresh()` emite o estado `Refreshing` (com spinner/mantendo dados anteriores) e conclui com sucesso simulando uma fonte remota local sem acesso à internet real. |
-
-## Resultados dos Testes de ViewModel Fase 2 - 03/11/2026
-
-| ID | Teste | Resultado | Detalhes |
-|---|---|---|---|
 | TV-006 | `testGoToPreviousDayChangesDateAndLoadsFlights` | **Sucesso (Aprovado)** | Verifica navegação para dia anterior. |
 | TV-007 | `testGoToNextDayChangesDateAndLoadsFlights` | **Sucesso (Aprovado)** | Verifica navegação para próximo dia. |
 | TV-008 | `testGoToTodayChangesDateAndLoadsFlights` | **Sucesso (Aprovado)** | Verifica navegação para hoje. |
@@ -55,7 +54,7 @@
 - Total de testes: **44**
 - Falhas: **0**
 - Erros: **0**
-- Ignorados: **1**
+- Ignorados: **1** (`SirosStreamParserRealFileTest` — precisa do CSV real)
 - `BUILD SUCCESSFUL`
 
 ## Correção de Concorrência e Sincronização nos Testes (Etapa 5) - 2026-11-01

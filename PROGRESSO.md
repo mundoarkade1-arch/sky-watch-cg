@@ -1,3 +1,15 @@
+## Falha na Fase 3 - Bloqueio do Gradle/Kapt
+- Último trecho do log:
+```
+To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/8.5/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.
+Daemon will be stopped at the end of the build
+```
+- Tentativas realizadas (3 abordagens distintas):
+  1. kaptDebugKotlin com `--no-daemon --stacktrace --info`
+  2. testDebugUnitTest com `--no-daemon`
+  3. assembleDebug com `--no-daemon --stacktrace`
+- Resultado: Travamento persistente na inicialização do daemon/processo do Gradle (nenhum avanço após 10 minutos em cada tentativa, processos Java limpos repetidamente).
+
 # Progresso do Projeto SKY WATCH CG
 
 ## Fase 0 - Limpeza e verdade

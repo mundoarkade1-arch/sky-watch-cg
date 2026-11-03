@@ -77,7 +77,7 @@ object NotificationHelper {
         isArrival: Boolean
     ) {
         val eventType = if (isArrival) "chegada" else "partida"
-        val title = "${flight.airline} ${flight.flightNumber} - ${eventType.capitalize()} em $minutesUntilEvent min"
+        val title = "${flight.airline} ${flight.flightNumber} - ${eventType.replaceFirstChar { if (it.isLowerCase()) it.titlecase(java.util.Locale.getDefault()) else it.toString() }} em $minutesUntilEvent min"
         val location = if (isArrival) {
             "Origem: ${flight.origin} (${flight.originName ?: ""}) → ${flight.destination}"
         } else {
@@ -110,16 +110,17 @@ object NotificationHelper {
             .setAutoCancel(true)
             .build()
 
-        val notificationId = NOTIFICATION_ID_BASE + (flight.flightNumber.toIntOrNull() ?: flight.flightNumber.hashCode())
+        // ID baseado no hash do flightId (único por voo+data), não só no número do voo
+        val notificationId = flight.flightId.hashCode()
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(notificationId, notification)
     }
 
     /**
-     * Cancela notificação de um voo específico.
+     * Cancela notificação de um voo específico pelo flightId.
      */
-    fun cancelFlightAlert(context: Context, flightNumber: String) {
-        val notificationId = NOTIFICATION_ID_BASE + (flightNumber.toIntOrNull() ?: flightNumber.hashCode())
+    fun cancelFlightAlert(context: Context, flightId: String) {
+        val notificationId = flightId.hashCode()
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.cancel(notificationId)
     }
