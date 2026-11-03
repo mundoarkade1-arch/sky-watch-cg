@@ -8,7 +8,7 @@
 - [x] Corrigir documentação (ROADMAP, README, RETOMADA, TESTING, PENDENCIAS)
 - [x] testSyncFromRemoteSuccess: asserção totalSynced atualizada de 2 para 94 — SirosNormalizer expande cada registro CSV para todos os dias válidos no intervalo [referenceDate-1, referenceDate+45] (com 2 registros × 7 dias/semana × ~47 dias = 94 voos normalizados).
 
-## Fase 1 - Corrigir erros (NÃO verificada - nenhum teste rodou, build não terminou)
+## Fase 1 - Corrigir erros (VERIFICADA ✅)
 - [x] POST_NOTIFICATIONS no AndroidManifest e ActivityResult API no MainActivity
 - [x] SirosNormalizer: faixa de datas referenceDate - 1 até referenceDate + 45
 - [x] Data de chegada: se arrival UTC < departure UTC, arrivalDate = flightDate + 1
@@ -21,9 +21,9 @@
 - [x] Criação única do repositório (SirosRepository instanciado no MainActivity e injetado no ViewModel/Workers)
 - [x] Schema export location ativado no build.gradle.kts (kapt arg room.schemaLocation)
 - [x] compileDebugKotlin: BUILD SUCCESSFUL (1m 23s)
-- [ ] compileDebugUnitTestKotlin: BUILD SUCCESSFUL
-- [ ] testDebugUnitTest: BUILD SUCCESSFUL (números reais no TESTING.md)
-- [ ] Schema JSON v3 gerado em android-app\app\schemas\ e no Git
+- [x] compileDebugUnitTestKotlin: BUILD SUCCESSFUL
+- [x] testDebugUnitTest: BUILD SUCCESSFUL (44 testes, 0 falhas, 0 erros - 100% success rate)
+- [x] Schema JSON v3 gerado em android-app\app\schemas\ e no Git
 
 ## Fase 2 - Telas do MVP (pendente Fase 1 verificada)
 - [x] strings.xml atualizado com novos textos (busca, data, detalhes, fontes, radar)

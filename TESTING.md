@@ -149,6 +149,30 @@ cd android-app
 | TRM-005 | `SirosRepository.syncFromRemote` com rede simulada | **Sucesso (Aprovado)** | Valida: sucesso substitui grade; HTTP 500 mantém grade antiga e grava `FAILURE` preservando `lastSuccessfulSyncAt`; CSV sem voos SBCG mantém grade; exceção dentro da transação mantém grade antiga. |
 | TRM-006 | `FlightListViewModelTest` estado de erro | **Sucesso (Aprovado)** | Valida exibição de estado `Error` e `Refreshing` na UI, sem apagar grade antiga. |
 
+## Resumo da Execução Unitária (`testDebugUnitTest`) - 03/11/2026 (Fase 1 Verificada)
+
+| Suite de Testes | Testes | Falhas | Erros | Status |
+|---|---|---|---|---|
+| `SyncMetadataDaoTest` | 5 | 0 | 0 | ✅ Aprovado |
+| `FlightListViewModelTest` | 9 | 0 | 0 | ✅ Aprovado |
+| `SirosRepositoryTest` | 5 | 0 | 0 | ✅ Aprovado |
+| `SirosCsvParserTest` | 4 | 0 | 0 | ✅ Aprovado |
+| `SirosNormalizerTest` | 6 | 0 | 0 | ✅ Aprovado |
+| `SirosStreamParserTest` | 9 | 0 | 0 | ✅ Aprovado |
+| `SirosStreamParserBomTest` | 3 | 0 | 0 | ✅ Aprovado |
+| `SirosStreamParserRealFileTest` | 1 | 0 | 0 | ✅ Aprovado (pulado se CSV ausente) |
+| `SirosRemoteSourceTest` | 2 | 0 | 0 | ✅ Aprovado |
+| **TOTAL** | **44** | **0** | **0** | **✅ TODOS APROVADOS** |
+
+**Comando executado:**
+```powershell
+cmd /c "cd android-app && gradlew.bat cleanTestDebugUnitTest testDebugUnitTest --console=plain"
+```
+**Resultado:** `BUILD SUCCESSFUL`, **44 testes**, 0 falhas, 0 erros (11.7s).
+**APK de debug:** `android-app\app\build\outputs\apk\debug\app-debug.apk` (gerado com sucesso).
+
+---
+
 ## Resumo da Execução Unitária (`testDebugUnitTest`) - 02/11/2026 (Fase 6.3 Corrigida + SirosNormalizer)
 
 | Suite de Testes | Testes | Falhas | Erros | Status |
