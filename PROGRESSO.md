@@ -7,6 +7,7 @@
 - [x] Corrigir teste testSyncFromRemoteSuccess (asserções de airline corrigidas)
 - [x] Corrigir documentação (ROADMAP, README, RETOMADA, TESTING, PENDENCIAS)
 - [x] testSyncFromRemoteSuccess: asserção totalSynced atualizada de 2 para 94 — SirosNormalizer expande cada registro CSV para todos os dias válidos no intervalo [referenceDate-1, referenceDate+45] (com 2 registros × 7 dias/semana × ~47 dias = 94 voos normalizados).
+- [x] testNormalizeOnlySaturday: esperado 2 voos (referenceDate=2024-10-15 → janela [2024-10-14, 2024-11-29]; vigência 2024-10-01 a 2024-10-31 → apenas sábados 19 e 26 entram na janela).
 
 ## Fase 1 - Corrigir erros (VERIFICADA ✅)
 - [x] POST_NOTIFICATIONS no AndroidManifest e ActivityResult API no MainActivity

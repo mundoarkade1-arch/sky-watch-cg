@@ -173,6 +173,11 @@ cmd /c "cd android-app && gradlew.bat cleanTestDebugUnitTest testDebugUnitTest -
 
 ---
 
+## Testes Instrumentados (`connectedAndroidTest`) — NÃO EXECUTADOS
+Precisam de dispositivo/emulador físico. Não rodados neste ambiente.
+
+---
+
 ## Resumo da Execução Unitária (`testDebugUnitTest`) - 02/11/2026 (Fase 6.3 Corrigida + SirosNormalizer)
 
 | Suite de Testes | Testes | Falhas | Erros | Status |
