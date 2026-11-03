@@ -26,7 +26,8 @@ data class NormalizedFlight(
     val operationType: OperationType,
     val scheduledDepartureUtc: LocalTime,
     val scheduledArrivalUtc: LocalTime,
-    val flightDate: LocalDate,     // Data específica da operação
+    val flightDate: LocalDate,     // Data de partida (data da operação)
+    val arrivalDate: LocalDate,    // Data de chegada (pode ser flightDate ou flightDate + 1 se cruzar meia-noite UTC)
     val daysOfWeek: List<Int>,     // Dias da semana em que opera (1=Segunda, ..., 7=Domingo)
     val validFrom: LocalDate,
     val validTo: LocalDate,

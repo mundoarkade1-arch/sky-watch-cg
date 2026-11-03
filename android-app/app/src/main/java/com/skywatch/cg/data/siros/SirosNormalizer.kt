@@ -94,6 +94,9 @@ object SirosNormalizer {
         val destTz = if (record.codigoDestino == "SBCG") "America/Campo_Grande" else "America/Sao_Paulo"
         val sirosRecordId = record.numeroSiros ?: "${record.codigoEmpresa}-${record.numeroVoo}"
 
+        // Se chegada UTC for antes da partida UTC, a chegada é no dia seguinte
+        val arrivalDate = if (arrival.isBefore(departure)) flightDate.plusDays(1) else flightDate
+
         return listOf(
             NormalizedFlight(
                 flightId = "$sirosRecordId-$flightDate",
@@ -111,6 +114,7 @@ object SirosNormalizer {
                 scheduledDepartureUtc = departure,
                 scheduledArrivalUtc = arrival,
                 flightDate = flightDate,
+                arrivalDate = arrivalDate,
                 daysOfWeek = parseDaysOfWeek(record).toList(),
                 validFrom = parseDate(record.inicioOperacao) ?: flightDate,
                 validTo = parseDate(record.fimOperacao) ?: flightDate,

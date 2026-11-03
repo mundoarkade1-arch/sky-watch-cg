@@ -8,21 +8,21 @@ import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import com.skywatch.cg.worker.FlightAlertWorker
 import com.skywatch.cg.worker.SirosSyncWorker
 import java.util.concurrent.TimeUnit
 
 /**
- * Receptor para BOOT_COMPLETED - garante que a sincronização periódica
- * seja re-agendada após reinicialização do dispositivo.
- * O WorkManager já persiste work requests automaticamente, mas este
- * receiver garante que as constraints sejam reaplicadas corretamente.
+ * Receptor para BOOT_COMPLETED - garante que os workers periódicos
+ * sejam re-agendados após reinicialização do dispositivo.
  */
 class BootReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
-            Log.d("BootReceiver", "BOOT_COMPLETED recebido - re-agendando sincronização periódica")
+            Log.d("BootReceiver", "BOOT_COMPLETED recebido - re-agendando workers periódicos")
             schedulePeriodicSync(context)
+            scheduleAlertWorker(context)
         }
     }
 
@@ -41,5 +41,22 @@ class BootReceiver : BroadcastReceiver() {
             syncWorkRequest
         )
         Log.d("BootReceiver", "WorkManager: sincronização periódica re-agendada após boot (6 horas)")
+    }
+
+    private fun scheduleAlertWorker(context: Context) {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val alertWorkRequest = PeriodicWorkRequestBuilder<FlightAlertWorker>(15, TimeUnit.MINUTES)
+            .setConstraints(constraints)
+            .build()
+
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+            "flight_alert_check",
+            androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+            alertWorkRequest
+        )
+        Log.d("BootReceiver", "WorkManager: verificação de alertas re-agendada após boot (15 min)")
     }
 }

@@ -1,8 +1,10 @@
 package com.skywatch.cg
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -28,15 +30,25 @@ class MainActivity : ComponentActivity() {
 
     private val viewModel: FlightListViewModel by viewModels()
 
+    // ActivityResult API para permissão POST_NOTIFICATIONS (Android 13+)
+    private val requestNotificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            if (granted) {
+                android.util.Log.d("MainActivity", "Permissão POST_NOTIFICATIONS concedida")
+            } else {
+                android.util.Log.w("MainActivity", "Permissão POST_NOTIFICATIONS negada")
+            }
+        }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
         // Cria o canal de notificação para alertas de voo
         NotificationHelper.createNotificationChannel(this)
 
-        // Solicita permissão de notificação (Android 13+)
+        // Solicita permissão de notificação (Android 13+) usando ActivityResult API
         if (!NotificationHelper.hasNotificationPermission(this)) {
-            NotificationHelper.requestNotificationPermission(this)
+            requestNotificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
         }
         
         // Agenda sincronização periódica via WorkManager (a cada 6 horas, requer rede)

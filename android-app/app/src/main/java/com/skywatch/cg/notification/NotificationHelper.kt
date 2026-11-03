@@ -55,8 +55,9 @@ object NotificationHelper {
     }
 
     /**
-     * Solicita permissão de notificação (Android 13+).
+     * Solicita permissão de notificação (Android 13+) — deprecated, usar ActivityResult API.
      */
+    @Deprecated("Use ActivityResultContracts.RequestPermission via MainActivity", ReplaceWith(""))
     fun requestNotificationPermission(activity: android.app.Activity, requestCode: Int = 1001) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             activity.requestPermissions(

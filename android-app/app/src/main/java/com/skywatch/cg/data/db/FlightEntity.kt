@@ -24,7 +24,8 @@ data class FlightEntity(
     val operationType: String,     // "ARRIVAL" ou "DEPARTURE"
     val scheduledDepartureUtc: String, // "HH:mm"
     val scheduledArrivalUtc: String,   // "HH:mm"
-    val flightDate: String,        // "yyyy-MM-dd"
+    val flightDate: String,        // "yyyy-MM-dd" - Data de partida
+    val arrivalDate: String,       // "yyyy-MM-dd" - Data de chegada (pode ser diferente de flightDate)
     val validFrom: String,         // "yyyy-MM-dd"
     val validTo: String,           // "yyyy-MM-dd"
     val serviceType: String?,
@@ -53,6 +54,7 @@ data class FlightEntity(
             scheduledDepartureUtc = LocalTime.parse(scheduledDepartureUtc),
             scheduledArrivalUtc = LocalTime.parse(scheduledArrivalUtc),
             flightDate = LocalDate.parse(flightDate),
+            arrivalDate = LocalDate.parse(arrivalDate),
             daysOfWeek = emptyList(), // Persistido por data específica na tabela
             validFrom = LocalDate.parse(validFrom),
             validTo = LocalDate.parse(validTo),
@@ -79,6 +81,7 @@ data class FlightEntity(
                 scheduledDepartureUtc = flight.scheduledDepartureUtc.toString(),
                 scheduledArrivalUtc = flight.scheduledArrivalUtc.toString(),
                 flightDate = flight.flightDate.toString(),
+                arrivalDate = flight.arrivalDate.toString(),
                 validFrom = flight.validFrom.toString(),
                 validTo = flight.validTo.toString(),
                 serviceType = flight.serviceType,

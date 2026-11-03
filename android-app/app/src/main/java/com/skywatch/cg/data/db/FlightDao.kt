@@ -23,26 +23,26 @@ interface FlightDao {
     @Delete
     suspend fun delete(flight: FlightEntity): Int
 
-    @Query("SELECT * FROM flights WHERE flightDate = :date AND operationType = 'ARRIVAL' ORDER BY scheduledArrivalUtc")
+    @Query("SELECT * FROM flights WHERE (operationType = 'ARRIVAL' AND arrivalDate = :date) OR (operationType = 'DEPARTURE' AND flightDate = :date) ORDER BY operationType, scheduledDepartureUtc")
+    suspend fun getFlightsByDate(date: String): List<FlightEntity>
+
+    @Query("SELECT * FROM flights WHERE operationType = 'ARRIVAL' AND arrivalDate = :date ORDER BY scheduledArrivalUtc")
     suspend fun getArrivalsByDate(date: String): List<FlightEntity>
 
-    @Query("SELECT * FROM flights WHERE flightDate BETWEEN :startDate AND :endDate AND operationType = 'ARRIVAL' ORDER BY flightDate, scheduledArrivalUtc")
+    @Query("SELECT * FROM flights WHERE operationType = 'ARRIVAL' AND arrivalDate BETWEEN :startDate AND :endDate ORDER BY arrivalDate, scheduledArrivalUtc")
     suspend fun getArrivalsByDateRange(startDate: String, endDate: String): List<FlightEntity>
 
-    @Query("SELECT * FROM flights WHERE flightDate = :date AND operationType = 'DEPARTURE' ORDER BY scheduledDepartureUtc")
+    @Query("SELECT * FROM flights WHERE operationType = 'DEPARTURE' AND flightDate = :date ORDER BY scheduledDepartureUtc")
     suspend fun getDeparturesByDate(date: String): List<FlightEntity>
 
-    @Query("SELECT * FROM flights WHERE flightDate BETWEEN :startDate AND :endDate AND operationType = 'DEPARTURE' ORDER BY flightDate, scheduledDepartureUtc")
+    @Query("SELECT * FROM flights WHERE operationType = 'DEPARTURE' AND flightDate BETWEEN :startDate AND :endDate ORDER BY flightDate, scheduledDepartureUtc")
     suspend fun getDeparturesByDateRange(startDate: String, endDate: String): List<FlightEntity>
 
-    @Query("SELECT * FROM flights WHERE operationType = 'ARRIVAL' ORDER BY flightDate, scheduledArrivalUtc")
+    @Query("SELECT * FROM flights WHERE operationType = 'ARRIVAL' ORDER BY arrivalDate, scheduledArrivalUtc")
     suspend fun getAllArrivals(): List<FlightEntity>
 
     @Query("SELECT * FROM flights WHERE operationType = 'DEPARTURE' ORDER BY flightDate, scheduledDepartureUtc")
     suspend fun getAllDepartures(): List<FlightEntity>
-
-    @Query("SELECT * FROM flights WHERE flightDate = :date ORDER BY operationType, scheduledDepartureUtc")
-    suspend fun getFlightsByDate(date: String): List<FlightEntity>
 
     @Query("SELECT * FROM flights WHERE sirosRecordId = :recordId")
     suspend fun getBySirosRecordId(recordId: String): List<FlightEntity>
