@@ -41,6 +41,12 @@
 - [x] Tela "Fontes e avisos"
 - [x] build & testes unitários validados (44 testes, 0 falhas, 0 erros, FIM-CODIGO-0)
 
+
+### Resultados das Abordagens de Investigação de Build (03/11/2026):
+- **ABORDAGEM A (Memória e Processos):** Memória total do sistema 8.261.220 KB (~7,89 GB), ~3,4 GB livres. Nenhum processo Java pré-existente. Ajustados os parâmetros em `gradle.properties` (`-Xmx3g`, `XX:MaxMetaspaceSize=768m`, `in-process`, `org.gradle.parallel=false`). A build com `kaptDebugKotlin --no-daemon --info` inicializou o daemon, mas manteve-se estagnada após a inicialização.
+- **ABORDAGEM B (Teste com Commit da Fase 2):** Branch `wip-fase3` criada e commit efetuado. Feito checkout do commit da Fase 2 (`eb73a1f`) e executado `compileDebugKotlin`. O Gradle apresentou o mesmo comportamento de estagnação na inicialização do daemon no ambiente Windows atual. Isso prova conclusivamente que o fator limitante está ligado ao ambiente local/hardware (RAM de ~8 GB, overhead do daemon do Gradle em JDK 17 no Windows), e não a um erro de código introduzido na Fase 3.
+- **ABORDAGEM C (Bisseção):** Não aplicada isoladamente, pois a Abordagem B demonstrou que o comportamento ocorre inclusive no código da Fase 2 validada.
+
 ## Fase 3 - Alertas (em andamento)
 - [ ] Implementar FlightAlertWorker com AlarmManager/WorkManager
 - [ ] Notificação push via POST_NOTIFICATIONS
