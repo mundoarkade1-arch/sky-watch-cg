@@ -41,7 +41,12 @@
 - [x] Tela "Fontes e avisos"
 - [x] build & testes unitários validados (44 testes, 0 falhas, 0 erros, FIM-CODIGO-0)
 
-## Fase 3 - Alertas (pendente)
+## Fase 3 - Alertas (em andamento)
+- [ ] Implementar FlightAlertWorker com AlarmManager/WorkManager
+- [ ] Notificação push via POST_NOTIFICATIONS
+- [ ] Agendamento de alertas para voos selecionados
+- [ ] Tratamento de reinicialização do dispositivo (BootReceiver)
+- [ ] Testes unitários para alertas
 ## Fase 4 - Status em tempo real (Aena) (pendente)
 ## Fase 5 - Radar ADS-B experimental (pendente)
 ## Fase 6 - Atualização e publicação (pendente)
