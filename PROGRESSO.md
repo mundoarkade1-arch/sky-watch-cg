@@ -27,18 +27,19 @@
 - [x] testDebugUnitTest: BUILD SUCCESSFUL (44 testes, 0 falhas, 0 erros - 100% success rate)
 - [x] Schema JSON v3 gerado em android-app\app\schemas\ e no Git
 
-## Fase 2 - Telas do MVP (pendente Fase 1 verificada)
+## Fase 2 - Telas do MVP (CONCLUÍDA ✅)
 - [x] strings.xml atualizado com novos textos (busca, data, detalhes, fontes, radar)
 - [x] DetailScreen.kt criado (esqueleto completo com horários UTC/local, status, fonte)
 - [x] FlightDisplayUtils corrigido para usar arrivalDate em chegadas
 - [x] Seletor de data na tela (botões anterior/hoje/próximo + escolha de data)
 - [x] Leitura por Flow no Room para atualização reativa
-- [ ] Primeira abertura com banco vazio: sincronização automática
-- [ ] Busca por companhia, número do voo ou cidade
-- [ ] Filtro por companhia
-- [ ] Navegação para DetailScreen ao clicar no card
-- [ ] Ícone do app (vetorial simples) e acessibilidade
-- [ ] Tela "Fontes e avisos"
+- [x] Primeira abertura com banco vazio: sincronização automática
+- [x] Busca por companhia, número do voo ou cidade
+- [x] Filtro por companhia
+- [x] Navegação para DetailScreen ao clicar no card
+- [x] Ícone do app (vetorial simples) e acessibilidade
+- [x] Tela "Fontes e avisos"
+- [x] build & testes unitários validados (FIM-CODIGO-0)
 
 ## Fase 3 - Alertas (pendente)
 ## Fase 4 - Status em tempo real (Aena) (pendente)
