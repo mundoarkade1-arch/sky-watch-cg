@@ -212,24 +212,37 @@ class SirosRepository(
 
     fun getArrivalsForUiFlow(date: LocalDate): Flow<List<NormalizedFlight>> {
         val prevDate = date.minusDays(1).format(dateFormatter)
-        val currDate = date.format(dateFormatter)
         val nextDate = date.plusDays(1).format(dateFormatter)
         
-        // Note: Room Flow for Range might be complex if we want it to be truly reactive to any change in the range.
-        // For MVP, we'll use a simpler approach or just stick to the current date if range is not strictly needed for UI flow.
-        // But to keep consistency with the non-flow version:
-        return dao.getArrivalsByDateFlow(currDate).map { entities ->
+        // Use range query to catch UTC day rollover flights, then filter by local date
+        return dao.getArrivalsByDateRangeFlow(prevDate, nextDate).map { entities ->
             entities.map { it.toNormalizedFlight() }
-            // Filter is already handled by query for single date. 
-            // If we needed the range for UTC rollover, we'd need a more complex query or multiple flows.
-            // Given the requirement of "Leitura por Flow no Room", I'll implement it for the specific date.
+                .filter { flight ->
+                    // Compute local date from UTC arrival time + destination timezone
+                    val localDate = LocalDateTime.of(flight.flightDate, flight.scheduledArrivalUtc)
+                        .atZone(ZoneId.of("UTC"))
+                        .withZoneSameInstant(ZoneId.of(flight.destinationTimezone))
+                        .toLocalDate()
+                    localDate == date
+                }
         }
     }
 
     fun getDeparturesForUiFlow(date: LocalDate): Flow<List<NormalizedFlight>> {
-        val currDate = date.format(dateFormatter)
-        return dao.getDeparturesByDateFlow(currDate).map { entities ->
+        val prevDate = date.minusDays(1).format(dateFormatter)
+        val nextDate = date.plusDays(1).format(dateFormatter)
+        
+        // Use range query to catch UTC day rollover flights, then filter by local date
+        return dao.getDeparturesByDateRangeFlow(prevDate, nextDate).map { entities ->
             entities.map { it.toNormalizedFlight() }
+                .filter { flight ->
+                    // Compute local date from UTC departure time + origin timezone
+                    val localDate = LocalDateTime.of(flight.flightDate, flight.scheduledDepartureUtc)
+                        .atZone(ZoneId.of("UTC"))
+                        .withZoneSameInstant(ZoneId.of(flight.originTimezone))
+                        .toLocalDate()
+                    localDate == date
+                }
         }
     }
 

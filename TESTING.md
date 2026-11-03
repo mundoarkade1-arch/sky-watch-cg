@@ -42,11 +42,20 @@
 |---|---|---|---|
 | TV-005 | `testRefreshStateEmitsRefreshing` | **Sucesso (Aprovado)** | Valida que a chamada a `refresh()` emite o estado `Refreshing` (com spinner/mantendo dados anteriores) e conclui com sucesso simulando uma fonte remota local sem acesso à internet real. |
 
-**Resumo da Execução Unitária (`testDebugUnitTest`) — 02/11/2026 (36 testes):**
-- Total de testes: **36**
+## Resultados dos Testes de ViewModel Fase 2 - 03/11/2026
+
+| ID | Teste | Resultado | Detalhes |
+|---|---|---|---|
+| TV-006 | `testGoToPreviousDayChangesDateAndLoadsFlights` | **Sucesso (Aprovado)** | Verifica navegação para dia anterior. |
+| TV-007 | `testGoToNextDayChangesDateAndLoadsFlights` | **Sucesso (Aprovado)** | Verifica navegação para próximo dia. |
+| TV-008 | `testGoToTodayChangesDateAndLoadsFlights` | **Sucesso (Aprovado)** | Verifica navegação para hoje. |
+| TV-009 | `testUtcDayRolloverFlightAppearsOnLocalDate` | **Sucesso (Aprovado)** | Verifica que voo 02:00 UTC aparece na data local correta (ex: 14/10 no fuso UTC-4). |
+
+**Resumo da Execução Unitária (`testDebugUnitTest`) — 03/11/2026 (44 testes):**
+- Total de testes: **44**
 - Falhas: **0**
 - Erros: **0**
-- Ignorados: **0**
+- Ignorados: **1**
 - `BUILD SUCCESSFUL`
 
 ## Correção de Concorrência e Sincronização nos Testes (Etapa 5) - 2026-11-01

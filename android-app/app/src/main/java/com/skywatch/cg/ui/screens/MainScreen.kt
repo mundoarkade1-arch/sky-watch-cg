@@ -6,9 +6,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Info
@@ -286,12 +286,12 @@ fun DatePickerRow(viewModel: FlightListViewModel) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(onClick = { viewModel.goToPreviousDay() }) {
-            Icon(Icons.Filled.ChevronLeft, contentDescription = "Anterior")
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Anterior")
         }
         
         TextButton(onClick = { viewModel.goToToday() }) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.CalendarToday, contentDescription = null, modifier = Modifier.size(18.dp))
+                Icon(Icons.Filled.DateRange, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = selectedDate.format(dateFormatter),
@@ -302,7 +302,7 @@ fun DatePickerRow(viewModel: FlightListViewModel) {
         }
 
         IconButton(onClick = { viewModel.goToNextDay() }) {
-            Icon(Icons.Filled.ChevronRight, contentDescription = "Próximo")
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "Próximo")
         }
     }
 }

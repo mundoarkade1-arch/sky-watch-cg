@@ -39,7 +39,7 @@
 - [x] Navegação para DetailScreen ao clicar no card
 - [x] Ícone do app (vetorial simples) e acessibilidade
 - [x] Tela "Fontes e avisos"
-- [x] build & testes unitários validados (FIM-CODIGO-0)
+- [x] build & testes unitários validados (44 testes, 0 falhas, 0 erros, FIM-CODIGO-0)
 
 ## Fase 3 - Alertas (pendente)
 ## Fase 4 - Status em tempo real (Aena) (pendente)

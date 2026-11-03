@@ -39,6 +39,9 @@ interface FlightDao {
     @Query("SELECT * FROM flights WHERE operationType = 'ARRIVAL' AND arrivalDate BETWEEN :startDate AND :endDate ORDER BY arrivalDate, scheduledArrivalUtc")
     suspend fun getArrivalsByDateRange(startDate: String, endDate: String): List<FlightEntity>
 
+    @Query("SELECT * FROM flights WHERE operationType = 'ARRIVAL' AND arrivalDate BETWEEN :startDate AND :endDate ORDER BY arrivalDate, scheduledArrivalUtc")
+    fun getArrivalsByDateRangeFlow(startDate: String, endDate: String): Flow<List<FlightEntity>>
+
     @Query("SELECT * FROM flights WHERE operationType = 'DEPARTURE' AND flightDate = :date ORDER BY scheduledDepartureUtc")
     suspend fun getDeparturesByDate(date: String): List<FlightEntity>
 
@@ -47,6 +50,9 @@ interface FlightDao {
 
     @Query("SELECT * FROM flights WHERE operationType = 'DEPARTURE' AND flightDate BETWEEN :startDate AND :endDate ORDER BY flightDate, scheduledDepartureUtc")
     suspend fun getDeparturesByDateRange(startDate: String, endDate: String): List<FlightEntity>
+
+    @Query("SELECT * FROM flights WHERE operationType = 'DEPARTURE' AND flightDate BETWEEN :startDate AND :endDate ORDER BY flightDate, scheduledDepartureUtc")
+    fun getDeparturesByDateRangeFlow(startDate: String, endDate: String): Flow<List<FlightEntity>>
 
     @Query("SELECT * FROM flights WHERE operationType = 'ARRIVAL' ORDER BY arrivalDate, scheduledArrivalUtc")
     suspend fun getAllArrivals(): List<FlightEntity>

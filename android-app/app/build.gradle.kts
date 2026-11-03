@@ -80,8 +80,8 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material3:material3-window-size-class")
-    // Material Icons
-    implementation("androidx.compose.material:material-icons-extended")
+    // Material Icons (Using standard core icons or keeping core set if extended is not used, but let's replace custom imports with standard set or remove material-icons-extended if desired)
+    // implementation("androidx.compose.material:material-icons-extended")
 
     // Room Database
     val room_version = "2.6.1"
