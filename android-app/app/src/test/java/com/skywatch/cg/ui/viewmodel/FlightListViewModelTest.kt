@@ -243,24 +243,16 @@ class FlightListViewModelTest {
         // Load initial data to get into Success state
         viewModel.loadFlights(testDate)
         testDispatcher.scheduler.advanceUntilIdle()
-        viewModel.uiState.first { it is FlightUiState.Success }
-
+        
         // Verify we're in Success state
         var state = viewModel.uiState.value
         assertTrue(state is FlightUiState.Success)
 
-        // Now call refresh - repository will sync (mocked to succeed with empty data)
-        // Since we're using real repository with in-memory DB, syncFromRemote will try to download
-        // We need to test with a mock repository, but for now let's test that refresh doesn't stay in Refreshing
+        // Now call refresh - repository will sync (real HTTP call in test hanging or failing)
         viewModel.refresh()
         testDispatcher.scheduler.advanceUntilIdle()
         
-        // Wait for state to leave Refreshing
-        val finalState = viewModel.uiState
-            .dropWhile { it is FlightUiState.Refreshing }
-            .first { it is FlightUiState.Success || it is FlightUiState.Error }
-        
-        // Should end in Success or Error, NOT Refreshing
+        val finalState = viewModel.uiState.value
         assertTrue(finalState is FlightUiState.Success || finalState is FlightUiState.Error)
         assertFalse(finalState is FlightUiState.Refreshing)
     }
@@ -273,7 +265,6 @@ class FlightListViewModelTest {
         // Load initial data (will be empty Success)
         viewModel.loadFlights(testDate)
         testDispatcher.scheduler.advanceUntilIdle()
-        viewModel.uiState.first { it is FlightUiState.Success }
 
         // Verify we're in Success state (empty)
         var state = viewModel.uiState.value
@@ -281,17 +272,11 @@ class FlightListViewModelTest {
         val success = state as FlightUiState.Success
         assertTrue(success.arrivals.isEmpty() && success.departures.isEmpty())
 
-        // Now call refresh - sync will fail (no network in test)
-        // But our fix ensures state goes back to Success with cached data or Error
+        // Now call refresh - sync will fail
         viewModel.refresh()
         testDispatcher.scheduler.advanceUntilIdle()
         
-        // Wait for state to leave Refreshing
-        val finalState = viewModel.uiState
-            .dropWhile { it is FlightUiState.Refreshing }
-            .first { it is FlightUiState.Success || it is FlightUiState.Error }
-        
-        // Should end in Success or Error, NOT Refreshing
+        val finalState = viewModel.uiState.value
         assertTrue(finalState is FlightUiState.Success || finalState is FlightUiState.Error)
         assertFalse(finalState is FlightUiState.Refreshing)
     }
