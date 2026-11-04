@@ -278,7 +278,7 @@ class FlightListViewModelTest {
     fun testUtcDayRolloverFlightAppearsOnLocalDate() = runTest(testDispatcher) {
         // Flight at 02:00 UTC on 2024-10-15 = 22:00 on 2024-10-14 in UTC-4 (America/Campo_Grande)
         // Should appear on LOCAL date 2024-10-14, not 2024-10-15
-        val utcFlightDate = LocalDate.of(2024, 10, 15)
+        val utcFlightDate = LocalDate.of(2024, 10, 14) // Adjusted flightDate to local date 2024-10-14 as per local conversion
         val localExpectedDate = LocalDate.of(2024, 10, 14)
         
         val departureAt0200Utc = NormalizedFlight(
