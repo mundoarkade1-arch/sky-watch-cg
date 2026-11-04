@@ -2,6 +2,7 @@
 
 ## Status atual
 - **Fase 0 (Limpeza e Verdade)**: Concluída. Limpeza de logs antigos, ajuste do `.gitignore`, normalização da faixa de datas do SIROS (`referenceDate - 1` a `referenceDate + 45`), correção do teste unitário `testSyncFromRemoteSuccess` e atualização da documentação.
+- **Correção de estabilidade (04/11/2026, sem avanço de etapa):** testes de atualização isolados de rede real; estado de atualização protegido contra emissões do Room; tela Sobre ajustada para retorno acessível e rolagem em telas pequenas. Validado localmente: 53 testes, 0 falhas, 0 erros, 1 teste ignorado; APK Debug gerado.
 
 ## Etapa 1 — Validação das fontes e Arquitetura (Concluído)
 - [x] Investigar acesso ao painel Aena e portal SIROS/ANAC.

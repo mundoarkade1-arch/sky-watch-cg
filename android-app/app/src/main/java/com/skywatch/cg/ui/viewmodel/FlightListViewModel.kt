@@ -69,6 +69,7 @@ class FlightListViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
     private var loadJob: Job? = null
+    private var refreshJob: Job? = null
 
     init {
         Log.d("FlightListViewModelDiag", "ViewModel created. Starting reactive flows.")
@@ -81,7 +82,14 @@ class FlightListViewModel(
             combine(arrivalsFlow, departuresFlow, _selectedDate) { arrivals, departures, date ->
                 FlightUiState.Success(arrivals, departures, date)
             }.collect { state ->
-                _uiState.value = state
+                _uiState.value = when (val currentState = _uiState.value) {
+                    is FlightUiState.Refreshing -> currentState.copy(
+                        arrivals = state.arrivals,
+                        departures = state.departures,
+                        selectedDate = state.selectedDate
+                    )
+                    else -> state
+                }
             }
         }
     }
@@ -100,61 +108,66 @@ class FlightListViewModel(
 
     fun refresh() {
         Log.d("FlightListViewModelDiag", "refresh() called with current selectedDate: ${_selectedDate.value}")
-        viewModelScope.launch {
-            // Mostra estado de atualizando se já temos dados
+        if (refreshJob?.isActive == true) return
+
+        refreshJob = viewModelScope.launch {
             val currentState = _uiState.value
-            if (currentState is FlightUiState.Success) {
-                _uiState.value = FlightUiState.Refreshing(
-                    arrivals = currentState.arrivals,
-                    departures = currentState.departures,
-                    selectedDate = currentState.selectedDate
-                )
-            } else if (currentState is FlightUiState.Refreshing) {
-                // Já está atualizando, mantém
-            } else {
-                _uiState.value = FlightUiState.Loading
+            val previousArrivals = when (currentState) {
+                is FlightUiState.Success -> currentState.arrivals
+                is FlightUiState.Refreshing -> currentState.arrivals
+                else -> emptyList()
             }
+            val previousDepartures = when (currentState) {
+                is FlightUiState.Success -> currentState.departures
+                is FlightUiState.Refreshing -> currentState.departures
+                else -> emptyList()
+            }
+            val refreshDate = _selectedDate.value
+            _uiState.value = FlightUiState.Refreshing(
+                arrivals = previousArrivals,
+                departures = previousDepartures,
+                selectedDate = refreshDate
+            )
 
             try {
                 val result = repository.syncFromRemote()
-                
-                // Após sync, ler dados atualizados diretamente para garantir que o estado saia de Refreshing
-                // mesmo se os dados não mudaram (flows com distinctUntilChanged não re-emitem)
                 val arrivals = repository.getArrivalsForUi(_selectedDate.value)
                 val departures = repository.getDeparturesForUi(_selectedDate.value)
-                
-                _uiState.value = FlightUiState.Success(
-                    arrivals = arrivals,
-                    departures = departures,
-                    selectedDate = _selectedDate.value
-                )
-                
-                // Log do resultado
+
                 when (result) {
                     is SirosRepository.SyncResult.Success -> {
+                        _uiState.value = FlightUiState.Success(
+                            arrivals = arrivals,
+                            departures = departures,
+                            selectedDate = _selectedDate.value
+                        )
                         Log.d("FlightListViewModel", "Sync manual bem-sucedida: ${result.totalSynced} voos")
                     }
                     is SirosRepository.SyncResult.Failure -> {
                         Log.w("FlightListViewModel", "Sync manual falhou: ${result.errorMessage}")
-                        // Se falhou mas temos dados cached, mantemos Success com dados antigos
-                        // Se não temos dados, voltamos para Error
                         if (arrivals.isEmpty() && departures.isEmpty()) {
                             _uiState.value = FlightUiState.Error(result.errorMessage)
+                        } else {
+                            _uiState.value = FlightUiState.Success(
+                                arrivals = arrivals,
+                                departures = departures,
+                                selectedDate = _selectedDate.value
+                            )
                         }
                     }
                 }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 Log.e("FlightListViewModel", "Exceção no refresh: ${e.message}", e)
-                val currentState = _uiState.value
-                if (currentState is FlightUiState.Refreshing) {
-                    // Volta para Success com dados anteriores
-                    _uiState.value = FlightUiState.Success(
-                        arrivals = currentState.arrivals,
-                        departures = currentState.departures,
-                        selectedDate = currentState.selectedDate
-                    )
-                } else {
+                if (previousArrivals.isEmpty() && previousDepartures.isEmpty()) {
                     _uiState.value = FlightUiState.Error(e.localizedMessage ?: "Erro desconhecido")
+                } else {
+                    _uiState.value = FlightUiState.Success(
+                        arrivals = previousArrivals,
+                        departures = previousDepartures,
+                        selectedDate = refreshDate
+                    )
                 }
             }
         }

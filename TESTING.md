@@ -229,3 +229,16 @@ cmd /c "cd android-app && gradlew.bat cleanTestDebugUnitTest testDebugUnitTest -
 ```
 **Resultado:** `BUILD SUCCESSFUL`, 33 testes, 0 falhas, 0 erros.
 Fase 6.3 concluída com sucesso. APK de debug gerado: `android-app\app\build\outputs\apk\debug\app-debug.apk` (12.6 MB).
+
+## Correção do CI e da tela Sobre — 2026-11-04
+
+**Falha investigada:** a execução CI #38 (commit `64f4c77`) terminou com 53 testes, 2 falhas e 1 teste ignorado. Os testes de atualização dependiam do download remoto SIROS real, que roda fora do relógio controlado por `runTest`; por isso o estado podia continuar em atualização quando o teste fazia a verificação.
+
+**Alterações verificadas:** os testes de atualização usam uma fonte remota falsa controlada pelo teste. O ViewModel preserva o estado de atualização durante emissões do Room, impede duas sincronizações manuais simultâneas e conclui em sucesso ou erro. A tela Sobre usa ícone de retorno acessível, cores do tema e conteúdo rolável.
+
+**Execução local:** `2026-11-04 18:59 UTC / 14:59 Campo Grande`.
+```powershell
+cd android-app
+.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug --console=plain
+```
+**Resultado reproduzível:** `BUILD SUCCESSFUL`; 53 testes, 0 falhas, 0 erros e 1 ignorado (`SirosStreamParserRealFileTest`, depende de CSV real local). APK Debug gerado em `android-app\app\build\outputs\apk\debug\app-debug.apk` (11.019.269 bytes).

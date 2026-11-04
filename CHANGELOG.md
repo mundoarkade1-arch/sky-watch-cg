@@ -1,4 +1,10 @@
 # Changelog
+## 2026-11-04 — Estabilização da atualização e da tela Sobre
+- O `FlightListViewModel` mantém o estado de atualização enquanto os fluxos do Room emitem mudanças, evita atualizações remotas simultâneas e encerra o estado de carregamento em sucesso ou falha. A falha preserva os voos em cache; sem cache, apresenta erro.
+- Testes de atualização passaram a usar uma fonte remota falsa controlada pelo teste, sem depender de rede ou do endpoint SIROS.
+- A tela Sobre passou a usar o ícone acessível de voltar, as cores do tema e conteúdo rolável em telas menores.
+- Validação local em 18:59 UTC / 14:59 Campo Grande: `testDebugUnitTest` (53 testes, 0 falhas, 0 erros, 1 ignorado) e `assembleDebug` concluídos com sucesso.
+
 ## 2026-11-03 — Redesenho Visual Completo (Partes 1-4)
 ### Parte 1 - Tema e Fontes
 - Novo tema escuro "painel de aeroporto" (`SkyWatchTheme`) com cores: fundo `#0A0F1C`, cartão `#121A2B`, borda `#1E2A42`, texto `#F1F5F9`, secundário `#8A97B1`, azul-céu `#38BDF8` (chegadas), âmbar `#FBBF24` (partidas).

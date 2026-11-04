@@ -2,24 +2,24 @@ package com.skywatch.cg.ui.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
@@ -157,13 +157,13 @@ fun TopAppBarWrapper(
                 )
             }
 
-            Box(
+            IconButton(
+                onClick = viewModel::refresh,
+                enabled = !isRefreshing,
                 modifier = Modifier
                     .size(44.dp)
                     .clip(RoundedCornerShape(14.dp))
                     .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .clickable { viewModel.refresh() },
-                contentAlignment = Alignment.Center
             ) {
                 if (isRefreshing) {
                     CircularProgressIndicator(
@@ -363,75 +363,76 @@ fun AboutScreen(
     navController: androidx.navigation.NavController,
     onNavigateBack: () -> Unit
 ) {
-    val uiState by remember { mutableStateOf(FlightUiState.Loading) }
-    val syncMetadata by remember { mutableStateOf<SyncMetadata?>(null) }
-    
     Scaffold(
         topBar = {
             TopAppBar(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .statusBarsPadding(),
+                modifier = Modifier.fillMaxWidth(),
                 title = {
                     Text(
                         text = "Sobre",
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = androidx.compose.ui.graphics.Color.White
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Text(
-                            text = "←",
-                            fontSize = 24.sp,
-                            color = androidx.compose.ui.graphics.Color.White,
-                            modifier = Modifier.size(48.dp).wrapContentSize(Alignment.Center)
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Voltar para voos"
                         )
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = androidx.compose.ui.graphics.Color(0xFF0A0F1C),
-                    titleContentColor = androidx.compose.ui.graphics.Color.White
-                )
+                }
             )
         },
         bottomBar = { BottomNavBar(navController) },
-        containerColor = Color(0xFF0A0F1C)
+        containerColor = MaterialTheme.colorScheme.background
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(24.dp),
+                .padding(24.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFF121A2B)
+                    containerColor = MaterialTheme.colorScheme.surface
                 ),
                 shape = RoundedCornerShape(20.dp),
-                border = BorderStroke(1.dp, Color(0xFF1E2A42))
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Text(
-                        text = "Fonte dos dados: CSV público da ANAC (SIROS)",
-                        fontSize = 16.sp,
-                        color = Color(0xFFF1F5F9)
+                        text = "SKY WATCH CG",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "Aviso: horários programados, não confirmam a operação em tempo real",
-                        fontSize = 16.sp,
-                        color = Color(0xFF8A97B1)
+                        text = "Fonte dos horários",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "CSV público de registros vigentes da ANAC (SIROS).",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = "Os horários exibidos são programados. Eles não confirmam o status operacional nem a posição atual de uma aeronave.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
                         text = "Versão ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
-                        fontSize = 14.sp,
-                        color = Color(0xFF8A97B1)
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
