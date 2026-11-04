@@ -97,7 +97,8 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.9.0")
     testImplementation("androidx.work:work-testing:2.9.0")
 
-    // Tooling
+    // Google Fonts for Compose
+    implementation("androidx.compose.ui:ui-text-google-fonts:1.6.0")
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
