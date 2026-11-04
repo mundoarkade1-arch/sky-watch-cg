@@ -11,7 +11,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.time.LocalDate
 
 @RunWith(RobolectricTestRunner::class)
 class FlightAlertWorkerTest {
@@ -35,30 +34,28 @@ class FlightAlertWorkerTest {
     fun testFlightEntityInsertionAndQuery() = runBlocking {
         val flight = FlightEntity(
             flightId = "G31234_2024-10-15_DEP",
+            sirosRecordId = "rec1",
             airline = "G3",
             flightNumber = "1234",
+            equipment = "B738",
             origin = "SBCG",
+            originName = "Campo Grande",
+            originTimezone = "America/Campo_Grande",
             destination = "SBGR",
+            destinationName = "Guarulhos",
+            destinationTimezone = "America/Sao_Paulo",
             operationType = "DEPARTURE",
-            scheduledDepartureUtc = 36000L,
-            scheduledArrivalUtc = 40000L,
+            scheduledDepartureUtc = "10:00",
+            scheduledArrivalUtc = "12:00",
             flightDate = "2024-10-15",
             arrivalDate = "2024-10-15",
-            originTimezone = "America/Campo_Grande",
-            destinationTimezone = "America/Sao_Paulo",
-            originName = "Campo Grande",
-            destinationName = "Guarulhos",
-            equipment = "B738",
-            serviceType = "N",
-            daysOfWeek = "1234567",
             validFrom = "2024-10-01",
             validTo = "2024-10-31",
-            sirosStatus = "CONFIRMADO",
-            sirosRecordId = "rec1",
-            createdAt = System.currentTimeMillis()
+            serviceType = "N",
+            sirosStatus = "CONFIRMADO"
         )
 
-        db.flightDao().insertFlights(listOf(flight))
+        db.flightDao().insert(flight)
         val departures = db.flightDao().getDeparturesByDate("2024-10-15")
         assertEquals(1, departures.size)
         assertEquals("1234", departures[0].flightNumber)
