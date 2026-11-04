@@ -19,6 +19,7 @@ import com.skywatch.cg.notification.NotificationHelper
 import com.skywatch.cg.ui.screens.MainScreen
 import com.skywatch.cg.ui.theme.SkyWatchTheme
 import com.skywatch.cg.ui.viewmodel.FlightListViewModel
+import com.skywatch.cg.ui.viewmodel.RadarViewModel
 import com.skywatch.cg.worker.FlightAlertWorker
 import com.skywatch.cg.worker.SirosSyncWorker
 import java.util.concurrent.TimeUnit
@@ -30,6 +31,7 @@ import kotlinx.coroutines.withContext
 class MainActivity : ComponentActivity() {
 
     private val viewModel: FlightListViewModel by viewModels()
+    private val radarViewModel: RadarViewModel by viewModels()
 
     // ActivityResult API para permissão POST_NOTIFICATIONS (Android 13+)
     private val requestNotificationPermissionLauncher =
@@ -67,7 +69,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MainScreen(viewModel = viewModel)
+                    MainScreen(viewModel = viewModel, radarViewModel = radarViewModel)
                 }
             }
         }

@@ -277,9 +277,9 @@ Correções: preenchido `arrivalDate` no fixture; teste configurado para executa
 
 Essa execução valida migrações Room e operações DAO no aparelho; não valida a entrega de notificações, permissões em uso, voo real na janela ou o `BootReceiver` após reinicialização. O telefone não foi reiniciado.
 
-**Validação local complementar:** `:app:testDebugUnitTest`, `:app:assembleDebug`, `:app:compileDebugAndroidTestKotlin` e `:app:processReleaseManifest` concluíram com sucesso. Suíte unitária: 53 testes contabilizados, 0 falhas, 0 erros e 1 ignorado por depender de CSV real.
+**Validação local complementar (antes do radar):** `:app:testDebugUnitTest`, `:app:assembleDebug`, `:app:compileDebugAndroidTestKotlin` e `:app:processReleaseManifest` concluíram com sucesso. Suíte unitária: 53 testes contabilizados, 0 falhas, 0 erros e 1 ignorado por depender de CSV real.
 
-**CI remoto:** CI #46 passou no commit `5c7bdf5`, CI #47 para `c8d6761`, #48 para `9e82c84`, #49 para `4b072c4`, #50 para `9206269` e #51 para `ad4db53` também passaram.
+**CI remoto:** CI #46 passou no commit `5c7bdf5`, CI #47 para `c8d6761`, #48 para `9e82c84`, #49 para `4b072c4`, #50 para `9206269`, #51 para `ad4db53`, #52 para `fe84e0b` e #53 para `6f0ba0e` também passaram.
 
 **Teste real de notificação após reinicialização:** pendente porque não havia voo SIROS elegível na janela de 15–30 minutos. O reinício está registrado abaixo e o teste de código do `BootReceiver` está na seção final; nenhum dos dois comprova a entrega de uma notificação real.
 
@@ -291,7 +291,7 @@ O `FlightAlertWorker` considera horários planejados SIROS entre 15 e 30 minutos
 ```powershell
 .\gradlew.bat :app:testDebugUnitTest :app:assembleDebug :app:compileDebugAndroidTestKotlin --console=plain
 ```
-**Resultado:** `BUILD SUCCESSFUL`; 56 testes contabilizados, 0 falhas, 0 erros e 1 ignorado por depender de CSV real. APK Debug e compilação dos testes instrumentados concluídos.
+**Resultado naquela etapa:** `BUILD SUCCESSFUL`; 56 testes contabilizados, 0 falhas, 0 erros e 1 ignorado por depender de CSV real. APK Debug e compilação dos testes instrumentados concluídos.
 
 O WorkManager pode atrasar execuções, então a janela pode passar sem notificação. Esse comportamento usa apenas o horário programado SIROS e não confirma o estado operacional do voo. A validação de entrega ponta a ponta continua pendente.
 
@@ -320,6 +320,23 @@ A versão 5 tinha uma diferença: migrações antigas criavam `sync_metadata` co
 **Resultados:** suíte unitária: 56 testes, 0 falhas, 0 erros e 1 ignorado por depender de CSV local. No telefone físico Android 14 (22101320G), 13 testes instrumentados, 0 falhas, 0 erros e 0 ignorados. APK Debug e manifest Release compilados com sucesso. Os testes cobrem instalações novas, migração até v6, remoção da antiga `CHECK`, preservação dos dados e rejeição de `id != 1` em inserção/atualização. Nenhum emulador foi aberto.
 
 Schema Room exportado em `android-app/app/schemas/com.skywatch.cg.data.db.AppDatabase/6.json`. CI #50 passou para o commit `9206269`.
+
+## Radar ADS-B experimental — 2026-11-04
+
+O protótipo usa a API ADSB.lol documentada, chamada apenas ao abrir a tela ou por atualização manual. A consulta está centrada nas coordenadas configuradas para CGR e pede observações em um raio de 50 milhas náuticas. O `RadarSnapshotParser` exige timestamp, valida latitude/longitude e ignora registros sem posição; chamadas HTTP malsucedidas geram erro visível, preservando o último resultado em memória. A interface mostra escopo radial e lista, tempo da consulta, idade da posição, atribuição ADSB.lol/ODbL e distinção explícita entre posição observada, planejamento SIROS e status operacional. Não há associação automática a voos.
+
+**Verificação pontual da API (web, sem inserir dados no app):** em 04/11/2026 às 21:22:07 UTC, o endpoint de 50 NM retornou `HTTP 200`, `total=1`, com uma posição reportada a 45.472 NM do centro consultado. Os identificadores foram omitidos. É apenas uma amostra daquele instante, não comprova cobertura contínua, presença de tráfego próximo ao aeroporto nem identidade de voo.
+
+**Testes automatizados:**
+```powershell
+.\gradlew.bat :app:testDebugUnitTest --tests com.skywatch.cg.data.radar.RadarSnapshotParserTest --tests com.skywatch.cg.data.radar.RadarRemoteSourceTest :app:assembleDebug
+.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug :app:processReleaseManifest
+```
+**Resultados:** testes focados do parser/cliente HTTP e build Debug aprovados. Regressão completa `BUILD SUCCESSFUL`: 63 testes contabilizados, 0 falhas, 0 erros e 1 ignorado por depender de CSV real; `assembleDebug` e `processReleaseManifest` aprovados. A consulta de app não é feita pelos testes (HTTP é simulado com MockWebServer). Nenhum emulador foi aberto.
+
+**Condições de uso:** ADSB.lol declara ODbL 1.0 e solicita contato antes de uso em produção. O protótipo exibe atribuição, mas a integração não deve ser distribuída como funcionalidade de produção até confirmar com o mantenedor as exigências aplicáveis. Consulte `docs/API_SOURCES.md`.
+
+**Teste no telefone físico:** instalado por `adb install -r` apenas o pacote `com.skywatch.cg.debug` no aparelho 22101320G (Android 14/API 34); o pacote Release não foi alterado e nenhum emulador foi aberto. A tela Radar abriu, mostrou o escopo, timestamp de consulta da fonte e estado “nenhuma observação ADS-B com posição” às 17:35:14, horário local. Não foi observado crash. A resposta vazia é válida para aquele instante; não prova ausência de aeronaves nem falha/continuidade de cobertura.
 
 ## Roteiro manual — alertas após reinicialização (execução parcial no Android)
 

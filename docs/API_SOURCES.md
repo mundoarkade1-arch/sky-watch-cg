@@ -34,21 +34,30 @@ Conclusão e decisão:
 
 A página [Info vuelos](https://www.aena.es/es/infovuelos.html) diz que os horários são locais e baseados em dados operacionais confirmados e estimativas fornecidas pelas companhias aéreas, mas trata da operação espanhola. Ela não é uma fonte para voos do Aeroporto de Campo Grande e não autoriza reutilização dos dados da Aena Brasil.
 
-## 4. OpenSky Network — candidata para observações ADS-B (pesquisa em 04/11/2026)
+## 4. ADSB.lol — observações ADS-B (protótipo experimental; pesquisa em 04/11/2026)
 
 Documentação oficial consultada:
-- [Documentação da API OpenSky](https://openskynetwork.github.io/opensky-api/)
-- [REST API e consulta por bounding box](https://openskynetwork.github.io/opensky-api/rest.html)
-- [Termos de uso referenciados pela documentação](https://opensky-network.org/about/terms-of-use) — a página respondeu HTTP 403 nesta consulta; os termos completos não foram verificados.
+- [Documentação da API aberta](https://www.adsb.lol/docs/open-data/api)
+- [Termos, privacidade e licença](https://www.adsb.lol/docs/privacy-license)
+- [OpenAPI](https://api.adsb.lol/api/openapi.json)
+- [Licença ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/)
 
 Constatações:
-- A API documentada fornece state vectors em tempo real com campos ADS-B como endereço ICAO, callsign, posição e timestamp; posições podem estar ausentes/obsoletas quando não há atualização recente.
-- A REST API documenta consulta de estado por bounding box WGS84 e menciona limites de taxa.
-- A própria documentação descreve o uso da API como voltado a pesquisa e não comercial; não fornece horários de aeroporto, atraso ou status operacional que não seja derivável dos dados ADS-B.
-- A documentação recomenda citar o trabalho OpenSky em publicações e materiais públicos que usem os dados. As exigências detalhadas de atribuição/licença não foram confirmadas por causa do HTTP 403.
-- Não foi feita consulta de cobertura ao redor de CGR nesta etapa. Logo, não se afirma que haja receptores ou aeronaves visíveis em SBCG.
+- A API documenta respostas de state vectors e consulta por posição/raio; os campos podem incluir endereço ICAO, callsign, latitude/longitude, altitude, velocidade, rumo e idade da posição.
+- A página de dados abertos declara que a API está disponível a todos e licencia os dados publicados em ODbL 1.0. A especificação OpenAPI menciona que, antes de uso para produção, o consumidor deve contactar o mantenedor para evitar alterações que quebrem aplicações.
+- A fonte declara que os dados são fornecidos “as is”, podem ser incompletos/atrasados e não têm garantia de precisão ou disponibilidade.
+- Uma única consulta `GET /v2/lat/-20.4686/lon/-54.6724/dist/50` respondeu `HTTP 200` em 04/11/2026 por volta de 21:22:07 UTC: `total=1`, posição reportada a 45.472 NM do centro consultado. Identificadores da aeronave não foram reproduzidos. Esse ponto observado não prova cobertura contínua, cobertura do aeroporto em todos os horários nem identificação de voo/companhia.
 
-Decisão provisória:
-- OpenSky é apenas uma candidata técnica, não uma fonte aprovada para integração. Antes de incluí-la no app ou distribuir a funcionalidade, confirmar os termos completos para o uso pretendido, as exigências de atribuição, os limites da API e a cobertura local.
-- A arquitetura menciona AvioADSB, mas os materiais do projeto não identificam documentação oficial, endpoint ou termos. Não é possível confirmar o serviço nem sua cobertura sem uma referência canônica.
-- Se a cobertura for nula ou intermitente, o radar deve mostrar “sem observações disponíveis”, não preencher posições fictícias. Observações ADS-B permanecem separadas de voos planejados SIROS e não serão associadas a um voo sem correspondência verificável.
+Decisão e implementação:
+- O app possui um protótipo experimental que consulta manualmente um raio de 50 NM ao abrir a tela Radar ou quando o usuário toca em atualizar. Não há polling em background.
+- A tela atribui ADSB.lol e ODbL 1.0, exibe timestamp e distingue observação ADS-B de planejamento/status operacional; resposta vazia é apresentada como “nenhuma observação retornada”, não como ausência de tráfego.
+- Antes de distribuir/usar em produção, contactar o mantenedor, confirmar requisitos ODbL/atribuição e limites operacionais. A amostragem de cobertura precisa ser repetida em períodos distintos.
+- O protótipo não associa callsign/posição a voos SIROS nem afirma que uma aeronave é voo comercial.
+
+## 5. OpenSky Network — alternativa não integrada
+
+A [documentação oficial OpenSky](https://openskynetwork.github.io/opensky-api/) também oferece state vectors e consultas por área, mas descreve a API para pesquisa/não comercial. A página de termos respondeu HTTP 403 durante a consulta, e não foi verificada a cobertura de CGR. O projeto não a integra.
+
+## 6. AvioADSB — referência ainda não verificada
+
+A arquitetura antiga menciona AvioADSB, mas não há no projeto link canônico, documentação de API ou termos/licença verificáveis. A integração depende de receber e validar esses materiais.

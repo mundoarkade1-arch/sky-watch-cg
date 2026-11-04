@@ -1,4 +1,13 @@
 # Changelog
+## 2026-11-04 — Primeiro protótipo de radar ADS-B
+- Adicionada tela Radar experimental com desenho de escopo radial para 50 NM centrado em CGR e lista de observações com callsign transmitido, endereço ICAO, altitude, velocidade, distância e idade da posição.
+- Criado cliente OkHttp usando dependência existente e API documentada ADSB.lol; consulta somente ao abrir a tela ou quando o usuário atualiza, sem polling em background.
+- Adicionadas validação de coordenadas, horário da consulta, estados de carregamento/vazio/erro, preservação do último resultado em falha e atribuição ODbL na tela.
+- Sem associação às linhas SIROS, sem status operacional inferido e sem dependência nova.
+- Testes de parser e HTTP, suíte completa e build registrados em `TESTING.md`.
+- A tela foi aberta no Poco 22101320G (Android 14) com a variante Debug; a resposta sem posições exibiu o estado vazio e timestamp, sem crash. Não foi aberto emulador.
+- Uso em produção requer contato com a fonte; cobertura local observada apenas em uma consulta e não garantida.
+
 ## 2026-11-04 — Teste de boot e início da avaliação do radar
 - Adicionado teste Robolectric que verifica o agendamento dos trabalhos únicos de sync e alertas quando o `BootReceiver` recebe `BOOT_COMPLETED`.
 - Regressão local: 57 testes unitários contabilizados, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado. Nenhum emulador foi aberto.

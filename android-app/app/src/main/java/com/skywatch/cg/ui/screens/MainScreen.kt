@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -31,6 +32,7 @@ import com.skywatch.cg.R
 import com.skywatch.cg.data.db.SyncMetadata
 import com.skywatch.cg.data.siros.NormalizedFlight
 import com.skywatch.cg.data.siros.OperationType
+import com.skywatch.cg.ui.viewmodel.RadarViewModel
 import com.skywatch.cg.ui.components.DayStrip
 import com.skywatch.cg.ui.components.FlightCard
 import com.skywatch.cg.ui.components.NextFlightCard
@@ -47,7 +49,7 @@ import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainScreen(viewModel: FlightListViewModel) {
+fun MainScreen(viewModel: FlightListViewModel, radarViewModel: RadarViewModel) {
     val navController = rememberNavController()
     
     NavHost(navController, startDestination = "voos") {
@@ -61,6 +63,12 @@ fun MainScreen(viewModel: FlightListViewModel) {
             AboutScreen(
                 navController = navController,
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable("radar") {
+            RadarScreen(
+                viewModel = radarViewModel,
+                navController = navController
             )
         }
     }
@@ -470,6 +478,18 @@ fun BottomNavBar(navController: androidx.navigation.NavController) {
             selected = currentRoute == "sobre",
             onClick = {
                 navController.navigate("sobre") {
+                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+        )
+        NavigationBarItem(
+            icon = { Icon(painter = painterResource(R.drawable.ic_radar), contentDescription = null) },
+            label = { Text(text = stringResource(R.string.radar_experimental), style = MaterialTheme.typography.labelSmall) },
+            selected = currentRoute == "radar",
+            onClick = {
+                navController.navigate("radar") {
                     popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                     launchSingleTop = true
                     restoreState = true
