@@ -1,4 +1,9 @@
 # Changelog
+## 2026-11-04 — Pesquisa de fonte Aena e validação manual de alertas
+- Documentadas as páginas, sitemap, `robots.txt` e termos oficiais consultados para Aena Brasil. Não foi encontrada documentação pública de uma API de status para CGR; os termos consultados restringem reutilização sem autorização escrita e a entidade indicada nos termos não é a mesma identificada para a concessão de CGR.
+- Sem scraping nem integração: solicitar esclarecimento/autorização escrita e documentação apropriada à entidade responsável por CGR.
+- Adicionado roteiro para teste real de notificações após reinicialização. O roteiro explicita a janela atual de até 2 horas, a restrição de rede e a natureza não exata da periodicidade do WorkManager.
+
 ## 2026-11-04 — Alinhamento da documentação do projeto
 - Atualizados README e roadmap para refletir o estado implementado e validado: sincronização SIROS, infraestrutura de notificações locais, suíte unitária e CI #39 aprovado.
 - Removidas as indicações contraditórias de que as Fases 6.2–6.4 e o refresh remoto ainda não estavam implementados.

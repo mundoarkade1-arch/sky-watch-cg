@@ -15,7 +15,7 @@
 | T-002 | Endpoints REST SIROS por data/período (/sas/siros_api/api/voos) | Restrito / Bloqueado | Retorna desafio CAPTCHA, inviabilizando chamadas diretas simples de API REST sem sessão navegada. |
 | T-003 | Identificação de voos comerciais de passageiros para SBCG | Confirmado | Localizados voos regulares de passageiros operados por GOL, LATAM e AZUL ligando Campo Grande a hubs como Guarulhos, Congonhas, Campinas e Cuiabá. |
 | T-004 | Fuso horário e conversão UTC para Local | Validado | Horários no CSV fornecidos em UTC. Conversão feita por aeroporto usando America/Sao_Paulo e America/Campo_Grande (sem subtração manual fixa). |
-| T-005 | Comparação com Aena | Complementar | SIROS fornece planejamento (HTA); Aena fornece status em tempo real. |
+| T-005 | Comparação com Aena | Fonte complementar apenas como conceito | SIROS fornece planejamento (HTA). Para CGR, ainda não foi confirmada API nem autorização para reutilizar status operacional Aena; ver pesquisa em `docs/API_SOURCES.md`. |
 | T-006 | Modelo de dados normalizado | Aprovado | Chave composta (ID SIROS original + Data do Voo), delay_minutes = null sem confirmação, distinção entre data_sincronizacao_geral e data_atualizacao_status. |
 
 ## Resultados dos Testes de Persistência Room e Repositório (Etapa 4) - APROVADOS
@@ -246,3 +246,30 @@ cd android-app
 **CI remoto:** execução #39, commit `bccfd48` na branch `wip-fase3`, concluída com sucesso em 2026-11-04. [Ver execução no GitHub Actions](https://github.com/mundoarkade1-arch/sky-watch-cg/actions/runs/41892849679).
 
 **Escopo ainda não coberto por esta execução:** teste manual ponta a ponta das notificações após reinicialização do dispositivo. A conclusão do CI não representa esse teste físico.
+
+## Roteiro manual — alertas após reinicialização (a executar no Android)
+
+**Objetivo:** verificar permissões e reagendamento pelo `BootReceiver` em um aparelho real. Este roteiro não substitui a informação operacional da companhia aérea nem confirma a operação do voo.
+
+**Comportamento atual a considerar:** o `FlightAlertWorker` só procura voos programados para os próximos 120 minutos, e a verificação periódica exige conexão de rede e tem intervalo mínimo configurado de 15 minutos. O WorkManager pode atrasar a execução; não prometa alerta exatamente 15 minutos antes. A fonte SIROS contém planejamento, não confirmação operacional. Use apenas um registro real presente no aplicativo; se não houver voo real na janela de teste, registre “não foi possível testar” em vez de criar dados fictícios.
+
+1. Instale o APK Debug produzido pelo build validado e abra o aplicativo pelo menos uma vez.
+2. Quando solicitado, permita notificações. Confirme também nas configurações do Android que as notificações do SKY WATCH CG e o canal “Alertas de Voo” estão habilitados.
+3. Conecte o aparelho à internet e atualize a lista SIROS. Confira que existe um voo real no cache com evento programado nos próximos 120 minutos. Registre o identificador/data do registro SIROS e o horário programado local, sem afirmar que o voo está confirmado.
+4. Anote a hora local e UTC; reinicie o aparelho usando o menu normal de energia. Após desbloquear, mantenha a conexão de rede ativa.
+5. Aguarde o WorkManager executar. A periodicidade de 15 minutos é um intervalo mínimo aproximado, não um prazo exato. Verifique se a notificação aparece e se mostra chegada/partida e horário local compatíveis com o registro planejado.
+6. Observe se a mesma notificação reaparece ou é atualizada em execuções subsequentes. Registre repetições; o worker verifica periodicamente qualquer voo dentro da janela de duas horas.
+7. Repita, se possível, com aparelho offline durante parte do período e depois reconectado; anote horários e se o trabalho retomou. Não interprete a ausência de notificação como prova de cancelamento do voo.
+
+**Registrar no resultado:** modelo do aparelho, versão Android, versão/commit do APK, permissões, identificador SIROS e data do voo, horário programado local/UTC, horário do reinício, horário de cada notificação, estado de rede e resultado. Não publicar matrícula, posição ou status operacional sem fonte verificável.
+
+| Campo | Resultado |
+|---|---|
+| Data/hora do teste (UTC e Campo Grande) | A preencher |
+| Aparelho / Android | A preencher |
+| APK (versão e commit) | A preencher |
+| Permissão e canal de notificação | A preencher |
+| Registro SIROS real / evento e horário programado | A preencher |
+| Reinicialização e condição de rede | A preencher |
+| Notificação recebida (horário) / repetida? | A preencher |
+| Resultado / evidências (sem dados sensíveis) | A preencher |

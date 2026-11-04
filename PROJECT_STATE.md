@@ -30,6 +30,8 @@
 - [x] **Estabilização da Fase 3 (04/11/2026):** investigada a falha do CI #38 (2 testes de atualização falhando). A causa era a dependência de rede real em testes do ViewModel; os testes agora usam fonte remota controlada. O estado `Refreshing` é mantido durante emissões do Room, atualizações repetidas são evitadas, falhas preservam dados em cache e a tela Sobre usa retorno acessível e conteúdo rolável. Validação local em 18:59 UTC / 14:59 Campo Grande: 53 testes contabilizados (52 executados, 0 falhas e 1 ignorado); `assembleDebug` bem-sucedido.
 - [x] **CI #39 (04/11/2026):** commit `bccfd48` na branch `wip-fase3` concluído com sucesso no GitHub Actions.
 - [x] **Documentação alinhada (04/11/2026):** `README.md`, `ROADMAP.md`, `PROJECT_STATE.md`, `TESTING.md` e `CHANGELOG.md` sincronizados com o estado comprovado do projeto.
+- [x] **Pesquisa Aena Brasil (04/11/2026):** página e sitemap oficiais de CGR consultados; não foi localizada documentação pública de painel/API para CGR. Os termos consultados restringem reprodução de conteúdo sem autorização escrita e identificam ANB, enquanto CGR é administrado pela BOAB. Sem presumir que os termos resolvam o escopo de CGR, nenhuma coleta automatizada será implementada antes de confirmação escrita e documentação apropriada. Detalhes e fontes em `docs/API_SOURCES.md`.
+- [x] **Roteiro manual de alertas após reinicialização:** adicionado a `TESTING.md`; execução em aparelho ainda pendente.
 
   - **6.3.1:** Download HTTP via OkHttp com parâmetros customizáveis no `SirosRemoteSource`, verificações de arquivo vazio (0 bytes) e download incompleto (Content-Length divergente).
   - **6.3.2:** `syncFromRemote()` com transação Room atômica (`withTransaction`), fechamento de streams, filtro streaming de SBCG, tratamento de erros e gravação de status `FAILURE` preservando a última sincronização bem-sucedida.
@@ -45,9 +47,11 @@
 - Aena: Sem API pública documentada confirmada; investigar integração autorizada antes de iniciar implementação.
 - AvioADSB: Baixa cobertura em CGR (experimental).
 - **Validação manual pendente:** registrar teste ponta a ponta das notificações após reinicialização do dispositivo. Os testes automatizados e a implementação de `BootReceiver` não substituem esse teste.
+- **Comportamento de alertas a validar:** o worker considera eventos nas próximas 2 horas e roda periodicamente com restrição de rede; WorkManager não garante execução exatamente a cada 15 minutos. Verificar no aparelho se uma notificação é repetida/atualizada nas execuções seguintes.
 - **Integração SIROS:** a tela usa os dados locais do Room; a atualização manual e a sincronização periódica atualizam esse cache com o CSV remoto.
 - **Ponto em aberto (Room):** em instalações NOVAS (schema v2), o Room cria a tabela sync_metadata SEM a restrição CHECK (id = 1). Somente bancos que passaram pela MIGRATION_1_2 têm o CHECK. Ou seja, o CHECK não vale em todos os bancos. Nenhum código foi alterado por causa disso; a decisão fica para depois.
 
 ## Próxima etapa
-- Confirmar e documentar uma fonte autorizada para status operacional Aena antes de planejar a implementação.
-- Depois, avaliar cobertura e termos de uma fonte ADS-B para CGR; manter observações ADS-B separadas dos voos SIROS e sem identificação não verificada.
+- Solicitar à entidade responsável pelo aeroporto de Campo Grande (BOAB/Aena Brasil) confirmação escrita das condições de uso e documentação de uma eventual API de status operacional.
+- Executar e registrar o roteiro de notificações após reinicialização descrito em `TESTING.md`.
+- Só então decidir se uma integração Aena é permitida e adequada; avaliar cobertura/termos ADS-B separadamente.
