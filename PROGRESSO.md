@@ -53,6 +53,12 @@ Daemon will be stopped at the end of the build
 - [x] Tela "Fontes e avisos"
 - [x] build & testes unitários validados (44 testes, 0 falhas, 0 erros, FIM-CODIGO-0)
 
+- [x] Implementar FlightAlertWorker com AlarmManager/WorkManager
+- [x] Notificação push via POST_NOTIFICATIONS
+- [x] Agendamento de alertas para voos selecionados
+- [x] Tratamento de reinicialização do dispositivo (BootReceiver)
+- [x] Testes unitários para alertas (FlightAlertWorkerTest)
+
 ## Fase 3 - Alertas (em andamento)
 - [ ] Implementar FlightAlertWorker com AlarmManager/WorkManager
 - [ ] Notificação push via POST_NOTIFICATIONS
