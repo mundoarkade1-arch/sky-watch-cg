@@ -1,5 +1,6 @@
 package com.skywatch.cg.ui.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -395,7 +397,7 @@ fun AboutScreen(
             )
         },
         bottomBar = { BottomNavBar(navController) },
-        containerColor = androidx.compose.ui.graphics.Color(0xFF0A0F1C)
+        containerColor = Color(0xFF0A0F1C)
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -407,10 +409,10 @@ fun AboutScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = androidx.compose.ui.graphics.Color(0xFF121A2B)
+                    containerColor = Color(0xFF121A2B)
                 ),
                 shape = RoundedCornerShape(20.dp),
-                border = androidx.compose.ui.graphics.BorderStroke(1.dp, androidx.compose.ui.graphics.Color(0xFF1E2A42))
+                border = BorderStroke(1.dp, Color(0xFF1E2A42))
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp),
@@ -419,17 +421,17 @@ fun AboutScreen(
                     Text(
                         text = "Fonte dos dados: CSV público da ANAC (SIROS)",
                         fontSize = 16.sp,
-                        color = androidx.compose.ui.graphics.Color(0xFFF1F5F9)
+                        color = Color(0xFFF1F5F9)
                     )
                     Text(
                         text = "Aviso: horários programados, não confirmam a operação em tempo real",
                         fontSize = 16.sp,
-                        color = androidx.compose.ui.graphics.Color(0xFF8A97B1)
+                        color = Color(0xFF8A97B1)
                     )
                     Text(
                         text = "Versão ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
                         fontSize = 14.sp,
-                        color = androidx.compose.ui.graphics.Color(0xFF8A97B1)
+                        color = Color(0xFF8A97B1)
                     )
                 }
             }
