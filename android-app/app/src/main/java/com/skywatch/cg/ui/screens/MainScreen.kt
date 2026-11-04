@@ -1,14 +1,12 @@
-﻿package com.skywatch.cg.ui.screens
+package com.skywatch.cg.ui.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Info
@@ -16,32 +14,29 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.skywatch.cg.R
 import com.skywatch.cg.data.db.SyncMetadata
 import com.skywatch.cg.data.siros.NormalizedFlight
 import com.skywatch.cg.data.siros.OperationType
+import com.skywatch.cg.ui.components.DayStrip
+import com.skywatch.cg.ui.components.FlightCard
+import com.skywatch.cg.ui.components.NextFlightCard
+import com.skywatch.cg.ui.components.SegmentedTabRow
 import com.skywatch.cg.ui.viewmodel.FlightListViewModel
 import com.skywatch.cg.ui.viewmodel.FlightUiState
 import com.skywatch.cg.util.getDisplayLastUpdate
-import com.skywatch.cg.util.getDisplayTime
-import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalTime
 import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-
-sealed class Screen(val route: String, val titleRes: Int) {
-    object Arrivals : Screen("arrivals", R.string.tab_arrivals)
-    object Departures : Screen("departures", R.string.tab_departures)
-}
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,386 +45,313 @@ fun MainScreen(viewModel: FlightListViewModel) {
     val uiState by viewModel.uiState.collectAsState()
     val syncMetadata by viewModel.syncMetadata.collectAsState()
 
-    val items = listOf(Screen.Arrivals, Screen.Departures)
-
     val isRefreshing = uiState is FlightUiState.Refreshing
+@Composable
+fun TopAppBarWrapper(
+    viewModel: FlightListViewModel,
+    uiState: FlightUiState,
+    isRefreshing: Boolean,
+    syncMetadata: SyncMetadata?,
+    lastSyncError: String?,
+    selectedTab: Int,
+    onTabSelected: (Int) -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
+    ) {
+        val currentDate = when (uiState) {
+            is FlightUiState.Success -> uiState.selectedDate
+            is FlightUiState.Refreshing -> uiState.selectedDate
+            else -> LocalDate.now()
+        }
+
+        val isToday = currentDate == LocalDate.now()
+        val headerTitle = if (isToday) "Voos de hoje" else currentDate.format(DateTimeFormatter.ofPattern("EEEE, d 'de' MMMM", Locale("pt", "BR"))).replaceFirstChar { it.uppercase() }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column {
+                Text(
+                    text = "CAMPO GRANDE · SBCG",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Medium,
+                    letterSpacing = 1.2.sp
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = headerTitle,
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .clickable { viewModel.refresh() },
+                contentAlignment = Alignment.Center
+            ) {
+                if (isRefreshing) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = "Atualizar",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
+
+        DayStrip(
+            selectedDate = currentDate,
+            onDateSelected = { viewModel.loadFlights(it) }
+        )
+
+        SegmentedTabRow(
+            selectedTab = selectedTab,
+            onTabSelected = onTabSelected
+        )
+
+        if (syncMetadata != null) {
+            Text(
+                text = "Última sincronização: ${syncMetadata.lastSuccessfulSyncAt.getDisplayLastUpdate()}",
+                fontSize = 10.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
+            )
+        }
+
+        if (lastSyncError != null) {
+            Text(
+                text = "Última falha: $lastSyncError",
+                fontSize = 10.sp,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 2.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun MainContent(
+    viewModel: FlightListViewModel,
+    uiState: FlightUiState,
+    selectedTab: Int,
+    innerPadding: PaddingValues
+) {
+    when (uiState) {
+        is FlightUiState.Loading -> LoadingState()
+        is FlightUiState.Error -> ErrorState(message = uiState.message, onRetry = { viewModel.refresh() })
+        is FlightUiState.Success, is FlightUiState.Refreshing -> {
+            val arrivals = if (uiState is FlightUiState.Success) uiState.arrivals else (uiState as FlightUiState.Refreshing).arrivals
+            val departures = if (uiState is FlightUiState.Success) uiState.departures else (uiState as FlightUiState.Refreshing).departures
+            val selectedDate = if (uiState is FlightUiState.Success) uiState.selectedDate else (uiState as FlightUiState.Refreshing).selectedDate
+
+            val flights = if (selectedTab == 0) arrivals else departures
+            val operationType = if (selectedTab == 0) OperationType.ARRIVAL else OperationType.DEPARTURE
+            val isToday = selectedDate == LocalDate.now()
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(bottom = innerPadding.calculateBottomPadding() + 80.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                contentPadding = innerPadding
+            ) {
+                if (isToday) {
+                    val now = LocalTime.now(ZoneId.of("America/Campo_Grande"))
+                    val nextFlight = flights
+                        .filter { it.isAfter(now, ZoneId.of("America/Campo_Grande")) }
+                        .minByOrNull { it.getTimeUntil(ZoneId.of("America/Campo_Grande")) }
+
+                    if (nextFlight != null) {
+                        item {
+                            NextFlightCard(flight = nextFlight) { }
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                    }
+                }
+
+                val futureFlights = if (isToday) {
+                    flights.filter { it.isAfter(LocalTime.now(ZoneId.of("America/Campo_Grande")), ZoneId.of("America/Campo_Grande")) }
+                } else {
+                    flights
+                }
+
+                if (futureFlights.isNotEmpty()) {
+                    item { SectionHeader("MAIS TARDE") }
+                    items(futureFlights) { flight -> FlightCard(flight = flight, onClick = { }) }
+                }
+
+                val pastFlights = if (isToday) {
+                    flights.filter { !it.isAfter(LocalTime.now(ZoneId.of("America/Campo_Grande")), ZoneId.of("America/Campo_Grande")) }
+                } else { emptyList() }
+
+                if (pastFlights.isNotEmpty()) {
+                    item { SectionHeader("JÁ PASSARAM", isDimmed = true) }
+                    items(pastFlights) { flight -> FlightCard(flight = flight, isDimmed = true, onClick = { }) }
+                }
+
+                if (flights.isEmpty()) { item { EmptyState(operationType = operationType) } }
+
+                item { SIROSDisclaimer() }
+            }
+        }
+    }
+}
     val lastSyncError = syncMetadata?.let {
         if (it.lastSyncStatus == "FAILURE" && !it.lastSyncErrorMessage.isNullOrBlank()) {
             it.lastSyncErrorMessage
         } else null
     }
 
+    val selectedTab = remember { mutableStateOf(0) } // 0 = Arrivals, 1 = Departures
+
     Scaffold(
-        topBar = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                TopAppBar(
-                    title = {
-                        Column {
-                            Text(
-                                text = stringResource(id = R.string.app_name),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 20.sp
-                            )
-                            Text(
-                                text = stringResource(id = R.string.airport_subtitle),
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    },
-                    actions = {
-                        IconButton(
-                            onClick = { viewModel.refresh() },
-                            enabled = !isRefreshing
-                        ) {
-                            if (isRefreshing) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(24.dp),
-                                    strokeWidth = 2.dp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            } else {
-                                Icon(
-                                    imageVector = Icons.Default.Refresh,
-                                    contentDescription = stringResource(id = R.string.refresh_description)
-                                )
-                            }
-                        }
-                    },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
-                )
-
-                // Última atualização
-                val currentSyncMeta = syncMetadata
-                if (currentSyncMeta != null) {
-                        Text(
-                            text = stringResource(id = R.string.last_update_prefix) + " " + currentSyncMeta.lastSuccessfulSyncAt.getDisplayLastUpdate(),
-                            fontSize = 10.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-                        )
-                    }
-
-                // Último erro de sincronização
-                if (lastSyncError != null) {
-                    Text(
-                        text = "Última falha: $lastSyncError",
-                        fontSize = 10.sp,
-                        color = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-                    )
-                }
-
-                // Seletor de data
-                DatePickerRow(viewModel = viewModel)
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.4f))
-                        .padding(horizontal = 12.dp, vertical = 6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Info,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onErrorContainer,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = stringResource(id = R.string.disclaimer_siros),
-                        fontSize = 11.sp,
-                        color = MaterialTheme.colorScheme.onErrorContainer
-                    )
-                }
-            }
-        },
-        bottomBar = {
-            NavigationBar {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
-                val currentRoute = navBackStackEntry?.destination?.route
-
-                items.forEach { screen ->
-                    NavigationBarItem(
-                        icon = {
-                            val iconText = if (screen == Screen.Arrivals) "↓" else "↑"
-                            Text(text = iconText, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                        },
-                        label = { Text(stringResource(screen.titleRes)) },
-                        selected = currentRoute == screen.route,
-                        onClick = {
-                            if (currentRoute != screen.route) {
-                                navController.navigate(screen.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            }
-                        }
-                    )
-                }
-            }
-        }
-    ) { innerPadding ->
-        NavHost(
-            navController = navController,
-            startDestination = Screen.Arrivals.route,
-            modifier = Modifier.padding(innerPadding)
-        ) {
-            composable(Screen.Arrivals.route) {
-                FlightListContent(uiState = uiState, operationType = OperationType.ARRIVAL)
-            }
-            composable(Screen.Departures.route) {
-                FlightListContent(uiState = uiState, operationType = OperationType.DEPARTURE)
-            }
-        }
-    }
-}
-
+        topBar = { TopAppBarWrapper(viewModel, uiState, isRefreshing, syncMetadata, lastSyncError, selectedTab.value) { selectedTab.value = it } },
+        bottomBar = { BottomNavBar(navController) }
 @Composable
-fun FlightListContent(uiState: FlightUiState, operationType: OperationType) {
-    var searchText by remember { mutableStateOf("") }
-    var filterAirline by remember { mutableStateOf("") }
-
-    when (uiState) {
-        is FlightUiState.Loading -> {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    CircularProgressIndicator()
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(text = stringResource(id = R.string.loading_flights))
-                }
-            }
-        }
-        is FlightUiState.Refreshing -> {
-            val flights = if (operationType == OperationType.ARRIVAL) uiState.arrivals else uiState.departures
-            val filteredFlights = filterFlights(flights, searchText, filterAirline)
-            if (flights.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        CircularProgressIndicator()
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(text = stringResource(id = R.string.loading_flights))
-                    }
-                }
-            } else {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    SearchAndFilterBar(
-                        searchText = searchText,
-                        onSearchTextChange = { searchText = it },
-                        filterAirline = filterAirline,
-                        onFilterAirlineChange = { filterAirline = it }
-                    )
-                    FlightList(flights = filteredFlights)
-                    // Indicador de atualização
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.padding(bottom = 16.dp),
-                            strokeWidth = 3.dp
-                        )
-                    }
-                }
-            }
-        }
-        is FlightUiState.Error -> {
-            Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.Center) {
-                Text(
-                    text = "${stringResource(id = R.string.error_loading)}: ${uiState.message}",
-                    color = MaterialTheme.colorScheme.error
-                )
-            }
-        }
-        is FlightUiState.Success -> {
-            val flights = if (operationType == OperationType.ARRIVAL) uiState.arrivals else uiState.departures
-            val filteredFlights = filterFlights(flights, searchText, filterAirline)
-            if (flights.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = stringResource(id = R.string.empty_flights),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 14.sp
-                    )
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(flights) { flight ->
-                        FlightCard(flight = flight)
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun DatePickerRow(viewModel: FlightListViewModel) {
-    val selectedDate by viewModel.selectedDate.collectAsState()
-    val dateFormatter = remember { DateTimeFormatter.ofPattern("EEE, dd/MM/yyyy") }
-
-    Row(
+fun SectionHeader(title: String, isDimmed: Boolean = false) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (isDimmed) 0.5f else 1f),
+        fontWeight = FontWeight.Medium,
+        letterSpacing = 1.sp,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+    )
+}
+
+@Composable
+fun EmptyState(operationType: OperationType) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 40.dp, horizontal = 24.dp),
+        contentAlignment = Alignment.Center
     ) {
-        IconButton(onClick = { viewModel.goToPreviousDay() }) {
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Anterior")
-        }
-        
-        TextButton(onClick = { viewModel.goToToday() }) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Filled.DateRange, contentDescription = null, modifier = Modifier.size(18.dp))
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = selectedDate.format(dateFormatter),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
-                )
-            }
-        }
-
-        IconButton(onClick = { viewModel.goToNextDay() }) {
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "Próximo")
-        }
-    }
-}
-
-@Composable
-fun FlightCard(flight: NormalizedFlight) {
-    val isArrival = flight.operationType == OperationType.ARRIVAL
-    val timeLabel = if (isArrival) "Chegada: ${flight.getDisplayTime(true)}" else "Partida: ${flight.getDisplayTime(false)}"
-    val locationLabel = if (isArrival) "Origem: ${flight.origin} (${flight.originName ?: ""})" else "Destino: ${flight.destination} (${flight.destinationName ?: ""})"
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
-    ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "${flight.airline} ${flight.flightNumber}",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Surface(
-                    shape = RoundedCornerShape(6.dp),
-                    color = if (isArrival) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
-                ) {
-                    Text(
-                        text = if (isArrival) "CHEGADA" else "PARTIDA",
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = locationLabel, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface)
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(text = timeLabel, fontSize = 14.sp, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.secondary)
-                Text(text = "Horário local (UTC-4)", fontSize = 11.sp, color = MaterialTheme.colorScheme.outline)
-                if (!flight.equipment.isNullOrBlank()) {
-                    Text(text = "Aeronave: ${flight.equipment}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = "Status SIROS: ${flight.sirosStatus} (${flight.flightDate})", fontSize = 11.sp, color = MaterialTheme.colorScheme.outline)
-        }
-    }
-}
-@Composable
-fun SearchAndFilterBar(
-    searchText: String,
-    onSearchTextChange: (String) -> Unit,
-    filterAirline: String,
-    onFilterAirlineChange: (String) -> Unit
-) {
-    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
-        // Search field
-        OutlinedTextField(
-            value = searchText,
-            onValueChange = onSearchTextChange,
-            label = { Text(stringResource(id = R.string.search_hint)) },
-            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        // Filter field
-        OutlinedTextField(
-            value = filterAirline,
-            onValueChange = onFilterAirlineChange,
-            label = { Text(stringResource(id = R.string.filter_airline)) },
-            leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null) },
-            modifier = Modifier.fillMaxWidth(),
-            singleLine = true
-        )
-    }
-}
-
-@Composable
-fun FlightList(flights: List<NormalizedFlight>) {
-    if (flights.isEmpty()) {
-        Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = stringResource(id = R.string.empty_flights),
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 14.sp
+                text = if (operationType == OperationType.ARRIVAL) "Nenhuma chegada programada" else "Nenhuma partida programada",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Os horários são programados (SIROS/ANAC) e podem não refletir a operação em tempo real.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                textAlign = androidx.compose.ui.text.TextAlign.Center
             )
         }
-    } else {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+    }
+}
+
+@Composable
+fun SIROSDisclaimer() {
+    Text(
+        text = "Horários programados (SIROS/ANAC). Não confirmam a operação em tempo real.",
+        style = MaterialTheme.typography.labelSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+        textAlign = androidx.compose.ui.text.TextAlign.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp, horizontal = 16.dp)
+    )
+}
+
+@Composable
+fun LoadingState() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(text = "Carregando voos...", color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
+fun ErrorState(message: String, onRetry: () -> Unit) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            modifier = Modifier.padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            items(flights) { flight ->
-                FlightCard(flight = flight)
+            Text(text = "Erro ao carregar", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = message, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Spacer(modifier = Modifier.height(24.dp))
+            Button(onClick = onRetry) {
+                Text("Tentar de novo")
             }
         }
     }
 }
 
-fun filterFlights(
-    flights: List<NormalizedFlight>,
-    searchText: String,
-    filterAirline: String
-): List<NormalizedFlight> {
-    return flights.filter { flight ->
-        val searchLower = searchText.lowercase()
-        val filterLower = filterAirline.lowercase()
-        val matchesSearch = searchText.isBlank() ||
-            flight.airline.lowercase().contains(searchLower) ||
-            flight.flightNumber.lowercase().contains(searchLower) ||
-            flight.origin.lowercase().contains(searchLower) ||
-            flight.destination.lowercase().contains(searchLower) ||
-            flight.originName?.lowercase()?.contains(searchLower) == true ||
-            flight.destinationName?.lowercase()?.contains(searchLower) == true
-        val matchesAirline = filterAirline.isBlank() ||
-            flight.airline.lowercase().contains(filterLower)
-        matchesSearch && matchesAirline
+@Composable
+fun BottomNavBar(navController: androidx.navigation.NavController) {
+    NavigationBar(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(bottom = 8.dp),
+        containerColor = MaterialTheme.colorScheme.surface
+    ) {
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.Info, contentDescription = null) },
+            label = { Text(text = "Voos", style = MaterialTheme.typography.labelSmall) },
+            selected = true,
+            onClick = { }
+        )
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.Info, contentDescription = null) },
+            label = { Text(text = "Sobre", style = MaterialTheme.typography.labelSmall) },
+            selected = false,
+            onClick = { }
+        )
+    }
+}
+
+fun NormalizedFlight.isAfter(currentTime: LocalTime, zone: ZoneId): Boolean {
+    val flightTime = if (operationType == OperationType.ARRIVAL) scheduledArrivalUtc else scheduledDepartureUtc
+    val localFlightTime = flightTime.atDate(flightDate).atZone(ZoneOffset.UTC).withZoneSameInstant(zone).toLocalTime()
+    return localFlightTime > currentTime
+}
+
+fun NormalizedFlight.getTimeUntil(zone: ZoneId): Long {
+    val flightTime = if (operationType == OperationType.ARRIVAL) scheduledArrivalUtc else scheduledDepartureUtc
+    val localFlightTime = flightTime.atDate(flightDate).atZone(ZoneOffset.UTC).withZoneSameInstant(zone).toLocalTime()
+    val now = LocalTime.now(zone)
+    return java.time.Duration.between(now, localFlightTime).toMinutes()
+}
+    ) { innerPadding ->
+        MainContent(
+            viewModel = viewModel,
+            uiState = uiState,
+            selectedTab = selectedTab.value,
+            innerPadding = innerPadding
+        )
     }
 }
