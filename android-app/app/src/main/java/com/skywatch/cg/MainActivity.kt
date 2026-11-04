@@ -9,14 +9,15 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.ui.Modifier
+import androidx.core.view.WindowCompat
 import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.skywatch.cg.notification.NotificationHelper
 import com.skywatch.cg.ui.screens.MainScreen
+import com.skywatch.cg.ui.theme.SkyWatchTheme
 import com.skywatch.cg.ui.viewmodel.FlightListViewModel
 import com.skywatch.cg.worker.FlightAlertWorker
 import com.skywatch.cg.worker.SirosSyncWorker
@@ -57,10 +58,25 @@ class MainActivity : ComponentActivity() {
         // Verifica atualizações no GitHub Releases
         checkForAppUpdates()
 
+        // Edge-to-edge transparent status bar
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        // Cria o canal de notificação para alertas de voo
+        NotificationHelper.createNotificationChannel(this)
+
+        // Solicita permissão de notificação (Android 13+) usando ActivityResult API
+        if (!NotificationHelper.hasNotificationPermission(this)) {
+            requestNotificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        }
+        
+        // Agenda sincronização periódica via WorkManager (a cada 6 horas, requer rede)
+        schedulePeriodicSync()
+        
+        // Verifica atualizações no GitHub Releases
+        checkForAppUpdates()
+
         setContent {
-            MaterialTheme(
-                colorScheme = darkColorScheme()
-            ) {
+            SkyWatchTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
