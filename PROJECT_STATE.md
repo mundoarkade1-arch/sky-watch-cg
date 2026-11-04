@@ -49,10 +49,12 @@
 - [x] **Teste automatizado do `BootReceiver` (04/11/2026):** teste Robolectric envia a ação `BOOT_COMPLETED` ao receiver e verifica que os trabalhos únicos de sincronização e alertas ficam enfileirados. Não simula nem comprova entrega pelo sistema operacional no boot real.
 - [x] **CI #51 (04/11/2026):** concluído com sucesso para o commit `ad4db53`.
 - [x] **CI #52 e #53 (04/11/2026):** concluídos com sucesso para os commits `fe84e0b` e `6f0ba0e`.
+- [x] **CI #54 (04/11/2026):** concluído com sucesso para o protótipo de radar no commit `e65bb63`.
 - [x] **Pesquisa inicial de fonte ADS-B (04/11/2026):** documentação oficial OpenSky descreve state vectors em tempo real e consultas por área; uso informado para pesquisa/não comercial. Termos completos não puderam ser consultados (HTTP 403) e a cobertura de CGR não foi verificada. Nenhuma integração foi feita.
 - [x] **Radar ADS-B experimental (04/11/2026):** primeira versão usa a API ADSB.lol com raio de 50 NM, botão de consulta manual, apresentação de observações em escopo radial e lista com timestamp/idade, sem associação a voos SIROS. Atribuição ODbL exibida na tela. A fonte solicita contato antes de uso em produção; não foi feito esse contato.
 - [x] **Testes do radar:** parser de payload, posições inválidas/ausentes, resposta vazia, timestamp obrigatório, integração HTTP bem-sucedida e erro HTTP cobertos por 6 testes unitários.
 - [x] **Teste físico inicial do radar (04/11/2026):** instalada e aberta apenas a variante Debug no aparelho 22101320G, sem emulador; a tela carregou resposta sem posições e exibiu estado vazio e horário da fonte, sem crash. Isso não prova ausência de tráfego nem cobertura contínua.
+- [x] **Atualização manual do radar revalidada (04/11/2026):** no aparelho 22101320G, o botão “Atualizar observações ADS-B” manteve a tela aberta e atualizou o horário da consulta de 17:41:43 para 17:42:08; a resposta continuou vazia. A captura posterior não mostrou exceção fatal nem ANR no logcat; a primeira tentativa, que retornou ao launcher, não foi reproduzida.
 
   - **6.3.1:** Download HTTP via OkHttp com parâmetros customizáveis no `SirosRemoteSource`, verificações de arquivo vazio (0 bytes) e download incompleto (Content-Length divergente).
   - **6.3.2:** `syncFromRemote()` com transação Room atômica (`withTransaction`), fechamento de streams, filtro streaming de SBCG, tratamento de erros e gravação de status `FAILURE` preservando a última sincronização bem-sucedida.
@@ -74,9 +76,10 @@
 - **Integração SIROS:** a tela usa os dados locais do Room; a atualização manual e a sincronização periódica atualizam esse cache com o CSV remoto.
 - A regra `sync_metadata.id = 1` está agora aplicada uniformemente por gatilhos no schema v6; migração v5→v6 mantém os dados. O schema legado v1 real continua indisponível, então os testes de v1 não comprovam a atualização de uma instalação legada real.
 
-## Próxima etapa — radar ADS-B
+## Próximas etapas — dependem de validação externa
 - Contatar ADSB.lol antes de distribuir/usar a integração em produção; confirmar condições, limites de frequência e atribuição adequados.
 - Avaliar cobertura em diferentes dias/horários e documentar quando não houver observações; uma resposta isolada não representa cobertura contínua.
-- Revalidar legibilidade/usabilidade no aparelho e amostrar cobertura em dias/horários distintos.
+- Concluir o teste de entrega/deduplicação de alertas quando houver um voo SIROS real elegível na janela de 15–30 minutos.
+- Solicitar confirmação escrita à entidade responsável por CGR sobre acesso autorizado a status operacional Aena.
 - Manter observações ADS-B separadas do planejamento SIROS; não associar a voo comercial sem correspondência verificável.
 - A integração Aena permanece uma frente separada e depende de resposta escrita; a minuta não foi enviada.

@@ -1,4 +1,10 @@
 # Changelog
+## 2026-11-04 — Validação final do protótipo de radar
+- CI #54 passou para o commit `e65bb63`.
+- No telefone Android 14, o botão de atualização manual manteve a tela aberta e atualizou o horário da consulta; não foi observado crash, exceção fatal ou ANR na revalidação.
+- A resposta continuou sem posições ADS-B com coordenadas válidas. Isso descreve apenas as consultas feitas, não a ausência de tráfego nem a cobertura contínua.
+- O radar continua experimental; contato com ADSB.lol e amostragem de cobertura em momentos distintos permanecem pendentes antes de qualquer uso em produção.
+
 ## 2026-11-04 — Primeiro protótipo de radar ADS-B
 - Adicionada tela Radar experimental com desenho de escopo radial para 50 NM centrado em CGR e lista de observações com callsign transmitido, endereço ICAO, altitude, velocidade, distância e idade da posição.
 - Criado cliente OkHttp usando dependência existente e API documentada ADSB.lol; consulta somente ao abrir a tela ou quando o usuário atualiza, sem polling em background.

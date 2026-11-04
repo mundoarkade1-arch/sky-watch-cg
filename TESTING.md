@@ -338,6 +338,10 @@ O protótipo usa a API ADSB.lol documentada, chamada apenas ao abrir a tela ou p
 
 **Teste no telefone físico:** instalado por `adb install -r` apenas o pacote `com.skywatch.cg.debug` no aparelho 22101320G (Android 14/API 34); o pacote Release não foi alterado e nenhum emulador foi aberto. A tela Radar abriu, mostrou o escopo, timestamp de consulta da fonte e estado “nenhuma observação ADS-B com posição” às 17:35:14, horário local. Não foi observado crash. A resposta vazia é válida para aquele instante; não prova ausência de aeronaves nem falha/continuidade de cobertura.
 
+**Revalidação do botão Atualizar (04/11/2026):** aberta a tela Radar no mesmo aparelho e acionado o botão “Atualizar observações ADS-B” pela área identificada na hierarquia da interface. A tela permaneceu aberta; o horário da consulta passou de 17:41:43 para 17:42:08 e a API retornou novamente o estado vazio. A captura de logcat após a ação não mostrou exceção fatal nem ANR. Uma tentativa anterior havia terminado no launcher, mas o comportamento não foi reproduzido após reabrir o app e repetir a ação; a causa daquela transição não foi determinada. A consulta vazia não comprova ausência de aeronaves nem cobertura contínua.
+
+**CI:** GitHub Actions CI #54 concluiu com sucesso para o commit `e65bb63` (protótipo experimental do radar).
+
 ## Roteiro manual — alertas após reinicialização (execução parcial no Android)
 
 **Objetivo:** verificar permissões e reagendamento pelo `BootReceiver` em um aparelho real. Este roteiro não substitui a informação operacional da companhia aérea nem confirma a operação do voo.

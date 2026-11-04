@@ -4,7 +4,7 @@
 - O MVP de chegadas e partidas, ingestão SIROS, sincronização periódica e infraestrutura de notificações locais estão implementados.
 - Correção da tela Sobre e do estado de atualização concluída. Validação local: 53 testes contabilizados (52 executados sem falhas e 1 ignorado); APK Debug gerado.
 - Revalidação local completa: 53 testes contabilizados (52 aprovados e 1 ignorado), `assembleDebug` aprovado; `FlightListViewModelTest` passou isoladamente (11 testes). Wrapper Gradle do Windows corrigido para propagar corretamente o código de saída.
-- CI #43 a #53 na branch `wip-fase3`: concluídos com sucesso; #50 validou a migração Room v5→v6, #51 documentação do reinício, #52 teste de boot e #53 evidência de logcat. CI do protótipo radar ainda será disparada após o push.
+- CI #43 a #54 na branch `wip-fase3`: concluídos com sucesso; #50 validou a migração Room v5→v6, #51 documentação do reinício, #52 teste de boot, #53 evidência de logcat e #54 protótipo do radar.
 - 13 testes instrumentados passaram em aparelho físico Android 14 (modelo 22101320G), incluindo migrações v1→v6, v4→v5 e v5→v6 com preservação de dados; execução feita sem emulador.
 - A pesquisa inicial da Etapa 4 foi registrada; integração Aena depende de autorização/documentação apropriadas para CGR. Nenhuma posição ADS-B ou status operacional é apresentado como confirmado sem correspondência verificável.
 
@@ -54,6 +54,7 @@
 - [x] Adicionar atualização manual, indicador de carregamento/erro/vazio, escopo radial e lista com posição, altitude, velocidade, distância e idade da posição.
 - [x] Exibir atribuição ADSB.lol/ODbL e avisos distinguindo observações ADS-B de planejamento/status operacional.
 - [x] Abrir a tela no aparelho Android 14 sem emulador; a resposta atual sem posições exibiu o estado vazio e o horário da fonte, sem crash.
+- [x] Revalidar a atualização manual no aparelho Android 14: a tela permaneceu aberta e o horário da consulta mudou de 17:41:43 para 17:42:08; resposta vazia, sem exceção fatal ou ANR observados no logcat.
 - [ ] Contactar ADSB.lol para confirmar condições/limites antes de uso em produção.
 - [ ] Revalidar legibilidade/usabilidade no telefone físico e amostrar cobertura em dias/horários diferentes.
 - [ ] Associar observações ADS-B a voo apenas com correspondência verificável; o protótipo não faz essa associação.
