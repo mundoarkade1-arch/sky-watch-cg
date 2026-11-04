@@ -5,7 +5,9 @@
 - O registro de deduplicação agora é gravado depois da chamada de publicação da notificação; o identificador de notificação estável permite atualizar a mesma notificação em uma repetição.
 - Validação local: 56 testes contabilizados (55 executados sem falhas e 1 ignorado), `assembleDebug` e `compileDebugAndroidTestKotlin` aprovados. Teste manual no aparelho após reinicialização permanece pendente.
 - CI #46 concluiu com sucesso para o commit anterior `5c7bdf5`; as mudanças desta seção ainda aguardam o próximo CI.
-- Reexecutados no telefone físico Android 14 (22101320G) os testes instrumentados: 11 testes, 0 falhas, 0 erros e 0 ignorados. O teste manual de notificações após reinicialização continua pendente; CI #47 para `c8d6761` está em execução.
+- Reexecutados no telefone físico Android 14 (22101320G) os testes instrumentados: 11 testes, 0 falhas, 0 erros e 0 ignorados. O teste manual de notificações após reinicialização continua pendente.
+- CI #47 (`c8d6761`) e #48 (`9e82c84`) concluíram com sucesso.
+- Removido o bloco duplicado de inicialização em `MainActivity.onCreate()`. A classe `FlightListViewModelTest` passou com 11 testes; `assembleDebug` e 11 testes instrumentados no telefone físico Android 14 concluíram sem falhas. Novo CI dessa correção ainda pendente.
 
 ## 2026-11-04 — Validação focada e correção do wrapper Windows
 - Reexecutada a suíte completa: 53 testes contabilizados, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` e os 11 testes isolados de `FlightListViewModelTest` passaram. CI #41 e #42 concluídos com sucesso.

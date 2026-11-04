@@ -4,7 +4,7 @@
 - O MVP de chegadas e partidas, ingestão SIROS, sincronização periódica e infraestrutura de notificações locais estão implementados.
 - Correção da tela Sobre e do estado de atualização concluída. Validação local: 53 testes contabilizados (52 executados sem falhas e 1 ignorado); APK Debug gerado.
 - Revalidação local completa: 53 testes contabilizados (52 aprovados e 1 ignorado), `assembleDebug` aprovado; `FlightListViewModelTest` passou isoladamente (11 testes). Wrapper Gradle do Windows corrigido para propagar corretamente o código de saída.
-- CI #43 a #46 na branch `wip-fase3`: concluídos com sucesso; #46 validou a correção Room v5. CI #47 para `c8d6761` está em andamento.
+- CI #43 a #48 na branch `wip-fase3`: concluídos com sucesso; #47 validou os ajustes de alertas e #48 a documentação dos testes no aparelho. A correção mais recente em `MainActivity` aguarda CI.
 - 11 testes instrumentados passaram em aparelho físico Android 14 (modelo 22101320G), incluindo migrações v1→v5 e v4→v5 sem perda de registro; execução feita sem emulador.
 - A pesquisa inicial da Etapa 4 foi registrada; integração Aena depende de autorização/documentação apropriadas para CGR. Nenhuma posição ADS-B ou status operacional é apresentado como confirmado sem correspondência verificável.
 
@@ -41,6 +41,7 @@
 - [x] Corrigir atualização que podia permanecer carregando; remover rede real dos testes de ViewModel.
 - [x] Validar suíte unitária e gerar APK Debug em 2026-11-04.
 - [x] Definir janela de alerta SIROS de 15–30 minutos, deduplicação por voo/operação/data local e correção da data UTC de chegadas que cruzam a meia-noite; testes unitários e build local aprovados.
+- [x] Remover a inicialização duplicada de notificações, trabalhos periódicos e consulta de atualizações em `MainActivity`; 11 testes do ViewModel, APK Debug e 11 testes instrumentados no telefone aprovados.
 - [ ] Registrar teste manual ponta a ponta de alertas e reinicialização em dispositivo Android. Os 11 testes instrumentados cobrem Room/DAO e migrações, não comprovam esse fluxo completo de notificações.
 - [ ] Verificar no dispositivo se o worker de alertas notifica uma vez por evento e se o `BootReceiver` reagenda o trabalho; o WorkManager pode atrasar e fazer a janela de 15–30 minutos passar.
 

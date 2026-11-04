@@ -279,7 +279,7 @@ Essa execução valida migrações Room e operações DAO no aparelho; não vali
 
 **Validação local complementar:** `:app:testDebugUnitTest`, `:app:assembleDebug`, `:app:compileDebugAndroidTestKotlin` e `:app:processReleaseManifest` concluíram com sucesso. Suíte unitária: 53 testes contabilizados, 0 falhas, 0 erros e 1 ignorado por depender de CSV real.
 
-**CI remoto:** CI #46 passou no commit `5c7bdf5`, incluindo a correção Room v5. CI #47 para o commit `c8d6761` foi iniciado e estava em execução na última consulta.
+**CI remoto:** CI #46 passou no commit `5c7bdf5`, incluindo a correção Room v5. O CI #47 para `c8d6761` e #48 para `9e82c84` também passaram. A correção de inicialização em `MainActivity` descrita abaixo ainda aguarda CI.
 
 **Teste manual de notificações após reinicialização:** permanece pendente; o aparelho não foi reiniciado, a tela do app não foi configurada para alertas e não foi verificado voo SIROS real na janela exigida. Os 11 testes instrumentados não cobrem esse fluxo ponta a ponta.
 
@@ -294,6 +294,18 @@ O `FlightAlertWorker` considera horários planejados SIROS entre 15 e 30 minutos
 **Resultado:** `BUILD SUCCESSFUL`; 56 testes contabilizados, 0 falhas, 0 erros e 1 ignorado por depender de CSV real. APK Debug e compilação dos testes instrumentados concluídos.
 
 O WorkManager pode atrasar execuções, então a janela pode passar sem notificação. Esse comportamento usa apenas o horário programado SIROS e não confirma o estado operacional do voo. O teste ponta a ponta após reinicialização continua pendente.
+
+## Validação de inicialização e ViewModel — 2026-11-04
+
+Removida a segunda execução de inicialização em `MainActivity.onCreate()`, que repetia a criação do canal, o pedido de permissão de notificações, o agendamento de trabalhos do WorkManager e a verificação de versão.
+
+**Comando executado** (a partir de `android-app`):
+```powershell
+.\gradlew.bat :app:testDebugUnitTest --tests com.skywatch.cg.ui.viewmodel.FlightListViewModelTest :app:assembleDebug :app:compileDebugAndroidTestKotlin --console=plain
+```
+**Resultado:** `BUILD SUCCESSFUL`; 11 testes do `FlightListViewModelTest`, 0 falhas, 0 erros e 0 ignorados; APK Debug e compilação dos testes instrumentados aprovados. CI #47 e #48 também concluíram com sucesso para commits anteriores; a correção de `MainActivity` ainda precisa de CI.
+
+Após essa correção, `.\gradlew.bat :app:connectedDebugAndroidTest --console=plain` também passou no telefone físico Android 14: 11 testes, 0 falhas, 0 erros e 0 ignorados. Isso valida banco/DAO/migrações, mas não abre a tela principal nem verifica a notificação real.
 
 ## Roteiro manual — alertas após reinicialização (a executar no Android)
 

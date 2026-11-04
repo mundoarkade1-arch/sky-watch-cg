@@ -61,20 +61,6 @@ class MainActivity : ComponentActivity() {
         // Edge-to-edge transparent status bar
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        // Cria o canal de notificação para alertas de voo
-        NotificationHelper.createNotificationChannel(this)
-
-        // Solicita permissão de notificação (Android 13+) usando ActivityResult API
-        if (!NotificationHelper.hasNotificationPermission(this)) {
-            requestNotificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
-        }
-        
-        // Agenda sincronização periódica via WorkManager (a cada 6 horas, requer rede)
-        schedulePeriodicSync()
-        
-        // Verifica atualizações no GitHub Releases
-        checkForAppUpdates()
-
         setContent {
             SkyWatchTheme {
                 Surface(
@@ -178,4 +164,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
