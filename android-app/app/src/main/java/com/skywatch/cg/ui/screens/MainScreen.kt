@@ -201,8 +201,7 @@ fun MainContent(
 
             LazyColumn(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(bottom = innerPadding.calculateBottomPadding() + 80.dp),
+                    .fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 contentPadding = innerPadding
             ) {
