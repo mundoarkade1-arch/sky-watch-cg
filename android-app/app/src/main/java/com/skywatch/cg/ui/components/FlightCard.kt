@@ -28,8 +28,8 @@ fun FlightCard(
     val isArrival = flight.operationType == OperationType.ARRIVAL
     val flightTime = if (isArrival) flight.scheduledArrivalUtc else flight.scheduledDepartureUtc
     val city = if (isArrival) (flight.originName ?: flight.origin) else (flight.destinationName ?: flight.destination)
-    val cityShort = city.split(" ").firstOrNull() ?: city
     val code = if (isArrival) flight.origin else flight.destination
+    val cityDisplay = if (city == code) city else "$city ($code)"
 
     val alpha = if (isDimmed) 0.5f else 1f
 
@@ -73,7 +73,7 @@ fun FlightCard(
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "$cityShort ($code)",
+                        text = cityDisplay,
                         style = MaterialTheme.typography.bodyMedium,
                         color = SkyWatchColors.OnSurfaceVariant.copy(alpha = alpha),
                         fontSize = 13.sp
