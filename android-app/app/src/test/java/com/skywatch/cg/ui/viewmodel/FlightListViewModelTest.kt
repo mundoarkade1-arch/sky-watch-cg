@@ -87,7 +87,8 @@ class FlightListViewModelTest {
     fun testLoadFlightsWithData() = runTest(testDispatcher) {
         val testDate = LocalDate.of(2024, 10, 15)
         
-        // Insert test data directly via DAO
+        // Arrival: 09:30 UTC at Campo Grande (UTC-4) = 05:30 local on 2024-10-15
+        // arrivalDate must match local date of arrival (2024-10-15), not UTC date
         val arrival = NormalizedFlight(
             flightId = "GLO-1234-2024-10-15",
             sirosRecordId = "GLO-001",
@@ -104,7 +105,7 @@ class FlightListViewModelTest {
             scheduledDepartureUtc = LocalTime.of(8, 0),
             scheduledArrivalUtc = LocalTime.of(9, 30),
             flightDate = testDate,
-            arrivalDate = testDate.plusDays(1),
+            arrivalDate = testDate,  // Fixed: local arrival date is 2024-10-15
             daysOfWeek = listOf(1, 2, 3, 4, 5, 6, 7),
             validFrom = LocalDate.of(2024, 10, 1),
             validTo = LocalDate.of(2025, 3, 31),
@@ -112,6 +113,7 @@ class FlightListViewModelTest {
             sirosStatus = "Em Operação"
         )
         
+        // Departure: 10:00 UTC from Campo Grande (UTC-4) = 06:00 local on 2024-10-15
         val departure = NormalizedFlight(
             flightId = "GLO-1235-2024-10-15",
             sirosRecordId = "GLO-002",
@@ -136,22 +138,23 @@ class FlightListViewModelTest {
             sirosStatus = "Em Operação"
         )
         
-        val repository = com.skywatch.cg.data.siros.SirosRepository(db, testDispatcher)
-        repository.saveNormalizedFlights(listOf(arrival, departure))
+        // Use the SAME repository as the viewModel to ensure data visibility
+        val testRepository = viewModel.repository
+        testRepository.saveNormalizedFlights(listOf(arrival, departure))
+        testDispatcher.scheduler.advanceUntilIdle()  // Ensure DB write completes
         
         // Trigger load
         viewModel.loadFlights(testDate)
         testDispatcher.scheduler.advanceUntilIdle()
-        viewModel.uiState.first { it !is FlightUiState.Loading }
         
-        val finalState = viewModel.uiState.value
-        
-        assertNotNull(finalState)
-        assertTrue(finalState is FlightUiState.Success)
-        val success = finalState as FlightUiState.Success
+        // Wait for actual data (not just non-Loading state)
+        val success = viewModel.uiState
+            .dropWhile { it is FlightUiState.Loading }
+            .first { it is FlightUiState.Success && (it as FlightUiState.Success).arrivals.size + (it as FlightUiState.Success).departures.size >= 2 }
+            as FlightUiState.Success
         
         // Consulta todos os voos gravados no banco para diagnóstico
-        val allFlightsInDb = repository.getAllDepartures() + repository.getAllArrivals()
+        val allFlightsInDb = testRepository.getAllDepartures() + testRepository.getAllArrivals()
         val diagInfo = buildString {
             append("DIAGNOSTICO: ")
             append("selectedDate=$testDate; ")
@@ -291,7 +294,7 @@ class FlightListViewModelTest {
     fun testUtcDayRolloverFlightAppearsOnLocalDate() = runTest(testDispatcher) {
         // Flight at 02:00 UTC on 2024-10-15 = 22:00 on 2024-10-14 in UTC-4 (America/Campo_Grande)
         // Should appear on LOCAL date 2024-10-14, not 2024-10-15
-        val utcFlightDate = LocalDate.of(2024, 10, 14) // Adjusted flightDate to local date 2024-10-14 as per local conversion
+        val utcFlightDate = LocalDate.of(2024, 10, 15)
         val localExpectedDate = LocalDate.of(2024, 10, 14)
         
         val departureAt0200Utc = NormalizedFlight(
@@ -309,7 +312,7 @@ class FlightListViewModelTest {
             operationType = OperationType.DEPARTURE,
             scheduledDepartureUtc = LocalTime.of(2, 0), // 02:00 UTC
             scheduledArrivalUtc = LocalTime.of(3, 30),
-            flightDate = utcFlightDate,
+            flightDate = utcFlightDate,  // UTC date of departure
             arrivalDate = utcFlightDate,
             daysOfWeek = listOf(1, 2, 3, 4, 5, 6, 7),
             validFrom = LocalDate.of(2024, 10, 1),
@@ -321,17 +324,17 @@ class FlightListViewModelTest {
         // Use the SAME repository instance as the viewModel to ensure data visibility
         val testRepository = viewModel.repository
         testRepository.saveNormalizedFlights(listOf(departureAt0200Utc))
-        testDispatcher.scheduler.advanceUntilIdle()
+        testDispatcher.scheduler.advanceUntilIdle()  // Ensure DB write completes
         
         // Load flights for the LOCAL date (14th) - should include the 02:00 UTC flight
         viewModel.loadFlights(localExpectedDate)
         testDispatcher.scheduler.advanceUntilIdle()
-        viewModel.uiState.first { it !is FlightUiState.Loading }
         
-        val finalState = viewModel.uiState.value
-        assertNotNull(finalState)
-        assertTrue(finalState is FlightUiState.Success)
-        val success = finalState as FlightUiState.Success
+        // Wait for actual data (not just non-Loading state)
+        val success = viewModel.uiState
+            .dropWhile { it is FlightUiState.Loading }
+            .first { it is FlightUiState.Success && (it as FlightUiState.Success).departures.size >= 1 }
+            as FlightUiState.Success
         
         // Consulta todos os voos gravados no banco para diagnóstico completo
         val allFlightsInDb = testRepository.getAllDepartures() + testRepository.getAllArrivals()
