@@ -46,20 +46,6 @@ android {
         unitTests {
             isIncludeAndroidResources = true
         }
-    testOptions {
-        unitTests {
-            isIncludeAndroidResources = true
-            all {
-                testLogging {
-                    events("passed", "skipped", "failed", "standardOut", "standardError")
-                    exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
-                    showExceptions = true
-                    showCauses = true
-                    showStackTraces = true
-                }
-            }
-        }
-    }
     }
     packagingOptions {
         resources {
@@ -125,4 +111,14 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
     androidTestImplementation("androidx.compose.ui:ui-test-manifest")
+}
+
+tasks.withType<Test>().configureEach {
+    testLogging {
+        events("failed", "skipped")
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        showExceptions = true
+        showCauses = true
+        showStackTraces = true
+    }
 }
