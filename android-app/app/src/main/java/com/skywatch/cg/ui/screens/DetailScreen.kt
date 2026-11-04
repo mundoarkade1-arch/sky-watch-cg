@@ -13,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -147,13 +146,13 @@ Spacer(modifier = Modifier.height(8.dp))
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground,
-                        textAlign = androidx.compose.ui.text.TextAlign.End
+                        textAlign = androidx.compose.ui.text.style.TextAlign.End
                     )
                     Text(
                         text = toCode,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = androidx.compose.ui.text.TextAlign.End
+                        textAlign = androidx.compose.ui.text.style.TextAlign.End
                     )
                 }
             }
@@ -226,7 +225,7 @@ InfoRow(
                 text = "Sem confirmação em tempo real. Horários programados (SIROS/ANAC).",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                textAlign = androidx.compose.ui.text.TextAlign.Center,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp)
