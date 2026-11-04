@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 4,
-    "identityHash": "0dd28a2093eef0ef5e31ae959fd2c51a",
+    "identityHash": "32f70268cb9cd96e0e85e024efe32e29",
     "entities": [
       {
         "tableName": "flights",
@@ -399,14 +399,25 @@
             "id"
           ]
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "idx_alert_sent_flight_date",
+            "unique": false,
+            "columnNames": [
+              "flightId",
+              "eventDate"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `idx_alert_sent_flight_date` ON `${TABLE_NAME}` (`flightId`, `eventDate`)"
+          }
+        ],
         "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0dd28a2093eef0ef5e31ae959fd2c51a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '32f70268cb9cd96e0e85e024efe32e29')"
     ]
   }
 }

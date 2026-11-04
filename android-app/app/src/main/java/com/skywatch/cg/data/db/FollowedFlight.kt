@@ -1,6 +1,7 @@
 package com.skywatch.cg.data.db
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "followed_flights")
@@ -29,7 +30,10 @@ data class FollowedFlight(
     val createdAt: Long
 )
 
-@Entity(tableName = "alert_sent")
+@Entity(
+    tableName = "alert_sent",
+    indices = [Index(value = ["flightId", "eventDate"], name = "idx_alert_sent_flight_date")]
+)
 data class AlertSent(
     @PrimaryKey val id: String,
     val flightId: String,

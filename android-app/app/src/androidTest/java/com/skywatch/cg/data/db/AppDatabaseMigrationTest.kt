@@ -57,13 +57,18 @@ class AppDatabaseMigrationTest {
 
     private fun openMigrated(): AppDatabase {
         return Room.databaseBuilder(context, AppDatabase::class.java, dbName)
-            .addMigrations(AppDatabase.MIGRATION_1_2)
+            .addMigrations(
+                AppDatabase.MIGRATION_1_2,
+                AppDatabase.MIGRATION_2_3,
+                AppDatabase.MIGRATION_3_4,
+                AppDatabase.MIGRATION_4_5
+            )
             .allowMainThreadQueries()
             .build()
     }
 
     @Test
-    fun migration1To2CreatesSyncMetadataAndKeepsFlights() = runBlocking {
+    fun migration1To5CreatesSyncMetadataAndKeepsFlights() = runBlocking {
         createV1Database()
         val database = openMigrated()
         try {
@@ -72,6 +77,38 @@ class AppDatabaseMigrationTest {
                 assertEquals(1, cursor.count)
             }
             assertNotNull(database.flightDao().getByFlightId("OLD-1"))
+        } finally {
+            database.close()
+        }
+    }
+
+    @Test
+    fun migration4To5AddsAlertIndexAndKeepsSentRecords() {
+        val initialDatabase = Room.databaseBuilder(context, AppDatabase::class.java, dbName)
+            .allowMainThreadQueries()
+            .build()
+        initialDatabase.openHelper.writableDatabase.execSQL(
+            "INSERT INTO alert_sent (id, flightId, operationType, eventDate, minutesBefore, sentAt) " +
+                "VALUES ('alert-1', 'flight-1', 'ARRIVAL', '2024-01-15', 15, 0)"
+        )
+        initialDatabase.close()
+
+        context.openOrCreateDatabase(dbName, 0, null).use { database ->
+            database.execSQL("DROP INDEX IF EXISTS `idx_alert_sent_flight_date`")
+            database.version = 4
+        }
+
+        val database = openMigrated()
+        try {
+            val sqlite = database.openHelper.writableDatabase
+            sqlite.query(
+                "SELECT name FROM sqlite_master WHERE type='index' AND name='idx_alert_sent_flight_date'"
+            ).use { cursor ->
+                assertEquals(1, cursor.count)
+            }
+            sqlite.query("SELECT id FROM alert_sent WHERE id = 'alert-1'").use { cursor ->
+                assertEquals(1, cursor.count)
+            }
         } finally {
             database.close()
         }

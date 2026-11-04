@@ -139,7 +139,7 @@ cd android-app
 
 - **Ressalvas importantes:**
   1. `AppDatabaseMigrationTest.kt` valida a migração v1→v2 sobre uma "v1 provável" (tabela `flights` idêntica ao schema atual gerado pelo Room). Como o schema real da v1 nunca foi exportado e não é recuperável do Git (arquivos só existem a partir do commit 5385fe2), o teste prova o comportamento da migração para o schema simulado, mas não para a v1 antiga real de um aparelho de produção.
-  2. Em instalações novas (schema v2), o Room cria `sync_metadata` SEM a restrição `CHECK (id = 1)`. A restrição existe apenas em bancos que passaram pela `MIGRATION_1_2`. Decisão sobre padronização futura deixada em aberto.
+  2. Naquele estado (schema v2), instalações novas criavam `sync_metadata` sem `CHECK (id = 1)`. A observação é histórica; o schema atual é v5 e o ponto permanece listado em `PROJECT_STATE.md`.
 
 ## Resultados dos Testes da Fase 6.3 - Ingestão Remota e Sincronização (01/11/2026)
 
@@ -263,11 +263,21 @@ Durante essa validação foi corrigido `android-app/gradlew.bat`: o script caía
 
 ## Testes instrumentados em aparelho físico — 2026-11-04
 
-Um aparelho físico Android 14 foi detectado via Android SDK. A compilação dos testes instrumentados encontrou um fixture incompleto em `FlightDaoTest`: faltava preencher `arrivalDate` em `FlightEntity`. O fixture foi corrigido e `:app:compileDebugAndroidTestKotlin` passou (`BUILD SUCCESSFUL`).
+Em um aparelho físico Android 14, a primeira execução encontrou um fixture incompleto em `FlightDaoTest` (faltava `arrivalDate`), uma cadeia de migração de teste incompleta (registrava v1→v2 apesar do banco atual estar na v5) e uma divergência real: a migração criava um índice para `alert_sent` que não estava declarado na entidade Room.
 
-Para preservar o aplicativo/dados já instalados e evitar conflito de assinatura, o build Debug foi separado com o identificador `com.skywatch.cg.debug`; o identificador Release não mudou. A execução de `:app:connectedDebugAndroidTest` ainda não chegou a iniciar os testes: o Android recusou instalar o pacote Debug com `INSTALL_FAILED_USER_RESTRICTED`. Nenhum aplicativo foi desinstalado nem dados apagados, e não foram alteradas configurações de segurança do aparelho. A instalação precisa ser autorizada no próprio dispositivo antes de nova tentativa.
+Correções: preenchido `arrivalDate` no fixture; teste configurado para executar a cadeia completa v1→v5; declarado na entidade `AlertSent` o índice já criado pela migração v3→v4; acrescentada migração v4→v5 idempotente para criar o índice em bancos v4 sem ele. A variante Debug usa `com.skywatch.cg.debug`, mantendo o pacote Release `com.skywatch.cg` separado.
 
-**Teste manual de notificações após reinicialização:** permanece pendente; o aparelho não foi reiniciado, o aplicativo não foi substituído e não foi verificado voo SIROS real na janela exigida. Não considerar a compilação ou a tentativa de instrumentação como aprovação do fluxo físico.
+**Comando executado** (a partir de `android-app`):
+```powershell
+.\gradlew.bat :app:connectedDebugAndroidTest --console=plain
+```
+**Resultado no aparelho Android 14:** `BUILD SUCCESSFUL`; 11 testes instrumentados, 0 falhas, 0 erros e 0 ignorados. Inclui migração v1→v5, migração v4→v5 preservando registro de alerta e os testes do DAO de voos.
+
+**Validação local complementar:** `:app:testDebugUnitTest`, `:app:assembleDebug`, `:app:compileDebugAndroidTestKotlin` e `:app:processReleaseManifest` concluíram com sucesso. Suíte unitária: 53 testes contabilizados, 0 falhas, 0 erros e 1 ignorado por depender de CSV real.
+
+**CI remoto:** CI #45 passou no commit `b03ae3a`, anterior à correção Room v5 desta execução. O CI da revisão atual será criado após o envio do commit.
+
+**Teste manual de notificações após reinicialização:** permanece pendente; o aparelho não foi reiniciado, a tela do app não foi configurada para alertas e não foi verificado voo SIROS real na janela exigida. Os 11 testes instrumentados não cobrem esse fluxo ponta a ponta.
 
 ## Roteiro manual — alertas após reinicialização (a executar no Android)
 
