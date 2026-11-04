@@ -43,7 +43,13 @@ class FlightListViewModelTest {
             .allowMainThreadQueries()
             .build()
         val testRepository = com.skywatch.cg.data.siros.SirosRepository(db, testDispatcher)
-        viewModel = FlightListViewModel(ApplicationProvider.getApplicationContext(), testRepository)
+        // Use fixed date provider for deterministic tests
+        val fixedToday = LocalDate.of(2024, 10, 15)
+        viewModel = FlightListViewModel(
+            ApplicationProvider.getApplicationContext(),
+            testRepository,
+            { fixedToday }
+        )
     }
 
     @After

@@ -38,7 +38,8 @@ sealed interface FlightUiState {
 
 class FlightListViewModel(
     application: Application,
-    private val repository: SirosRepository
+    private val repository: SirosRepository,
+    private val todayProvider: () -> LocalDate = { LocalDate.now() }
 ) : AndroidViewModel(application) {
 
     // Construtor de produção (usa banco real)
@@ -47,7 +48,7 @@ class FlightListViewModel(
         SirosRepository(AppDatabase.getDatabase(application))
     )
 
-    private val _selectedDate = MutableStateFlow(LocalDate.now())
+    private val _selectedDate = MutableStateFlow(todayProvider())
     val selectedDate: StateFlow<LocalDate> = _selectedDate.asStateFlow()
 
     // Flows from repository for reactive updates
@@ -143,7 +144,7 @@ class FlightListViewModel(
     }
 
     fun goToToday() {
-        val today = LocalDate.now()
+        val today = todayProvider()
         Log.d("FlightListViewModelDiag", "goToToday() -> $today")
         loadFlights(today)
     }
