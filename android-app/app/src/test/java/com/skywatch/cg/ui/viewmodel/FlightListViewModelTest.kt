@@ -305,8 +305,10 @@ class FlightListViewModelTest {
             sirosStatus = "Em Operação"
         )
         
-        val repository = com.skywatch.cg.data.siros.SirosRepository(db, testDispatcher)
-        repository.saveNormalizedFlights(listOf(departureAt0200Utc))
+        // Use the SAME repository instance as the viewModel to ensure data visibility
+        val testRepository = viewModel.repository as com.skywatch.cg.data.siros.SirosRepository
+        testRepository.saveNormalizedFlights(listOf(departureAt0200Utc))
+        testDispatcher.scheduler.advanceUntilIdle()
         
         // Load flights for the LOCAL date (14th) - should include the 02:00 UTC flight
         viewModel.loadFlights(localExpectedDate)
