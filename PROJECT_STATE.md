@@ -55,6 +55,10 @@
 - [x] **Testes do radar:** parser de payload, posições inválidas/ausentes, resposta vazia, timestamp obrigatório, integração HTTP bem-sucedida e erro HTTP cobertos por 6 testes unitários.
 - [x] **Teste físico inicial do radar (04/11/2026):** instalada e aberta apenas a variante Debug no aparelho 22101320G, sem emulador; a tela carregou resposta sem posições e exibiu estado vazio e horário da fonte, sem crash. Isso não prova ausência de tráfego nem cobertura contínua.
 - [x] **Atualização manual do radar revalidada (04/11/2026):** no aparelho 22101320G, o botão “Atualizar observações ADS-B” manteve a tela aberta e atualizou o horário da consulta de 17:41:43 para 17:42:08; a resposta continuou vazia. A captura posterior não mostrou exceção fatal nem ANR no logcat; a primeira tentativa, que retornou ao launcher, não foi reproduzida.
+- [x] **Detalhes de voo e versão de prévia (04/11/2026):** cartões e próximo voo abrem a tela de detalhes com rota e horário local; removido o botão "Seguir voo" sem implementação. A situação SIROS está identificada como cadastral e não como confirmação em tempo real. Comparação de versões numérica e versão Debug `1.0.17`/código 17.
+- [x] **Regressão local final (04/11/2026):** `testDebugUnitTest` e `testReleaseUnitTest`: 68 testes por variante, 0 falhas, 0 erros e 1 ignorado por depender de CSV local. `assembleDebug`, `assembleRelease`, `lintVitalRelease` e `processReleaseManifest` concluídos em `BUILD SUCCESSFUL`.
+- [x] **Verificação física da prévia (04/11/2026):** APK Debug de 11.091.182 bytes instalado no aparelho Android 14; pacote `com.skywatch.cg.debug`, versão 1.0.17/código 17. Abertura, cartão→detalhes e botão Voltar verificados sem exceção fatal no logcat. Não foi aberto emulador.
+- [x] **Workflow de publicação (04/11/2026):** ao receber tag `v*`, executa testes Debug e publica o APK Debug como pré-lançamento GitHub; não é build assinado de distribuição estável. A assinatura Debug do runner pode exigir desinstalar uma prévia anterior para atualizar.
 
   - **6.3.1:** Download HTTP via OkHttp com parâmetros customizáveis no `SirosRemoteSource`, verificações de arquivo vazio (0 bytes) e download incompleto (Content-Length divergente).
   - **6.3.2:** `syncFromRemote()` com transação Room atômica (`withTransaction`), fechamento de streams, filtro streaming de SBCG, tratamento de erros e gravação de status `FAILURE` preservando a última sincronização bem-sucedida.
@@ -75,6 +79,8 @@
 - **Validação manual de alertas pendente:** o worker busca eventos dentro da janela de 15–30 minutos e usa rede/periodicidade gerenciadas pelo WorkManager. Atrasos podem fazer a janela passar; o WorkManager não garante execução exatamente a cada 15 minutos. Verificar em aparelho real permissões, recebimento, deduplicação e reagendamento após reinicialização.
 - **Integração SIROS:** a tela usa os dados locais do Room; a atualização manual e a sincronização periódica atualizam esse cache com o CSV remoto.
 - A regra `sync_metadata.id = 1` está agora aplicada uniformemente por gatilhos no schema v6; migração v5→v6 mantém os dados. O schema legado v1 real continua indisponível, então os testes de v1 não comprovam a atualização de uma instalação legada real.
+- **Testes instrumentados nesta rodada:** a instalação do APK de teste foi bloqueada por `INSTALL_FAILED_VERIFICATION_FAILURE`; a proteção do Android não foi desativada. A instalação e abertura do APK Debug normal passaram.
+- **Pré-lançamento pendente:** as alterações locais ainda precisam de commit, push e execução do workflow da tag para confirmar o asset no GitHub. Não há assinatura persistente de distribuição/Play Store configurada.
 
 ## Próximas etapas — dependem de validação externa
 - Contatar ADSB.lol antes de distribuir/usar a integração em produção; confirmar condições, limites de frequência e atribuição adequados.

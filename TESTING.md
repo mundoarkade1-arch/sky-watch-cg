@@ -389,3 +389,19 @@ Adicionado `BootReceiverTest`, que inicializa o WorkManager de teste, envia `ACT
 **Regressão completa:** `.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug --console=plain` concluiu com `BUILD SUCCESSFUL`; 57 testes contabilizados, 0 falhas, 0 erros e 1 ignorado por depender de CSV real. APK Debug atualizado. Não foi aberto emulador.
 
 O teste verifica a lógica do receiver com uma ação enviada pelo teste. Não comprova que o Android entregou `BOOT_COMPLETED` no reinício físico nem substitui o teste de notificação com voo SIROS real.
+
+## Detalhes de voo e prévia Debug 1.0.17 — 2026-11-04
+
+**Regressão reproduzível** (a partir de `android-app`):
+```powershell
+.\gradlew.bat :app:testDebugUnitTest :app:testReleaseUnitTest :app:assembleDebug :app:assembleRelease :app:lintVitalRelease :app:processReleaseManifest --console=plain
+```
+**Resultado:** `BUILD SUCCESSFUL` em 5 min 4 s. Os relatórios XML registram 68 testes em cada variante (Debug e Release), 0 falhas, 0 erros e 1 ignorado por depender de CSV real. `assembleDebug`, `assembleRelease`, `lintVitalRelease` e `processReleaseManifest` passaram. O teste ignorado é `SirosStreamParserRealFileTest`, que requer o CSV local real.
+
+**APK Debug:** `android-app\app\build\outputs\apk\debug\app-debug.apk`, 11.091.182 bytes, SHA-256 `369ED4F04295679273D3576D84696EE4E3276FF75BF3D6BC12DAD0743E93C649`. Assinatura verificada como Android Debug. No Poco 22101320G (Android 14/API 34), a instalação foi concluída; o pacote reportou `com.skywatch.cg.debug`, versão 1.0.17/código 17. O app abriu, um cartão abriu os detalhes e Voltar retornou à lista; a situação SIROS apareceu como cadastral e o logcat não registrou exceção fatal. Nenhum emulador foi aberto.
+
+Durante essa verificação, a tela de detalhes foi ajustada para identificar `sirosStatus` como situação cadastral e esclarecer que ela não confirma a operação do voo. O teste manual do fluxo foi repetido depois do ajuste.
+
+**Limite dos testes instrumentados:** `connectedDebugAndroidTest` não conseguiu instalar o APK instrumentado no aparelho devido a `INSTALL_FAILED_VERIFICATION_FAILURE`. A verificação de segurança do Android não foi desativada nem contornada. O APK Debug normal foi instalado com sucesso, mas isso não substitui os testes instrumentados.
+
+O workflow acionado por tags `v*` publica somente uma prévia Debug, não um APK assinado para distribuição estável/Play Store. Como o runner do CI pode usar uma chave Debug diferente em cada execução, instalar uma prévia atualizada talvez exija desinstalar a anterior, o que apaga os dados locais. O teste de entrega/deduplicação de alerta real continua pendente até haver voo SIROS elegível.

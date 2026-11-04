@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -19,20 +22,37 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Build Debug APK
+      - name: Run unit tests and build Debug APK
+        working-directory: android-app
         run: |
-          cd android-app
           chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
+          ./gradlew testDebugUnitTest assembleDebug --console=plain --no-daemon
+
+      - name: Prepare release asset
+        shell: bash
+        run: |
+          mkdir -p dist
+          cp android-app/app/build/outputs/apk/debug/app-debug.apk \
+            "dist/SKY-WATCH-CG-${GITHUB_REF_NAME}-debug.apk"
 
       - name: Upload APK to Release
         uses: softprops/action-gh-release@v1
         with:
-          files: android-app/app/build/outputs/apk/debug/app-debug.apk
+          name: SKY WATCH CG ${{ github.ref_name }} — Prévia Debug
+          body: |
+            APK instalável de prévia/teste, gerado da variante Debug.
+
+            - Pacote Android: `com.skywatch.cg.debug` (instala em paralelo à versão Release).
+            - Inclui a grade SIROS e o radar ADS-B ainda experimental.
+            - Não é uma versão assinada para distribuição estável nem para publicação na Play Store.
+            - A chave Debug do CI pode mudar entre execuções; para instalar uma nova prévia, talvez seja necessário desinstalar a anterior, apagando os dados locais.
+            - A integração ADS-B aguarda confirmação de condições com a fonte; status operacional Aena não está integrado.
+
+            Para instalar, baixe o APK em um aparelho Android e permita a instalação para o aplicativo usado para abrir o arquivo.
+          prerelease: true
+          files: dist/SKY-WATCH-CG-${{ github.ref_name }}-debug.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-
 
 
 

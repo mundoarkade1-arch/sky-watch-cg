@@ -36,6 +36,12 @@ sealed interface FlightUiState {
     ) : FlightUiState
 }
 
+sealed interface FlightDetailUiState {
+    data class Loading(val flightId: String) : FlightDetailUiState
+    data class Success(val flightId: String, val flight: NormalizedFlight) : FlightDetailUiState
+    data class Error(val flightId: String, val message: String) : FlightDetailUiState
+}
+
 class FlightListViewModel(
     application: Application,
     internal val repository: SirosRepository,
@@ -68,8 +74,12 @@ class FlightListViewModel(
     val syncMetadata: StateFlow<SyncMetadata?> = syncMetadataFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
+    private val _flightDetailUiState = MutableStateFlow<FlightDetailUiState?>(null)
+    val flightDetailUiState: StateFlow<FlightDetailUiState?> = _flightDetailUiState.asStateFlow()
+
     private var loadJob: Job? = null
     private var refreshJob: Job? = null
+    private var flightDetailJob: Job? = null
 
     init {
         Log.d("FlightListViewModelDiag", "ViewModel created. Starting reactive flows.")
@@ -104,6 +114,33 @@ class FlightListViewModel(
         loadJob?.cancel()
         Log.d("FlightListViewModelDiag", "Previous job cancelled (if any). Updating selectedDate to: $date")
         _selectedDate.value = date
+    }
+
+    fun loadFlightDetails(flightId: String) {
+        if (flightDetailJob?.isActive == true &&
+            (_flightDetailUiState.value as? FlightDetailUiState.Loading)?.flightId == flightId
+        ) return
+
+        flightDetailJob?.cancel()
+        _flightDetailUiState.value = FlightDetailUiState.Loading(flightId)
+        flightDetailJob = viewModelScope.launch {
+            try {
+                val flight = repository.getFlightById(flightId)?.toNormalizedFlight()
+                _flightDetailUiState.value = if (flight == null) {
+                    FlightDetailUiState.Error(flightId, "Voo não encontrado no cache local.")
+                } else {
+                    FlightDetailUiState.Success(flightId, flight)
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e("FlightListViewModel", "Falha ao carregar detalhes do voo $flightId", e)
+                _flightDetailUiState.value = FlightDetailUiState.Error(
+                    flightId,
+                    e.localizedMessage ?: "Não foi possível carregar os detalhes do voo."
+                )
+            }
+        }
     }
 
     fun refresh() {

@@ -12,8 +12,8 @@ android {
         applicationId = "com.skywatch.cg"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = providers.gradleProperty("android.versionCode").get().toInt()
+        versionName = providers.gradleProperty("android.versionName").get()
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true

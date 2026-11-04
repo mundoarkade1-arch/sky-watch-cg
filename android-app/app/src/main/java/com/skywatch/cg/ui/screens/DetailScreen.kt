@@ -5,7 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -36,19 +36,20 @@ fun DetailScreen(
 val isArrival = flight.operationType == OperationType.ARRIVAL
     val localTime = if (isArrival) flight.scheduledArrivalUtc else flight.scheduledDepartureUtc
     val localDate = if (isArrival) flight.arrivalDate else flight.flightDate
+    val localTimezone = if (isArrival) flight.destinationTimezone else flight.originTimezone
 
     val localTimeStr = localTime.atDate(localDate)
         .atZone(ZoneOffset.UTC)
-        .withZoneSameInstant(ZoneId.of("America/Campo_Grande"))
+        .withZoneSameInstant(ZoneId.of(localTimezone))
         .toLocalTime()
         .format(DateTimeFormatter.ofPattern("HH:mm"))
 
     val utcTimeStr = localTime.format(DateTimeFormatter.ofPattern("HH:mm")) + " UTC"
 
-    val fromCity = if (isArrival) (flight.originName ?: flight.origin) else (flight.destinationName ?: flight.destination)
-    val toCity = if (isArrival) (flight.destinationName ?: flight.destination) else (flight.originName ?: flight.origin)
-    val fromCode = if (isArrival) flight.origin else flight.destination
-    val toCode = if (isArrival) flight.destination else flight.origin
+    val fromCity = flight.originName ?: flight.origin
+    val toCity = flight.destinationName ?: flight.destination
+    val fromCode = flight.origin
+    val toCode = flight.destination
 
     val accentColor = if (isArrival) SkyWatchColors.ArrivalAccent else SkyWatchColors.DepartureAccent
 
@@ -58,7 +59,7 @@ val isArrival = flight.operationType == OperationType.ARRIVAL
                 title = { Text(text = "${flight.airline} ${flight.flightNumber}", style = MaterialTheme.typography.titleLarge) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Voltar")
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -183,7 +184,7 @@ Spacer(modifier = Modifier.height(8.dp))
                 }
 InfoRow(
                     icon = "ℹ",
-                    label = "Status SIROS",
+    label = "Situação cadastral SIROS",
                     value = flight.sirosStatus,
                     accentColor = accentColor
                 )
@@ -197,32 +198,9 @@ InfoRow(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Follow button placeholder
-            if (false) { // TODO: check if flight is followed
-                Button(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = { /* unfollow */ },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer
-                    )
-                ) {
-                    Text(text = "Deixar de seguir", fontWeight = FontWeight.Bold)
-                }
-            } else {
-                Button(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = { /* follow */ },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = accentColor
-                    )
-                ) {
-                    Text(text = "Seguir voo", fontWeight = FontWeight.Bold)
-                }
-            }
-
             // Disclaimer
             Text(
-                text = "Sem confirmação em tempo real. Horários programados (SIROS/ANAC).",
+                text = "Horários programados (SIROS/ANAC). A situação do registro não confirma a operação do voo.",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,

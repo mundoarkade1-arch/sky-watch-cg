@@ -454,6 +454,55 @@ class FlightListViewModelTest {
         assertEquals(LocalTime.of(2, 0), success.departures[0].scheduledDepartureUtc)
     }
 
+    @Test
+    fun testLoadFlightDetailsReturnsCachedFlight() = runTest(testDispatcher) {
+        val flight = NormalizedFlight(
+            flightId = "GLO-1234-2024-10-15",
+            sirosRecordId = "GLO-001",
+            airline = "GOL",
+            flightNumber = "1234",
+            equipment = "B738",
+            origin = "SBGR",
+            originName = "GUARULHOS",
+            originTimezone = "America/Sao_Paulo",
+            destination = "SBCG",
+            destinationName = "CAMPO GRANDE",
+            destinationTimezone = "America/Campo_Grande",
+            operationType = OperationType.ARRIVAL,
+            scheduledDepartureUtc = LocalTime.of(8, 0),
+            scheduledArrivalUtc = LocalTime.of(9, 30),
+            flightDate = fixedToday,
+            arrivalDate = fixedToday,
+            daysOfWeek = listOf(1, 2, 3, 4, 5, 6, 7),
+            validFrom = fixedToday.minusDays(1),
+            validTo = fixedToday.plusDays(1),
+            serviceType = "REGULAR DE PASSAGEIROS",
+            sirosStatus = "Em Operação"
+        )
+        viewModel.repository.saveNormalizedFlights(listOf(flight))
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.loadFlightDetails(flight.flightId)
+        val state = viewModel.flightDetailUiState.first {
+            it is FlightDetailUiState.Success
+        }
+        assertTrue("Unexpected detail state: $state", state is FlightDetailUiState.Success)
+        val loadedFlight = (state as FlightDetailUiState.Success).flight
+        assertEquals(flight.flightId, loadedFlight.flightId)
+        assertEquals(flight.origin, loadedFlight.origin)
+        assertEquals(flight.destination, loadedFlight.destination)
+    }
+
+    @Test
+    fun testLoadFlightDetailsReportsMissingFlight() = runTest(testDispatcher) {
+        viewModel.loadFlightDetails("missing-flight")
+        val state = viewModel.flightDetailUiState.first {
+            it is FlightDetailUiState.Error
+        }
+        assertTrue("Unexpected detail state: $state", state is FlightDetailUiState.Error)
+        assertEquals("missing-flight", (state as FlightDetailUiState.Error).flightId)
+    }
+
     private class FakeSirosRemoteSource(
         private val download: suspend (java.io.File) -> com.skywatch.cg.data.siros.SirosRemoteSource.DownloadResult
     ) : com.skywatch.cg.data.siros.SirosRemoteSource("http://unused.invalid") {

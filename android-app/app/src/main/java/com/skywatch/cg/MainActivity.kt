@@ -2,6 +2,7 @@ package com.skywatch.cg
 
 import android.content.Intent
 import android.os.Bundle
+import com.skywatch.cg.BuildConfig
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
@@ -20,6 +21,7 @@ import com.skywatch.cg.ui.screens.MainScreen
 import com.skywatch.cg.ui.theme.SkyWatchTheme
 import com.skywatch.cg.ui.viewmodel.FlightListViewModel
 import com.skywatch.cg.ui.viewmodel.RadarViewModel
+import com.skywatch.cg.util.AppVersionComparator
 import com.skywatch.cg.worker.FlightAlertWorker
 import com.skywatch.cg.worker.SirosSyncWorker
 import java.util.concurrent.TimeUnit
@@ -109,12 +111,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun checkForAppUpdates() {
-        val currentVersion = try {
-            val pInfo = packageManager.getPackageInfo(packageName, 0)
-            pInfo.versionName ?: "1.0.0"
-        } catch (e: Exception) {
-            "1.0.0"
-        }
+        val currentVersion = BuildConfig.VERSION_NAME
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val url = java.net.URL("https://api.github.com/repos/mundoarkade1-arch/sky-watch-cg/releases/latest")
@@ -134,7 +131,13 @@ class MainActivity : ComponentActivity() {
                     val matchResult = tagRegex.find(response)
                     if (matchResult != null) {
                         val latestTag = matchResult.groupValues[1]
-                        if (latestTag != "v$currentVersion" && latestTag != currentVersion) {
+                        val versionComparison = AppVersionComparator.compare(latestTag, currentVersion)
+                        if (versionComparison == null) {
+                            android.util.Log.w(
+                                "MainActivity",
+                                "Versão de lançamento inválida recebida do GitHub: $latestTag"
+                            )
+                        } else if (versionComparison > 0) {
                             withContext(Dispatchers.Main) {
                                 showUpdateDialog(latestTag)
                             }

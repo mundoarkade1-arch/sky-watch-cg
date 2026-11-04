@@ -1,5 +1,6 @@
 package com.skywatch.cg.ui.screens
 
+import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
@@ -23,10 +24,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.skywatch.cg.BuildConfig
 import com.skywatch.cg.R
 import com.skywatch.cg.data.db.SyncMetadata
@@ -37,6 +40,7 @@ import com.skywatch.cg.ui.components.DayStrip
 import com.skywatch.cg.ui.components.FlightCard
 import com.skywatch.cg.ui.components.NextFlightCard
 import com.skywatch.cg.ui.components.SegmentedTabRow
+import com.skywatch.cg.ui.viewmodel.FlightDetailUiState
 import com.skywatch.cg.ui.viewmodel.FlightListViewModel
 import com.skywatch.cg.ui.viewmodel.FlightUiState
 import com.skywatch.cg.util.getDisplayLastUpdate
@@ -64,6 +68,48 @@ fun MainScreen(viewModel: FlightListViewModel, radarViewModel: RadarViewModel) {
                 navController = navController,
                 onNavigateBack = { navController.popBackStack() }
             )
+        }
+        composable(
+            route = "detalhe/{flightId}",
+            arguments = listOf(navArgument("flightId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val flightId = backStackEntry.arguments?.getString("flightId")
+            val detailState by viewModel.flightDetailUiState.collectAsState()
+
+            LaunchedEffect(flightId) {
+                flightId?.let(viewModel::loadFlightDetails)
+            }
+
+            if (flightId == null) {
+                ErrorState(
+                    message = "Identificador do voo inválido.",
+                    onRetry = { navController.popBackStack() }
+                )
+            } else {
+                when (val state = detailState) {
+                    is FlightDetailUiState.Success -> {
+                        if (state.flightId == flightId) {
+                            DetailScreen(
+                                flight = state.flight,
+                                onBack = { navController.popBackStack() }
+                            )
+                        } else {
+                            LoadingState()
+                        }
+                    }
+                    is FlightDetailUiState.Error -> {
+                        if (state.flightId == flightId) {
+                            ErrorState(
+                                message = state.message,
+                                onRetry = { viewModel.loadFlightDetails(flightId) }
+                            )
+                        } else {
+                            LoadingState()
+                        }
+                    }
+                    else -> LoadingState()
+                }
+            }
         }
         composable("radar") {
             RadarScreen(
@@ -110,6 +156,9 @@ fun FlightsScreen(
             viewModel = viewModel,
             uiState = uiState,
             selectedTab = selectedTab.value,
+            onFlightSelected = { flight ->
+                navController.navigate("detalhe/${Uri.encode(flight.flightId)}")
+            },
             innerPadding = innerPadding
         )
     }
@@ -223,6 +272,7 @@ fun MainContent(
     viewModel: FlightListViewModel,
     uiState: FlightUiState,
     selectedTab: Int,
+    onFlightSelected: (NormalizedFlight) -> Unit,
     innerPadding: PaddingValues
 ) {
     when (uiState) {
@@ -251,7 +301,7 @@ fun MainContent(
 
                     if (nextFlight != null) {
                         item {
-                            NextFlightCard(flight = nextFlight) { }
+                            NextFlightCard(flight = nextFlight) { onFlightSelected(nextFlight) }
                             Spacer(modifier = Modifier.height(8.dp))
                         }
                     }
@@ -263,7 +313,9 @@ fun MainContent(
 
                 if (futureFlights.isNotEmpty()) {
                     item { SectionHeader("MAIS TARDE") }
-                    items(futureFlights) { flight -> FlightCard(flight = flight, onClick = { }) }
+                    items(futureFlights) { flight ->
+                        FlightCard(flight = flight, onClick = { onFlightSelected(flight) })
+                    }
                 }
 
                 val pastFlights = if (isToday) {
@@ -272,7 +324,9 @@ fun MainContent(
 
                 if (pastFlights.isNotEmpty()) {
                     item { SectionHeader("JÁ PASSARAM", isDimmed = true) }
-                    items(pastFlights) { flight -> FlightCard(flight = flight, isDimmed = true, onClick = { }) }
+                    items(pastFlights) { flight ->
+                        FlightCard(flight = flight, isDimmed = true, onClick = { onFlightSelected(flight) })
+                    }
                 }
 
                 if (flights.isEmpty()) { item { EmptyState(operationType = operationType) } }

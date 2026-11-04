@@ -1,4 +1,12 @@
 # Changelog
+## 2026-11-04 — Detalhes de voo e prévia Debug 1.0.17
+- Cartões e próximo voo abrem a tela de detalhes; a rota é apresentada origem→destino e os horários usam o fuso do aeroporto do evento.
+- Removido o botão "Seguir voo" sem ação implementada; a situação SIROS é identificada como cadastral, sem sugerir confirmação operacional em tempo real.
+- Comparação numérica de versões evita sugerir como atualização um release estável anterior à prévia instalada.
+- Regressão local: 68 testes por variante Debug e Release, sem falhas (1 ignorado em cada por depender de CSV local); builds Debug/Release e lint vital aprovados.
+- APK Debug 1.0.17 instalado e fluxo de detalhes/Voltar verificado no Android 14, sem emulador.
+- Workflow de tag publica uma prévia Debug no GitHub. O APK não é assinado para distribuição estável e ainda requer push/tag para confirmar o asset remoto.
+
 ## 2026-11-04 — Validação final do protótipo de radar
 - CI #54 passou para o commit `e65bb63`.
 - No telefone Android 14, o botão de atualização manual manteve a tela aberta e atualizou o horário da consulta; não foi observado crash, exceção fatal ou ANR na revalidação.
