@@ -56,7 +56,10 @@ fun MainScreen(viewModel: FlightListViewModel) {
             )
         }
         composable("sobre") {
-            AboutScreen(onNavigateBack = { navController.popBackStack() })
+            AboutScreen(
+                navController = navController,
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
     }
 }
@@ -352,39 +355,85 @@ fun ErrorState(message: String, onRetry: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AboutScreen(onNavigateBack: () -> Unit) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Text(
-            text = "Sobre",
-            style = MaterialTheme.typography.displayMedium,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        
-        Text(
-            text = "Dados: CSV público da ANAC (SIROS)",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        
-        Text(
-            text = "Horários programados. Não confirmam a operação em tempo real.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-        )
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        Text(
-            text = "Versão ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-        )
+fun AboutScreen(
+    navController: androidx.navigation.NavController,
+    onNavigateBack: () -> Unit
+) {
+    val uiState by remember { mutableStateOf(FlightUiState.Loading) }
+    val syncMetadata by remember { mutableStateOf<SyncMetadata?>(null) }
+    
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding(),
+                title = {
+                    Text(
+                        text = "Sobre",
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = androidx.compose.ui.graphics.Color.White
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Text(
+                            text = "←",
+                            fontSize = 24.sp,
+                            color = androidx.compose.ui.graphics.Color.White,
+                            modifier = Modifier.size(48.dp).wrapContentSize(Alignment.Center)
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = androidx.compose.ui.graphics.Color(0xFF0A0F1C),
+                    titleContentColor = androidx.compose.ui.graphics.Color.White
+                )
+            )
+        },
+        bottomBar = { BottomNavBar(navController) },
+        containerColor = androidx.compose.ui.graphics.Color(0xFF0A0F1C)
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = androidx.compose.ui.graphics.Color(0xFF121A2B)
+                ),
+                shape = RoundedCornerShape(20.dp),
+                border = androidx.compose.ui.graphics.BorderStroke(1.dp, androidx.compose.ui.graphics.Color(0xFF1E2A42))
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        text = "Fonte dos dados: CSV público da ANAC (SIROS)",
+                        fontSize = 16.sp,
+                        color = androidx.compose.ui.graphics.Color(0xFFF1F5F9)
+                    )
+                    Text(
+                        text = "Aviso: horários programados, não confirmam a operação em tempo real",
+                        fontSize = 16.sp,
+                        color = androidx.compose.ui.graphics.Color(0xFF8A97B1)
+                    )
+                    Text(
+                        text = "Versão ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+                        fontSize = 14.sp,
+                        color = androidx.compose.ui.graphics.Color(0xFF8A97B1)
+                    )
+                }
+            }
+        }
     }
 }
 
