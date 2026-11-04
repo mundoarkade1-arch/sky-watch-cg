@@ -3,6 +3,7 @@
 ## Status atual — 2026-11-04
 - O MVP de chegadas e partidas, ingestão SIROS, sincronização periódica e infraestrutura de notificações locais estão implementados.
 - Navegação dos cartões e do próximo voo para detalhes concluída; regressão local mais recente: 68 testes por variante (Debug/Release), 0 falhas e 1 ignorado; lint vital e builds Debug/Release aprovados. APK `1.0.17` instalado e fluxo de detalhe/Voltar verificado no telefone Android 14.
+- CI #56 passou e o workflow de Release #13 publicou a prévia Debug `v1.0.17` no GitHub. Distribuição estável/Play Store continua dependente de chave persistente de assinatura.
 - Correção da tela Sobre e do estado de atualização concluída. Validação local: 53 testes contabilizados (52 executados sem falhas e 1 ignorado); APK Debug gerado.
 - Revalidação local completa: 53 testes contabilizados (52 aprovados e 1 ignorado), `assembleDebug` aprovado; `FlightListViewModelTest` passou isoladamente (11 testes). Wrapper Gradle do Windows corrigido para propagar corretamente o código de saída.
 - CI #43 a #54 na branch `wip-fase3`: concluídos com sucesso; #50 validou a migração Room v5→v6, #51 documentação do reinício, #52 teste de boot, #53 evidência de logcat e #54 protótipo do radar.

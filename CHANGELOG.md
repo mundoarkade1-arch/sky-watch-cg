@@ -5,7 +5,8 @@
 - Comparação numérica de versões evita sugerir como atualização um release estável anterior à prévia instalada.
 - Regressão local: 68 testes por variante Debug e Release, sem falhas (1 ignorado em cada por depender de CSV local); builds Debug/Release e lint vital aprovados.
 - APK Debug 1.0.17 instalado e fluxo de detalhes/Voltar verificado no Android 14, sem emulador.
-- Workflow de tag publica uma prévia Debug no GitHub. O APK não é assinado para distribuição estável e ainda requer push/tag para confirmar o asset remoto.
+- CI #56 e workflow de Release #13 passaram; prévia `v1.0.17` publicada no [GitHub Releases](https://github.com/mundoarkade1-arch/sky-watch-cg/releases/tag/v1.0.17) como `SKY-WATCH-CG-v1.0.17-debug.apk`.
+- O APK não é assinado para distribuição estável; uma atualização de outra execução do CI pode exigir desinstalar a prévia anterior.
 
 ## 2026-11-04 — Validação final do protótipo de radar
 - CI #54 passou para o commit `e65bb63`.

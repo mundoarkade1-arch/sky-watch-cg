@@ -405,3 +405,5 @@ Durante essa verificação, a tela de detalhes foi ajustada para identificar `si
 **Limite dos testes instrumentados:** `connectedDebugAndroidTest` não conseguiu instalar o APK instrumentado no aparelho devido a `INSTALL_FAILED_VERIFICATION_FAILURE`. A verificação de segurança do Android não foi desativada nem contornada. O APK Debug normal foi instalado com sucesso, mas isso não substitui os testes instrumentados.
 
 O workflow acionado por tags `v*` publica somente uma prévia Debug, não um APK assinado para distribuição estável/Play Store. Como o runner do CI pode usar uma chave Debug diferente em cada execução, instalar uma prévia atualizada talvez exija desinstalar a anterior, o que apaga os dados locais. O teste de entrega/deduplicação de alerta real continua pendente até haver voo SIROS elegível.
+
+**Publicação remota:** CI #56 passou para o commit `3858738`. O workflow "Build and Release Android APK" #13 para a tag `v1.0.17` concluiu com sucesso, incluindo a etapa `Upload APK to Release`. O APK está no [Release v1.0.17](https://github.com/mundoarkade1-arch/sky-watch-cg/releases/tag/v1.0.17) com o nome `SKY-WATCH-CG-v1.0.17-debug.apk`.
