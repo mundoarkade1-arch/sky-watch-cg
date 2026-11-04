@@ -17,6 +17,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.WindowInsets
+import androidx.compose.ui.window.statusBarsPadding
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.rememberNavController
 import com.skywatch.cg.R
@@ -89,6 +91,7 @@ fun TopAppBarWrapper(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface)
+            .statusBarsPadding()
     ) {
         val currentDate = when (uiState) {
             is FlightUiState.Success -> uiState.selectedDate
