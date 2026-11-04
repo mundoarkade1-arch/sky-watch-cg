@@ -19,8 +19,10 @@ android {
             useSupportLibrary = true
         }
     }
-
     buildTypes {
+        debug {
+            applicationIdSuffix = ".debug"
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(

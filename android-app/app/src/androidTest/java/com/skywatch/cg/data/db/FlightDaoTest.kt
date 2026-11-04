@@ -49,6 +49,7 @@ class FlightDaoTest {
             scheduledDepartureUtc = "10:00",
             scheduledArrivalUtc = "11:30",
             flightDate = flightDate.toString(),
+            arrivalDate = flightDate.toString(),
             validFrom = "2024-01-01",
             validTo = "2024-12-31",
             serviceType = "REGULAR DE PASSAGEIROS",

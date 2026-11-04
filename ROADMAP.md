@@ -4,7 +4,8 @@
 - O MVP de chegadas e partidas, ingestão SIROS, sincronização periódica e infraestrutura de notificações locais estão implementados.
 - Correção da tela Sobre e do estado de atualização concluída. Validação local: 53 testes contabilizados (52 executados sem falhas e 1 ignorado); APK Debug gerado.
 - Revalidação local completa: 53 testes contabilizados (52 aprovados e 1 ignorado), `assembleDebug` aprovado; `FlightListViewModelTest` passou isoladamente (11 testes). Wrapper Gradle do Windows corrigido para propagar corretamente o código de saída.
-- CI #42 para o commit `fa2712d` na branch `wip-fase3`: build e testes concluídos com sucesso.
+- CI #43 e #44 para os commits `8aff2ce` e `dcdaddb` na branch `wip-fase3`: concluídos com sucesso.
+- Compilação local dos testes instrumentados corrigida/aprovada. O app Debug usa sufixo `.debug` para não substituir o pacote Release; a instalação no aparelho foi cancelada pelo Android, então os testes instrumentados ainda não rodaram.
 - A pesquisa inicial da Etapa 4 foi registrada; integração Aena depende de autorização/documentação apropriadas para CGR. Nenhuma posição ADS-B ou status operacional é apresentado como confirmado sem correspondência verificável.
 
 ## Etapa 1 — Validação das fontes e arquitetura (Concluída)
@@ -40,6 +41,7 @@
 - [x] Corrigir atualização que podia permanecer carregando; remover rede real dos testes de ViewModel.
 - [x] Validar suíte unitária e gerar APK Debug em 2026-11-04.
 - [ ] Registrar teste manual ponta a ponta de alertas e reinicialização em dispositivo Android. Testes instrumentados anteriores cobriram Room/migração; não comprovam, por si só, esse fluxo completo de notificações.
+- [ ] Desbloquear a execução instrumentada em aparelho: fixture compila após correção de `arrivalDate` e o pacote Debug tem sufixo isolado, mas o Android recusou a instalação (`INSTALL_FAILED_USER_RESTRICTED`). Preservada a instalação existente, sem desinstalar ou apagar dados.
 - [ ] Verificar no dispositivo se o worker de alertas notifica repetidamente/atualiza a mesma notificação: atualmente ele busca eventos programados na janela de até duas horas e pode executar periodicamente, conforme restrições do WorkManager.
 
 ## Próxima etapa recomendada

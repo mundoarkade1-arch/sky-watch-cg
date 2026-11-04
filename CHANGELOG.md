@@ -4,6 +4,8 @@
 - Corrigido `android-app/gradlew.bat` para preservar o código de saída real do Gradle, em vez de retornar falha após builds aprovados.
 - O teste físico de notificações após reinicialização continua pendente; não havia `adb` nem aparelho detectado no ambiente.
 - Preparada em `docs/AENA_API_REQUEST.md` uma minuta de pedido de orientação e autorização; ela ainda não foi enviada.
+- Corrigido o fixture `FlightDaoTest` para incluir `arrivalDate`; compilação instrumentada passou. A execução no aparelho Android 14 foi bloqueada por conflito de assinatura com o app já instalado; nenhuma instalação/dado foi removido.
+- Isolado o identificador do build Debug como `com.skywatch.cg.debug`, preservando o identificador Release. A tentativa no aparelho foi recusada pelo Android (`INSTALL_FAILED_USER_RESTRICTED`); os CI #43 e #44 passaram.
 
 ## 2026-11-04 — Pesquisa de fonte Aena e validação manual de alertas
 - Documentadas as páginas, sitemap, `robots.txt` e termos oficiais consultados para Aena Brasil. Não foi encontrada documentação pública de uma API de status para CGR; os termos consultados restringem reutilização sem autorização escrita e a entidade indicada nos termos não é a mesma identificada para a concessão de CGR.

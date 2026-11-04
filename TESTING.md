@@ -261,7 +261,13 @@ Durante essa validação foi corrigido `android-app/gradlew.bat`: o script caía
 
 **CI remoto:** execuções #41 e #42 concluídas com sucesso; a #42 validou o build Debug e a suíte unitária no commit `fa2712d`. [Ver execução #42 no GitHub Actions](https://github.com/mundoarkade1-arch/sky-watch-cg/actions/runs/41896892995).
 
-**Teste físico pendente:** não foi possível executar o roteiro abaixo neste ambiente porque `adb` não está disponível no PATH e nenhum dispositivo Android foi detectado. Não marcar o teste de notificações após reinicialização como concluído com base nos testes unitários/CI.
+## Testes instrumentados em aparelho físico — 2026-11-04
+
+Um aparelho físico Android 14 foi detectado via Android SDK. A compilação dos testes instrumentados encontrou um fixture incompleto em `FlightDaoTest`: faltava preencher `arrivalDate` em `FlightEntity`. O fixture foi corrigido e `:app:compileDebugAndroidTestKotlin` passou (`BUILD SUCCESSFUL`).
+
+Para preservar o aplicativo/dados já instalados e evitar conflito de assinatura, o build Debug foi separado com o identificador `com.skywatch.cg.debug`; o identificador Release não mudou. A execução de `:app:connectedDebugAndroidTest` ainda não chegou a iniciar os testes: o Android recusou instalar o pacote Debug com `INSTALL_FAILED_USER_RESTRICTED`. Nenhum aplicativo foi desinstalado nem dados apagados, e não foram alteradas configurações de segurança do aparelho. A instalação precisa ser autorizada no próprio dispositivo antes de nova tentativa.
+
+**Teste manual de notificações após reinicialização:** permanece pendente; o aparelho não foi reiniciado, o aplicativo não foi substituído e não foi verificado voo SIROS real na janela exigida. Não considerar a compilação ou a tentativa de instrumentação como aprovação do fluxo físico.
 
 ## Roteiro manual — alertas após reinicialização (a executar no Android)
 
