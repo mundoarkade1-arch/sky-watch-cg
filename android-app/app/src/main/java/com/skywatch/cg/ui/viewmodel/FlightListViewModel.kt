@@ -115,18 +115,46 @@ class FlightListViewModel(
                 _uiState.value = FlightUiState.Loading
             }
 
-            val result = repository.syncFromRemote()
-            loadSyncMetadata()
-            loadFlights(_selectedDate.value)
-            
-            // O estado final será definido por loadFlights (Success ou Error)
-            // Mas podemos logar o resultado da sync
-            when (result) {
-                is SirosRepository.SyncResult.Success -> {
-                    Log.d("FlightListViewModel", "Sync manual bem-sucedida: ${result.totalSynced} voos")
+            try {
+                val result = repository.syncFromRemote()
+                
+                // Após sync, ler dados atualizados diretamente para garantir que o estado saia de Refreshing
+                // mesmo se os dados não mudaram (flows com distinctUntilChanged não re-emitem)
+                val arrivals = repository.getArrivalsForUi(_selectedDate.value)
+                val departures = repository.getDeparturesForUi(_selectedDate.value)
+                
+                _uiState.value = FlightUiState.Success(
+                    arrivals = arrivals,
+                    departures = departures,
+                    selectedDate = _selectedDate.value
+                )
+                
+                // Log do resultado
+                when (result) {
+                    is SirosRepository.SyncResult.Success -> {
+                        Log.d("FlightListViewModel", "Sync manual bem-sucedida: ${result.totalSynced} voos")
+                    }
+                    is SirosRepository.SyncResult.Failure -> {
+                        Log.w("FlightListViewModel", "Sync manual falhou: ${result.errorMessage}")
+                        // Se falhou mas temos dados cached, mantemos Success com dados antigos
+                        // Se não temos dados, voltamos para Error
+                        if (arrivals.isEmpty() && departures.isEmpty()) {
+                            _uiState.value = FlightUiState.Error(result.errorMessage)
+                        }
+                    }
                 }
-                is SirosRepository.SyncResult.Failure -> {
-                    Log.w("FlightListViewModel", "Sync manual falhou: ${result.errorMessage}")
+            } catch (e: Exception) {
+                Log.e("FlightListViewModel", "Exceção no refresh: ${e.message}", e)
+                val currentState = _uiState.value
+                if (currentState is FlightUiState.Refreshing) {
+                    // Volta para Success com dados anteriores
+                    _uiState.value = FlightUiState.Success(
+                        arrivals = currentState.arrivals,
+                        departures = currentState.departures,
+                        selectedDate = currentState.selectedDate
+                    )
+                } else {
+                    _uiState.value = FlightUiState.Error(e.localizedMessage ?: "Erro desconhecido")
                 }
             }
         }
