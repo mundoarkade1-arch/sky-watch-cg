@@ -13,6 +13,7 @@ Fontes oficiais consultadas:
 - [Página do Aeroporto de Campo Grande (CGR)](https://www.aenabrasil.com.br/pt/aeroportos/aeroporto-de-campo-grande/index.html)
 - [Página institucional da Aena Brasil](https://www.aenabrasil.com.br/pt/corporativo/sobre-nos.html)
 - [Termos e Condições de Uso](https://www.aenabrasil.com.br/pt/corporativo/termocondicaouso.html)
+- [Central de Atendimento ao Usuário](https://www.aenabrasil.com.br/pt/corporativo/centralatendimento.html) e [contatos dos aeroportos](https://www.aenabrasil.com.br/pt/corporativo/ContatoAena.html)
 - [robots.txt](https://www.aenabrasil.com.br/robots.txt)
 - [Índice do sitemap](https://www.aenabrasil.com.br/sites/sitemaps/sitemapsBrasil/sitemap_index.xml) e [sitemap Brasil](https://www.aenabrasil.com.br/sites/sitemaps/sitemapsBrasil/sitemap.xml)
 
@@ -26,6 +27,7 @@ Constatações verificadas:
 Conclusão e decisão:
 - **Integração automatizada não autorizada/validada.** Não fazer scraping nem reutilizar dados da interface até obter confirmação escrita da entidade responsável por CGR, esclarecer a aplicabilidade dos termos e receber documentação, licença e limites de uso de uma API apropriada.
 - Se não houver autorização/API, manter SIROS como fonte de planejamento e encaminhar o passageiro à companhia aérea/Aena para confirmação operacional. Não rotular horário planejado como status real.
+- Canal oficial para solicitar orientação: Central de Atendimento ao Usuário; a página lista o contato do Aeroporto Internacional de Campo Grande como `(34) 2512-1803`. A central também publica `institucional@aenabrasil.com.br` para comunicações administrativas. Confirmar com a própria Aena o canal adequado para pedido técnico/jurídico e solicitar resposta escrita.
 
 ## 3. Aena Espanha — nota de escopo
 

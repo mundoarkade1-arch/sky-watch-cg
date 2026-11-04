@@ -25,7 +25,7 @@
 
 ## Etapa 4 — Status operacional e radar ADS-B (Pesquisa inicial concluída; integração bloqueada por autorização)
 - [x] Conferir página/sitemap oficial Aena Brasil e identificar as condições de uso públicas consultadas; registrar os resultados em `docs/API_SOURCES.md`.
-- [ ] Solicitar confirmação escrita à entidade responsável por CGR (BOAB/Aena Brasil) sobre termos aplicáveis e autorização/documentação para uma API de status.
+- [ ] Solicitar confirmação escrita à entidade responsável por CGR (BOAB/Aena Brasil), usando a Central de Atendimento oficial indicada em `docs/API_SOURCES.md`, sobre termos aplicáveis e autorização/documentação para uma API de status.
 - [ ] Exibir status operacional separado dos horários planejados SIROS, apenas quando houver dado verificável.
 - [ ] Avaliar cobertura, termos e atribuição de fonte ADS-B para CGR antes de qualquer exibição.
 - [ ] Associar observações ADS-B a voos somente com correspondência verificável; caso contrário, identificá-las apenas como observações experimentais.
@@ -41,4 +41,4 @@
 - [ ] Verificar no dispositivo se o worker de alertas notifica repetidamente/atualiza a mesma notificação: atualmente ele busca eventos programados na janela de até duas horas e pode executar periodicamente, conforme restrições do WorkManager.
 
 ## Próxima etapa recomendada
-Pedir confirmação escrita e documentação de API à entidade responsável pelo Aeroporto de Campo Grande. Em paralelo, executar o roteiro manual de alertas em `TESTING.md`. Não fazer scraping nem integrar dados Aena sem autorização clara.
+Pedir confirmação escrita e documentação de API à entidade responsável pelo Aeroporto de Campo Grande pelo canal oficial indicado em `docs/API_SOURCES.md`. Em paralelo, executar o roteiro manual de alertas em `TESTING.md`. Não fazer scraping nem integrar dados Aena sem autorização clara.

@@ -2,6 +2,7 @@
 ## 2026-11-04 — Pesquisa de fonte Aena e validação manual de alertas
 - Documentadas as páginas, sitemap, `robots.txt` e termos oficiais consultados para Aena Brasil. Não foi encontrada documentação pública de uma API de status para CGR; os termos consultados restringem reutilização sem autorização escrita e a entidade indicada nos termos não é a mesma identificada para a concessão de CGR.
 - Sem scraping nem integração: solicitar esclarecimento/autorização escrita e documentação apropriada à entidade responsável por CGR.
+- Incluídos na documentação os canais oficiais de atendimento da Aena para iniciar o pedido de orientação e autorização por escrito.
 - Adicionado roteiro para teste real de notificações após reinicialização. O roteiro explicita a janela atual de até 2 horas, a restrição de rede e a natureza não exata da periodicidade do WorkManager.
 
 ## 2026-11-04 — Alinhamento da documentação do projeto

@@ -52,6 +52,6 @@
 - **Ponto em aberto (Room):** em instalações NOVAS (schema v2), o Room cria a tabela sync_metadata SEM a restrição CHECK (id = 1). Somente bancos que passaram pela MIGRATION_1_2 têm o CHECK. Ou seja, o CHECK não vale em todos os bancos. Nenhum código foi alterado por causa disso; a decisão fica para depois.
 
 ## Próxima etapa
-- Solicitar à entidade responsável pelo aeroporto de Campo Grande (BOAB/Aena Brasil) confirmação escrita das condições de uso e documentação de uma eventual API de status operacional.
+- Solicitar à entidade responsável pelo aeroporto de Campo Grande (BOAB/Aena Brasil), usando a Central de Atendimento oficial indicada em `docs/API_SOURCES.md`, confirmação escrita das condições de uso e documentação de uma eventual API de status operacional.
 - Executar e registrar o roteiro de notificações após reinicialização descrito em `TESTING.md`.
 - Só então decidir se uma integração Aena é permitida e adequada; avaliar cobertura/termos ADS-B separadamente.
