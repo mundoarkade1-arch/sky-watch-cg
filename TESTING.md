@@ -279,9 +279,9 @@ Essa execução valida migrações Room e operações DAO no aparelho; não vali
 
 **Validação local complementar:** `:app:testDebugUnitTest`, `:app:assembleDebug`, `:app:compileDebugAndroidTestKotlin` e `:app:processReleaseManifest` concluíram com sucesso. Suíte unitária: 53 testes contabilizados, 0 falhas, 0 erros e 1 ignorado por depender de CSV real.
 
-**CI remoto:** CI #46 passou no commit `5c7bdf5`, CI #47 para `c8d6761`, #48 para `9e82c84`, #49 para `4b072c4` e #50 para `9206269` também passaram.
+**CI remoto:** CI #46 passou no commit `5c7bdf5`, CI #47 para `c8d6761`, #48 para `9e82c84`, #49 para `4b072c4`, #50 para `9206269` e #51 para `ad4db53` também passaram.
 
-**Teste manual após reinicialização:** execução parcial registrada abaixo. O aparelho foi reiniciado com o app Debug instalado e havia trabalhos agendados após o boot, mas não houve log direto do `BootReceiver` nem voo SIROS elegível para verificar a notificação. Os testes instrumentados não cobrem esse fluxo ponta a ponta.
+**Teste real de notificação após reinicialização:** pendente porque não havia voo SIROS elegível na janela de 15–30 minutos. O reinício está registrado abaixo e o teste de código do `BootReceiver` está na seção final; nenhum dos dois comprova a entrega de uma notificação real.
 
 ## Validação local dos alertas — 2026-11-04
 
@@ -293,7 +293,7 @@ O `FlightAlertWorker` considera horários planejados SIROS entre 15 e 30 minutos
 ```
 **Resultado:** `BUILD SUCCESSFUL`; 56 testes contabilizados, 0 falhas, 0 erros e 1 ignorado por depender de CSV real. APK Debug e compilação dos testes instrumentados concluídos.
 
-O WorkManager pode atrasar execuções, então a janela pode passar sem notificação. Esse comportamento usa apenas o horário programado SIROS e não confirma o estado operacional do voo. O teste ponta a ponta após reinicialização continua pendente.
+O WorkManager pode atrasar execuções, então a janela pode passar sem notificação. Esse comportamento usa apenas o horário programado SIROS e não confirma o estado operacional do voo. A validação de entrega ponta a ponta continua pendente.
 
 ## Validação de inicialização e ViewModel — 2026-11-04
 
@@ -303,7 +303,7 @@ Removida a segunda execução de inicialização em `MainActivity.onCreate()`, q
 ```powershell
 .\gradlew.bat :app:testDebugUnitTest --tests com.skywatch.cg.ui.viewmodel.FlightListViewModelTest :app:assembleDebug :app:compileDebugAndroidTestKotlin --console=plain
 ```
-**Resultado:** `BUILD SUCCESSFUL`; 11 testes do `FlightListViewModelTest`, 0 falhas, 0 erros e 0 ignorados; APK Debug e compilação dos testes instrumentados aprovados. CI #47 a #50 também passaram.
+**Resultado:** `BUILD SUCCESSFUL`; 11 testes do `FlightListViewModelTest`, 0 falhas, 0 erros e 0 ignorados; APK Debug e compilação dos testes instrumentados aprovados. CI #47 a #51 também passaram.
 
 Após essa correção, `.\gradlew.bat :app:connectedDebugAndroidTest --console=plain` também passou no telefone físico Android 14: 11 testes, 0 falhas, 0 erros e 0 ignorados. Isso valida banco/DAO/migrações, mas não abre a tela principal nem verifica a notificação real.
 
@@ -351,15 +351,18 @@ O telefone modelo 22101320G (Android 14/API 34) foi reiniciado manualmente depoi
 | Voo SIROS real na janela de alerta | Não havia |
 | Notificação real recebida | Não avaliada; sem voo elegível |
 
-**Registrar no resultado:** modelo do aparelho, versão Android, versão/commit do APK, permissões, identificador SIROS e data do voo, horário programado local/UTC, horário do reinício, horário de cada notificação, estado de rede e resultado. Não publicar matrícula, posição ou status operacional sem fonte verificável.
+Os detalhes disponíveis do reinício estão registrados na tabela acima. O voo SIROS elegível, o horário de notificação e a entrega/deduplicação não se aplicam a esta execução e só devem ser registrados em novo teste com voo real. Não publicar matrícula, posição ou status operacional sem fonte verificável.
 
-| Campo | Resultado |
-|---|---|
-| Data/hora do teste (UTC e Campo Grande) | A preencher |
-| Aparelho / Android | A preencher |
-| APK (versão e commit) | A preencher |
-| Permissão e canal de notificação | A preencher |
-| Registro SIROS real / evento e horário programado | A preencher |
-| Reinicialização e condição de rede | A preencher |
-| Notificação recebida (horário) / repetida? | A preencher |
-| Resultado / evidências (sem dados sensíveis) | A preencher |
+## Teste automatizado do BootReceiver — 2026-11-04
+
+Adicionado `BootReceiverTest`, que inicializa o WorkManager de teste, envia `ACTION_BOOT_COMPLETED` ao receiver e verifica que os trabalhos únicos `siros_periodic_sync` e `flight_alert_check` são enfileirados como `ENQUEUED`, com os respectivos workers.
+
+**Comando executado** (a partir de `android-app`):
+```powershell
+.\gradlew.bat :app:testDebugUnitTest --tests com.skywatch.cg.BootReceiverTest --console=plain
+```
+**Resultado focado:** `BUILD SUCCESSFUL`; 1 teste, 0 falhas, 0 erros e 0 ignorados.
+
+**Regressão completa:** `.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug --console=plain` concluiu com `BUILD SUCCESSFUL`; 57 testes contabilizados, 0 falhas, 0 erros e 1 ignorado por depender de CSV real. APK Debug atualizado. Não foi aberto emulador.
+
+O teste verifica a lógica do receiver com uma ação enviada pelo teste. Não comprova que o Android entregou `BOOT_COMPLETED` no reinício físico nem substitui o teste de notificação com voo SIROS real.

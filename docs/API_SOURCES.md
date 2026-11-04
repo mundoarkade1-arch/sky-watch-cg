@@ -33,3 +33,22 @@ Conclusão e decisão:
 ## 3. Aena Espanha — nota de escopo
 
 A página [Info vuelos](https://www.aena.es/es/infovuelos.html) diz que os horários são locais e baseados em dados operacionais confirmados e estimativas fornecidas pelas companhias aéreas, mas trata da operação espanhola. Ela não é uma fonte para voos do Aeroporto de Campo Grande e não autoriza reutilização dos dados da Aena Brasil.
+
+## 4. OpenSky Network — candidata para observações ADS-B (pesquisa em 04/11/2026)
+
+Documentação oficial consultada:
+- [Documentação da API OpenSky](https://openskynetwork.github.io/opensky-api/)
+- [REST API e consulta por bounding box](https://openskynetwork.github.io/opensky-api/rest.html)
+- [Termos de uso referenciados pela documentação](https://opensky-network.org/about/terms-of-use) — a página respondeu HTTP 403 nesta consulta; os termos completos não foram verificados.
+
+Constatações:
+- A API documentada fornece state vectors em tempo real com campos ADS-B como endereço ICAO, callsign, posição e timestamp; posições podem estar ausentes/obsoletas quando não há atualização recente.
+- A REST API documenta consulta de estado por bounding box WGS84 e menciona limites de taxa.
+- A própria documentação descreve o uso da API como voltado a pesquisa e não comercial; não fornece horários de aeroporto, atraso ou status operacional que não seja derivável dos dados ADS-B.
+- A documentação recomenda citar o trabalho OpenSky em publicações e materiais públicos que usem os dados. As exigências detalhadas de atribuição/licença não foram confirmadas por causa do HTTP 403.
+- Não foi feita consulta de cobertura ao redor de CGR nesta etapa. Logo, não se afirma que haja receptores ou aeronaves visíveis em SBCG.
+
+Decisão provisória:
+- OpenSky é apenas uma candidata técnica, não uma fonte aprovada para integração. Antes de incluí-la no app ou distribuir a funcionalidade, confirmar os termos completos para o uso pretendido, as exigências de atribuição, os limites da API e a cobertura local.
+- A arquitetura menciona AvioADSB, mas os materiais do projeto não identificam documentação oficial, endpoint ou termos. Não é possível confirmar o serviço nem sua cobertura sem uma referência canônica.
+- Se a cobertura for nula ou intermitente, o radar deve mostrar “sem observações disponíveis”, não preencher posições fictícias. Observações ADS-B permanecem separadas de voos planejados SIROS e não serão associadas a um voo sem correspondência verificável.

@@ -1,4 +1,10 @@
 # Changelog
+## 2026-11-04 — Teste de boot e início da avaliação do radar
+- Adicionado teste Robolectric que verifica o agendamento dos trabalhos únicos de sync e alertas quando o `BootReceiver` recebe `BOOT_COMPLETED`.
+- Regressão local: 57 testes unitários contabilizados, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado. Nenhum emulador foi aberto.
+- CI #51 passou para `ad4db53`.
+- Iniciada a avaliação OpenSky: a documentação oficial descreve posições ADS-B em state vectors, consultas geográficas e uso para pesquisa/não comercial. Termos detalhados e cobertura de CGR continuam sem validação; nenhuma integração ou posição foi exibida.
+
 ## 2026-11-04 — Uniformização do schema Room v6
 - Adicionada migração v5→v6 que remove o `CHECK (id = 1)` presente apenas em bancos migrados e preserva os registros.
 - Adicionados gatilhos idempotentes para aplicar a regra `id = 1` em bancos novos e migrados, em inserções e atualizações.
