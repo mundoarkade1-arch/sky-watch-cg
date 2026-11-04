@@ -3,6 +3,7 @@
 - Adicionado teste Robolectric que verifica o agendamento dos trabalhos únicos de sync e alertas quando o `BootReceiver` recebe `BOOT_COMPLETED`.
 - Regressão local: 57 testes unitários contabilizados, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado. Nenhum emulador foi aberto.
 - CI #51 passou para `ad4db53`.
+- Logcat do aparelho após reinício natural confirmou a execução do `BootReceiver` e o reagendamento às 17:06:21. A entrega de notificação não foi avaliada por falta de voo SIROS elegível.
 - Iniciada a avaliação OpenSky: a documentação oficial descreve posições ADS-B em state vectors, consultas geográficas e uso para pesquisa/não comercial. Termos detalhados e cobertura de CGR continuam sem validação; nenhuma integração ou posição foi exibida.
 
 ## 2026-11-04 — Uniformização do schema Room v6

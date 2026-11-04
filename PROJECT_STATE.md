@@ -45,7 +45,7 @@
 - [x] **CI #45 a #48 (04/11/2026):** concluídos com sucesso. #47 validou `c8d6761`; #48 validou a documentação do teste no aparelho no commit `9e82c84`.
 - [x] **CI #49 (04/11/2026):** concluído com sucesso para `4b072c4`.
 - [x] **CI #50 (04/11/2026):** concluído com sucesso para `9206269`, incluindo a migração Room v5→v6.
-- [x] **Reinicialização do telefone (04/11/2026):** app Debug instalado antes do boot, Android 14 voltou a conectar; permissão de notificações concedida e dois jobs WorkManager do app observados após o boot. Não foi encontrado log direto do `BootReceiver`; sem voo SIROS na janela, entrega de alerta e execução do receiver permanecem sem comprovação.
+- [x] **Reinicialização do telefone (04/11/2026):** app Debug instalado antes do boot. Logcat do boot natural registrou `BOOT_COMPLETED recebido` e o reagendamento de sync e alertas às 17:06:21–17:06:21.258; `boot_count=69` e uptime de 864 s quando conferidos. Permissão concedida e dois jobs WorkManager visíveis. Sem voo SIROS na janela, não houve teste de entrega de alerta.
 - [x] **Teste automatizado do `BootReceiver` (04/11/2026):** teste Robolectric envia a ação `BOOT_COMPLETED` ao receiver e verifica que os trabalhos únicos de sincronização e alertas ficam enfileirados. Não simula nem comprova entrega pelo sistema operacional no boot real.
 - [x] **CI #51 (04/11/2026):** concluído com sucesso para o commit `ad4db53`.
 - [x] **Pesquisa inicial de fonte ADS-B (04/11/2026):** documentação oficial OpenSky descreve state vectors em tempo real e consultas por área; uso informado para pesquisa/não comercial. Termos completos não puderam ser consultados (HTTP 403) e a cobertura de CGR não foi verificada. Nenhuma integração foi feita.
@@ -64,7 +64,7 @@
 - Aena: Sem API pública documentada confirmada; investigar integração autorizada antes de iniciar implementação.
 - AvioADSB: não foi possível confirmar uma documentação/API oficial ou os termos a partir dos materiais disponíveis; cobertura de CGR não deve ser presumida.
 - OpenSky: candidato técnico para posição ADS-B, mas elegibilidade de uso e cobertura de CGR ainda não foram comprovadas; não integrar enquanto os termos completos não forem verificados.
-- **Notificação ponta a ponta pendente:** o teste automatizado confirma o agendamento feito pelo código do receiver; após o reinício real não foi localizado log direto do `BootReceiver`. Sem voo SIROS entre 15 e 30 minutos, entrega e deduplicação do alerta não foram observadas.
+- **Notificação ponta a ponta pendente:** o `BootReceiver` foi confirmado pelo logcat após reinício natural e o teste automatizado cobre seu agendamento; sem voo SIROS entre 15 e 30 minutos, entrega e deduplicação do alerta não foram observadas.
 - **Validação manual de alertas pendente:** o worker busca eventos dentro da janela de 15–30 minutos e usa rede/periodicidade gerenciadas pelo WorkManager. Atrasos podem fazer a janela passar; o WorkManager não garante execução exatamente a cada 15 minutos. Verificar em aparelho real permissões, recebimento, deduplicação e reagendamento após reinicialização.
 - **Integração SIROS:** a tela usa os dados locais do Room; a atualização manual e a sincronização periódica atualizam esse cache com o CSV remoto.
 - A regra `sync_metadata.id = 1` está agora aplicada uniformemente por gatilhos no schema v6; migração v5→v6 mantém os dados. O schema legado v1 real continua indisponível, então os testes de v1 não comprovam a atualização de uma instalação legada real.

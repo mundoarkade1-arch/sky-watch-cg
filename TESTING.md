@@ -339,7 +339,9 @@ Schema Room exportado em `android-app/app/schemas/com.skywatch.cg.data.db.AppDat
 
 O telefone modelo 22101320G (Android 14/API 34) foi reiniciado manualmente depois da instalação e primeira abertura do APK Debug `com.skywatch.cg.debug`. O ADB voltou a conectar; `POST_NOTIFICATIONS` estava concedida, `RECEIVE_BOOT_COMPLETED` estava concedida e dois jobs do `SystemJobService` associados ao pacote foram encontrados no `dumpsys jobscheduler`.
 
-**Limite da evidência:** não foi localizado log do `BootReceiver` (`BOOT_COMPLETED recebido`/`re-agendando workers`). Os jobs existentes após a reinicialização comprovam que havia trabalhos registrados, mas, por si só, não comprovam que o receiver os reagendou. O usuário informou que não havia voo SIROS real programado na janela de 15–30 minutos; assim, não foi possível verificar entrega nem deduplicação de notificação. Nenhum dado de voo foi inventado.
+**Evidência direta do receiver:** sem enviar broadcast manual, o logcat após o boot registrou `BOOT_COMPLETED recebido - re-agendando workers periódicos` às 17:06:21, `sincronização periódica re-agendada` às 17:06:21.257 e `verificação de alertas re-agendada` às 17:06:21.258. Na conferência, o aparelho indicava `boot_count=69`, uptime de 864 s e fuso `America/Manaus` (UTC−4), compatíveis com o boot e os horários dos logs.
+
+**Limite restante:** o usuário informou que não havia voo SIROS real programado na janela de 15–30 minutos; assim, não foi possível verificar entrega nem deduplicação de notificação. Nenhum dado de voo foi inventado.
 
 | Verificação | Resultado |
 |---|---|
@@ -347,7 +349,7 @@ O telefone modelo 22101320G (Android 14/API 34) foi reiniciado manualmente depoi
 | App Debug instalado antes do boot | Sim |
 | Permissão de notificações | Concedida |
 | Jobs WorkManager visíveis após o boot | 2 jobs associados ao pacote |
-| Log direto de execução do `BootReceiver` | Não localizado |
+| Log direto de execução do `BootReceiver` | Sim; logcat após boot natural às 17:06:21 |
 | Voo SIROS real na janela de alerta | Não havia |
 | Notificação real recebida | Não avaliada; sem voo elegível |
 

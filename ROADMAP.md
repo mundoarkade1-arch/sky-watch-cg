@@ -43,9 +43,8 @@
 - [x] Definir janela de alerta SIROS de 15–30 minutos, deduplicação por voo/operação/data local e correção da data UTC de chegadas que cruzam a meia-noite; testes unitários e build local aprovados.
 - [x] Remover a inicialização duplicada de notificações, trabalhos periódicos e consulta de atualizações em `MainActivity`; 11 testes do ViewModel, APK Debug e 11 testes instrumentados no telefone aprovados.
 - [x] Uniformizar a regra `sync_metadata.id = 1` em bancos novos e migrados no schema v6; testes físicos cobrem inserção inválida, atualização inválida e migração preservando dados.
-- [x] Reiniciar o telefone com o app Debug instalado e verificar estado após o boot: permissão de notificação concedida e dois jobs WorkManager do app visíveis.
+- [x] Reiniciar o telefone com o app Debug instalado e confirmar no logcat a execução natural do `BootReceiver`, permissão concedida e jobs WorkManager após o boot.
 - [x] Testar o contrato do `BootReceiver` em Robolectric: `BOOT_COMPLETED` agenda os trabalhos únicos de sync e alertas; teste de código, não prova de entrega do broadcast pelo Android.
-- [ ] Confirmar por log ou teste controlado que `BootReceiver` recebeu `BOOT_COMPLETED`; o log direto não foi localizado nesta execução.
 - [ ] Verificar a entrega/deduplicação de alerta com um voo SIROS real na janela de 15–30 minutos; não havia voo elegível nesta execução.
 
 ## Etapa 7 — Radar ADS-B (avaliação da fonte iniciada)
