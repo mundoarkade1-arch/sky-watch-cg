@@ -5,6 +5,7 @@
 - O registro de deduplicação agora é gravado depois da chamada de publicação da notificação; o identificador de notificação estável permite atualizar a mesma notificação em uma repetição.
 - Validação local: 56 testes contabilizados (55 executados sem falhas e 1 ignorado), `assembleDebug` e `compileDebugAndroidTestKotlin` aprovados. Teste manual no aparelho após reinicialização permanece pendente.
 - CI #46 concluiu com sucesso para o commit anterior `5c7bdf5`; as mudanças desta seção ainda aguardam o próximo CI.
+- Reexecutados no telefone físico Android 14 (22101320G) os testes instrumentados: 11 testes, 0 falhas, 0 erros e 0 ignorados. O teste manual de notificações após reinicialização continua pendente; CI #47 para `c8d6761` está em execução.
 
 ## 2026-11-04 — Validação focada e correção do wrapper Windows
 - Reexecutada a suíte completa: 53 testes contabilizados, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` e os 11 testes isolados de `FlightListViewModelTest` passaram. CI #41 e #42 concluídos com sucesso.
@@ -14,11 +15,11 @@
 - Corrigidos o fixture instrumentado (`arrivalDate`) e o schema Room: o índice de `alert_sent` agora é declarado na entidade e uma migração idempotente v4→v5 atualiza bancos existentes. Resultado no Android 14: 11 testes instrumentados aprovados, cobrindo migrações v1→v5 e v4→v5.
 - Separado o pacote Debug como `com.skywatch.cg.debug` para permitir testes sem substituir o pacote Release. CI #43, #44 e #45 concluídos com sucesso; a validação local mais recente inclui a migração v5.
 
-## 2026-11-04 — Pesquisa de fonte Aena e validação manual de alertas
+## 2026-11-04 — Pesquisa de fonte Aena e plano de validação de alertas
 - Documentadas as páginas, sitemap, `robots.txt` e termos oficiais consultados para Aena Brasil. Não foi encontrada documentação pública de uma API de status para CGR; os termos consultados restringem reutilização sem autorização escrita e a entidade indicada nos termos não é a mesma identificada para a concessão de CGR.
 - Sem scraping nem integração: solicitar esclarecimento/autorização escrita e documentação apropriada à entidade responsável por CGR.
 - Incluídos na documentação os canais oficiais de atendimento da Aena para iniciar o pedido de orientação e autorização por escrito.
-- Adicionado roteiro para teste real de notificações após reinicialização. O roteiro explicita a janela atual de até 2 horas, a restrição de rede e a natureza não exata da periodicidade do WorkManager.
+- Adicionado roteiro para teste real de notificações após reinicialização. A janela foi posteriormente definida para 15–30 minutos antes; a restrição de rede e os atrasos possíveis do WorkManager continuam relevantes.
 
 ## 2026-11-04 — Alinhamento da documentação do projeto
 - Atualizados README e roadmap para refletir o estado implementado e validado: sincronização SIROS, infraestrutura de notificações locais, suíte unitária e CI #39 aprovado.

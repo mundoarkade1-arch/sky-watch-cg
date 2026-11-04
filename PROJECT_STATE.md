@@ -39,7 +39,9 @@
 - [x] **Fixture instrumentado corrigido (04/11/2026):** preenchido `arrivalDate` em `FlightDaoTest`; `compileDebugAndroidTestKotlin` aprovado.
 - [x] **Isolamento do pacote de teste Debug (04/11/2026):** adicionado sufixo `.debug` para evitar conflito com a instalação Release e preservar dados do app existente; o identificador Release permanece inalterado.
 - [x] **Correção e validação de migrações Room (04/11/2026):** o índice `idx_alert_sent_flight_date` que a migração v3→v4 já criava foi declarado na entidade `AlertSent`; banco atualizado para versão 5 com migração v4→v5 idempotente. Em aparelho físico Android 14, 11 testes instrumentados passaram, incluindo migração v1→v5 e v4→v5 com preservação de registro.
-- [x] **CI #45 e #46 (04/11/2026):** ambos concluídos com sucesso; #46 validou o commit `5c7bdf5` com a correção Room v5. As alterações atuais nos alertas ainda precisam de um novo CI após o envio.
+- [x] **Testes instrumentados no aparelho (04/11/2026):** após a alteração da janela de alertas, 11 testes passaram em telefone físico Android 14 (modelo 22101320G), sem emulador.
+- [x] **CI #45 e #46 (04/11/2026):** ambos concluídos com sucesso; #46 validou o commit `5c7bdf5` com a correção Room v5.
+- [ ] **CI #47:** execução para o commit `c8d6761` em andamento no momento da última consulta.
 - [x] **Roteiro manual de alertas após reinicialização:** adicionado a `TESTING.md`; execução em aparelho ainda pendente.
 
   - **6.3.1:** Download HTTP via OkHttp com parâmetros customizáveis no `SirosRemoteSource`, verificações de arquivo vazio (0 bytes) e download incompleto (Content-Length divergente).

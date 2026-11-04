@@ -273,9 +273,13 @@ Correções: preenchido `arrivalDate` no fixture; teste configurado para executa
 ```
 **Resultado no aparelho Android 14:** `BUILD SUCCESSFUL`; 11 testes instrumentados, 0 falhas, 0 erros e 0 ignorados. Inclui migração v1→v5, migração v4→v5 preservando registro de alerta e os testes do DAO de voos.
 
+**Reexecução no aparelho após os ajustes de alertas — 2026-11-04:** executado `.\gradlew.bat :app:connectedDebugAndroidTest --console=plain` com o telefone físico modelo 22101320G (Android 14 / API 34), identificado pelo Android SDK. Resultado: `BUILD SUCCESSFUL`; 11 testes, 0 falhas, 0 erros e 0 ignorados. Relatório XML em `android-app\app\build\outputs\androidTest-results\connected\debug\TEST-22101320G - 14-_app-.xml`.
+
+Essa execução valida migrações Room e operações DAO no aparelho; não valida a entrega de notificações, permissões em uso, voo real na janela ou o `BootReceiver` após reinicialização. O telefone não foi reiniciado.
+
 **Validação local complementar:** `:app:testDebugUnitTest`, `:app:assembleDebug`, `:app:compileDebugAndroidTestKotlin` e `:app:processReleaseManifest` concluíram com sucesso. Suíte unitária: 53 testes contabilizados, 0 falhas, 0 erros e 1 ignorado por depender de CSV real.
 
-**CI remoto:** CI #46 passou no commit `5c7bdf5`, incluindo a correção Room v5. As alterações de alertas descritas abaixo não estavam nesse commit e precisarão de novo CI após o envio.
+**CI remoto:** CI #46 passou no commit `5c7bdf5`, incluindo a correção Room v5. CI #47 para o commit `c8d6761` foi iniciado e estava em execução na última consulta.
 
 **Teste manual de notificações após reinicialização:** permanece pendente; o aparelho não foi reiniciado, a tela do app não foi configurada para alertas e não foi verificado voo SIROS real na janela exigida. Os 11 testes instrumentados não cobrem esse fluxo ponta a ponta.
 

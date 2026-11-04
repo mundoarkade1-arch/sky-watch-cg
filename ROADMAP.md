@@ -4,8 +4,8 @@
 - O MVP de chegadas e partidas, ingestão SIROS, sincronização periódica e infraestrutura de notificações locais estão implementados.
 - Correção da tela Sobre e do estado de atualização concluída. Validação local: 53 testes contabilizados (52 executados sem falhas e 1 ignorado); APK Debug gerado.
 - Revalidação local completa: 53 testes contabilizados (52 aprovados e 1 ignorado), `assembleDebug` aprovado; `FlightListViewModelTest` passou isoladamente (11 testes). Wrapper Gradle do Windows corrigido para propagar corretamente o código de saída.
-- CI #43 a #46 na branch `wip-fase3`: concluídos com sucesso; #46 validou a correção Room v5. O CI das alterações atuais de alertas será iniciado após o envio.
-- 11 testes instrumentados passaram em aparelho Android 14. A migração Room foi atualizada para v5, com cobertura de v1→v5 e v4→v5 sem perda de registro.
+- CI #43 a #46 na branch `wip-fase3`: concluídos com sucesso; #46 validou a correção Room v5. CI #47 para `c8d6761` está em andamento.
+- 11 testes instrumentados passaram em aparelho físico Android 14 (modelo 22101320G), incluindo migrações v1→v5 e v4→v5 sem perda de registro; execução feita sem emulador.
 - A pesquisa inicial da Etapa 4 foi registrada; integração Aena depende de autorização/documentação apropriadas para CGR. Nenhuma posição ADS-B ou status operacional é apresentado como confirmado sem correspondência verificável.
 
 ## Etapa 1 — Validação das fontes e arquitetura (Concluída)
