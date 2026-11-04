@@ -20,7 +20,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.skywatch.cg.BuildConfig
 import com.skywatch.cg.R
 import com.skywatch.cg.data.db.SyncMetadata
 import com.skywatch.cg.data.siros.NormalizedFlight
@@ -43,6 +46,26 @@ import java.util.Locale
 @Composable
 fun MainScreen(viewModel: FlightListViewModel) {
     val navController = rememberNavController()
+    
+    NavHost(navController, startDestination = "voos") {
+        composable("voos") {
+            FlightsScreen(
+                viewModel = viewModel,
+                navController = navController
+            )
+        }
+        composable("sobre") {
+            AboutScreen(navController = navController)
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FlightsScreen(
+    viewModel: FlightListViewModel,
+    navController: androidx.navigation.NavController
+) {
     val uiState by viewModel.uiState.collectAsState()
     val syncMetadata by viewModel.syncMetadata.collectAsState()
 
@@ -77,6 +100,7 @@ fun MainScreen(viewModel: FlightListViewModel) {
         )
     }
 }
+
 @Composable
 fun TopAppBarWrapper(
     viewModel: FlightListViewModel,
@@ -328,7 +352,46 @@ fun ErrorState(message: String, onRetry: () -> Unit) {
 }
 
 @Composable
+fun AboutScreen(onNavigateBack: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = "Sobre",
+            style = MaterialTheme.typography.displayMedium,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+        
+        Text(
+            text = "Dados: CSV público da ANAC (SIROS)",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        
+        Text(
+            text = "Horários programados. Não confirmam a operação em tempo real.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+        )
+        
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        Text(
+            text = "Versão ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+        )
+    }
+}
+
+@Composable
 fun BottomNavBar(navController: androidx.navigation.NavController) {
+    val navBackStackEntry = navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry.value?.destination?.route ?: "voos"
+    
     NavigationBar(
         modifier = Modifier
             .fillMaxWidth()
@@ -339,14 +402,26 @@ fun BottomNavBar(navController: androidx.navigation.NavController) {
         NavigationBarItem(
             icon = { Icon(painter = painterResource(R.drawable.ic_voos), contentDescription = null) },
             label = { Text(text = "Voos", style = MaterialTheme.typography.labelSmall) },
-            selected = true,
-            onClick = { }
+            selected = currentRoute == "voos",
+            onClick = {
+                navController.navigate("voos") {
+                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
         )
         NavigationBarItem(
             icon = { Icon(painter = painterResource(R.drawable.ic_sobre), contentDescription = null) },
             label = { Text(text = "Sobre", style = MaterialTheme.typography.labelSmall) },
-            selected = false,
-            onClick = { }
+            selected = currentRoute == "sobre",
+            onClick = {
+                navController.navigate("sobre") {
+                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
         )
     }
 }
