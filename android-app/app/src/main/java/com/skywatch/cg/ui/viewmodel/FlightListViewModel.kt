@@ -38,7 +38,7 @@ sealed interface FlightUiState {
 
 class FlightListViewModel(
     application: Application,
-    private val repository: SirosRepository,
+    internal val repository: SirosRepository,
     private val todayProvider: () -> LocalDate = { LocalDate.now() }
 ) : AndroidViewModel(application) {
 

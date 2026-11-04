@@ -306,7 +306,7 @@ class FlightListViewModelTest {
         )
         
         // Use the SAME repository instance as the viewModel to ensure data visibility
-        val testRepository = viewModel.repository as com.skywatch.cg.data.siros.SirosRepository
+        val testRepository = viewModel.repository
         testRepository.saveNormalizedFlights(listOf(departureAt0200Utc))
         testDispatcher.scheduler.advanceUntilIdle()
         
