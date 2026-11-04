@@ -27,7 +27,9 @@
 - [x] **Fase 6.1 (SyncMetadata) validada nos testes unitários e instrumentados:** entidade `SyncMetadata`, `SyncMetadataDao`, migração Room v1→v2 com restrição `CHECK (id = 1)`. Testes instrumentados (`AppDatabaseMigrationTest`, `FlightDaoTest`) executados com sucesso em aparelho real (Poco X5 Pro, Android 14, USB): 10 testes, 0 falhas, 0 erros. **Ressalvas:** a migração foi validada sobre uma "v1 provável" (tabela flights idêntica ao schema atual gerado pelo Room); o schema real da v1 nunca foi exportado e não é recuperável do Git (arquivos só existem a partir do commit 5385fe2), portanto o teste não prova a migração de um aparelho real rodando a v1 antiga. Além disso, em instalações novas (schema v2), o Room cria `sync_metadata` SEM o `CHECK (id = 1)`; apenas bancos migrados da v1 possuem o CHECK.
 - [x] **Fase 6.3 (Corrigida): Ingestão remota, transação atômica, última atualização na interface, WorkManager e APK de debug.**
 - [x] **Etapa A concluída:** Correção do teste `testRefreshStateEmitsRefreshing` em `FlightListViewModelTest` utilizando fonte remota falsa (`SirosRemoteSource` com localhost fictício) e controle de corrotinas (`yield()` / `advanceUntilIdle()`). 36 testes unitários verdes (0 falhas). Código enviado para o repositório remoto via `git push origin main` (após `git commit --amend`).
-- [x] **Estabilização da Fase 3 (04/11/2026):** investigada a falha do CI #38 (2 testes de atualização falhando). A causa era a dependência de rede real em testes do ViewModel; os testes agora usam fonte remota controlada. O estado `Refreshing` é mantido durante emissões do Room, atualizações repetidas são evitadas, falhas preservam dados em cache e a tela Sobre usa retorno acessível e conteúdo rolável. Validação local em 18:59 UTC / 14:59 Campo Grande: 53 testes, 0 falhas, 0 erros, 1 ignorado; `assembleDebug` bem-sucedido.
+- [x] **Estabilização da Fase 3 (04/11/2026):** investigada a falha do CI #38 (2 testes de atualização falhando). A causa era a dependência de rede real em testes do ViewModel; os testes agora usam fonte remota controlada. O estado `Refreshing` é mantido durante emissões do Room, atualizações repetidas são evitadas, falhas preservam dados em cache e a tela Sobre usa retorno acessível e conteúdo rolável. Validação local em 18:59 UTC / 14:59 Campo Grande: 53 testes contabilizados (52 executados, 0 falhas e 1 ignorado); `assembleDebug` bem-sucedido.
+- [x] **CI #39 (04/11/2026):** commit `bccfd48` na branch `wip-fase3` concluído com sucesso no GitHub Actions.
+- [x] **Documentação alinhada (04/11/2026):** `README.md`, `ROADMAP.md`, `PROJECT_STATE.md`, `TESTING.md` e `CHANGELOG.md` sincronizados com o estado comprovado do projeto.
 
   - **6.3.1:** Download HTTP via OkHttp com parâmetros customizáveis no `SirosRemoteSource`, verificações de arquivo vazio (0 bytes) e download incompleto (Content-Length divergente).
   - **6.3.2:** `syncFromRemote()` com transação Room atômica (`withTransaction`), fechamento de streams, filtro streaming de SBCG, tratamento de erros e gravação de status `FAILURE` preservando a última sincronização bem-sucedida.
@@ -40,13 +42,12 @@
 
 ## Bloqueios e riscos
 - SIROS CSV: Requer download periódico e tratamento correto da codificação UTF-8 com BOM (detectado automaticamente) e delimitador ;.
-- Aena: Sem API pública documentada, sujeito a tratamento de frontend.
+- Aena: Sem API pública documentada confirmada; investigar integração autorizada antes de iniciar implementação.
 - AvioADSB: Baixa cobertura em CGR (experimental).
-- Alertas locais: Exigem receptor de boot (BOOT_COMPLETED) para reagendar alarmes após reiniciar o aparelho.
-- **Limitação atual:** A ingestão remota automatizada do CSV SIROS/ANAC ainda não está totalmente integrada no fluxo de tela (as telas consultam diretamente o banco local Room).
+- **Validação manual pendente:** registrar teste ponta a ponta das notificações após reinicialização do dispositivo. Os testes automatizados e a implementação de `BootReceiver` não substituem esse teste.
+- **Integração SIROS:** a tela usa os dados locais do Room; a atualização manual e a sincronização periódica atualizam esse cache com o CSV remoto.
 - **Ponto em aberto (Room):** em instalações NOVAS (schema v2), o Room cria a tabela sync_metadata SEM a restrição CHECK (id = 1). Somente bancos que passaram pela MIGRATION_1_2 têm o CHECK. Ou seja, o CHECK não vale em todos os bancos. Nenhum código foi alterado por causa disso; a decisão fica para depois.
 
 ## Próxima etapa
-- [x] **Fase 6.4 (Notificações Locais):** `NotificationHelper`, `FlightAlertWorker` e `BootReceiver` (BOOT_COMPLETED) implementados e integrados para alertas de voos nas próximas 2 horas.
-
-- Iniciar a implementação do sistema de alertas locais com AlarmManager/WorkManager.
+- Confirmar e documentar uma fonte autorizada para status operacional Aena antes de planejar a implementação.
+- Depois, avaliar cobertura e termos de uma fonte ADS-B para CGR; manter observações ADS-B separadas dos voos SIROS e sem identificação não verificada.

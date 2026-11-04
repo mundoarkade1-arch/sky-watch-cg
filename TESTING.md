@@ -241,4 +241,8 @@ Fase 6.3 concluída com sucesso. APK de debug gerado: `android-app\app\build\out
 cd android-app
 .\gradlew.bat :app:testDebugUnitTest :app:assembleDebug --console=plain
 ```
-**Resultado reproduzível:** `BUILD SUCCESSFUL`; 53 testes, 0 falhas, 0 erros e 1 ignorado (`SirosStreamParserRealFileTest`, depende de CSV real local). APK Debug gerado em `android-app\app\build\outputs\apk\debug\app-debug.apk` (11.019.269 bytes).
+**Resultado reproduzível:** `BUILD SUCCESSFUL`; 53 testes contabilizados: 52 executados, 0 falhas, 0 erros e 1 ignorado (`SirosStreamParserRealFileTest`, depende de CSV real local). APK Debug gerado em `android-app\app\build\outputs\apk\debug\app-debug.apk` (11.019.269 bytes).
+
+**CI remoto:** execução #39, commit `bccfd48` na branch `wip-fase3`, concluída com sucesso em 2026-11-04. [Ver execução no GitHub Actions](https://github.com/mundoarkade1-arch/sky-watch-cg/actions/runs/41892849679).
+
+**Escopo ainda não coberto por esta execução:** teste manual ponta a ponta das notificações após reinicialização do dispositivo. A conclusão do CI não representa esse teste físico.

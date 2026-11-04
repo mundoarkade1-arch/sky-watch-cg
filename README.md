@@ -3,7 +3,7 @@
 Aplicativo Android para acompanhar voos comerciais de chegada e partida do Aeroporto Internacional de Campo Grande (CGR / SBCG), com radar ADS-B e alertas.
 
 ## Objetivo inicial
-Validar fontes gratuitas e permitidas de dados antes de implementar a interface completa.
+Exibir voos planejados para Campo Grande com fontes documentadas, distinguindo planejamento, status operacional e observações ADS-B.
 
 ## Escopo aprovado
 - Plataforma: Android
@@ -15,7 +15,7 @@ Validar fontes gratuitas e permitidas de dados antes de implementar a interface 
 - Prioridade: fontes gratuitas
 
 ## Estado atual
-Projeto em desenvolvimento ativo. Fase 0 concluída (limpeza, verdade, correção de normalização e documentação).
+Projeto em desenvolvimento ativo. O MVP Android, a sincronização SIROS, a sincronização periódica e a base de notificações locais estão implementados. A última validação local contabilizou 53 testes: 52 executados sem falhas e 1 ignorado por depender de CSV real; o APK Debug foi gerado e o CI #39 concluiu com sucesso. Status operacional Aena e radar ADS-B continuam planejados e dependem de fontes autorizadas e verificáveis.
 
 ## Estrutura
 - `AGENTS.md`: regras para agentes de IA

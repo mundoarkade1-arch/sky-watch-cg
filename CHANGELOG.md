@@ -1,4 +1,10 @@
 # Changelog
+## 2026-11-04 — Alinhamento da documentação do projeto
+- Atualizados README e roadmap para refletir o estado implementado e validado: sincronização SIROS, infraestrutura de notificações locais, suíte unitária e CI #39 aprovado.
+- Removidas as indicações contraditórias de que as Fases 6.2–6.4 e o refresh remoto ainda não estavam implementados.
+- Registrados como próximos itens a investigação de uma fonte autorizada para Aena e a validação manual de alertas após reinicialização do dispositivo.
+- Esclarecida a contagem da suíte local: 53 testes contabilizados, 52 executados sem falhas e 1 ignorado por depender de CSV real.
+
 ## 2026-11-04 — Estabilização da atualização e da tela Sobre
 - O `FlightListViewModel` mantém o estado de atualização enquanto os fluxos do Room emitem mudanças, evita atualizações remotas simultâneas e encerra o estado de carregamento em sucesso ou falha. A falha preserva os voos em cache; sem cache, apresenta erro.
 - Testes de atualização passaram a usar uma fonte remota falsa controlada pelo teste, sem depender de rede ou do endpoint SIROS.
