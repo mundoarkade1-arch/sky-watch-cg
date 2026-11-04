@@ -149,8 +149,21 @@ class FlightListViewModelTest {
         assertNotNull(finalState)
         assertTrue(finalState is FlightUiState.Success)
         val success = finalState as FlightUiState.Success
-        assertEquals(1, success.arrivals.size)
-        assertEquals(1, success.departures.size)
+        
+        // Consulta todos os voos gravados no banco para diagnóstico
+        val allFlightsInDb = repository.getAllDepartures() + repository.getAllArrivals()
+        val diagInfo = buildString {
+            append("DIAGNOSTICO: ")
+            append("selectedDate=$testDate; ")
+            append("allFlightsDb=[${allFlightsInDb.joinToString { f -> 
+                "id=${f.flightId}, flightDate=${f.flightDate}, arrivalDate=${f.arrivalDate}, depUtc=${f.scheduledDepartureUtc}, arrUtc=${f.scheduledArrivalUtc}, origTz=${f.originTimezone}, destTz=${f.destinationTimezone}"
+            }}]; ")
+            append("returnedArrivals=${success.arrivals.map { it.flightId }}; ")
+            append("returnedDepartures=${success.departures.map { it.flightId }}")
+        }
+        
+        assertEquals(diagInfo, 1, success.arrivals.size)
+        assertEquals(diagInfo, 1, success.departures.size)
         assertEquals("GOL", success.arrivals[0].airline)
         assertEquals("1234", success.arrivals[0].flightNumber)
         assertEquals("GOL", success.departures[0].airline)
@@ -334,7 +347,7 @@ class FlightListViewModelTest {
 
         // Flight should appear on 14th (local date), not 15th
         assertEquals(diagInfo, localExpectedDate, success.selectedDate)
-        assertEquals(1, success.departures.size)
+        assertEquals(diagInfo, 1, success.departures.size)
         assertEquals("GLO-9999-2024-10-15", success.departures[0].flightId)
         assertEquals(LocalTime.of(2, 0), success.departures[0].scheduledDepartureUtc)
     }
