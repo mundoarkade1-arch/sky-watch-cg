@@ -275,22 +275,34 @@ Correções: preenchido `arrivalDate` no fixture; teste configurado para executa
 
 **Validação local complementar:** `:app:testDebugUnitTest`, `:app:assembleDebug`, `:app:compileDebugAndroidTestKotlin` e `:app:processReleaseManifest` concluíram com sucesso. Suíte unitária: 53 testes contabilizados, 0 falhas, 0 erros e 1 ignorado por depender de CSV real.
 
-**CI remoto:** CI #45 passou no commit `b03ae3a`, anterior à correção Room v5 desta execução. O CI da revisão atual será criado após o envio do commit.
+**CI remoto:** CI #46 passou no commit `5c7bdf5`, incluindo a correção Room v5. As alterações de alertas descritas abaixo não estavam nesse commit e precisarão de novo CI após o envio.
 
 **Teste manual de notificações após reinicialização:** permanece pendente; o aparelho não foi reiniciado, a tela do app não foi configurada para alertas e não foi verificado voo SIROS real na janela exigida. Os 11 testes instrumentados não cobrem esse fluxo ponta a ponta.
+
+## Validação local dos alertas — 2026-11-04
+
+O `FlightAlertWorker` considera horários planejados SIROS entre 15 e 30 minutos antes do evento no fuso do aeroporto, deduplica pelo voo/operação/data local e usa `arrivalDate` como data UTC das chegadas. A permissão de notificações é verificada antes de processar os voos. O registro de deduplicação é salvo após a chamada de publicação, para não marcar como enviado antes de tentar notificar.
+
+**Comandos executados** (a partir de `android-app`):
+```powershell
+.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug :app:compileDebugAndroidTestKotlin --console=plain
+```
+**Resultado:** `BUILD SUCCESSFUL`; 56 testes contabilizados, 0 falhas, 0 erros e 1 ignorado por depender de CSV real. APK Debug e compilação dos testes instrumentados concluídos.
+
+O WorkManager pode atrasar execuções, então a janela pode passar sem notificação. Esse comportamento usa apenas o horário programado SIROS e não confirma o estado operacional do voo. O teste ponta a ponta após reinicialização continua pendente.
 
 ## Roteiro manual — alertas após reinicialização (a executar no Android)
 
 **Objetivo:** verificar permissões e reagendamento pelo `BootReceiver` em um aparelho real. Este roteiro não substitui a informação operacional da companhia aérea nem confirma a operação do voo.
 
-**Comportamento atual a considerar:** o `FlightAlertWorker` só procura voos programados para os próximos 120 minutos, e a verificação periódica exige conexão de rede e tem intervalo mínimo configurado de 15 minutos. O WorkManager pode atrasar a execução; não prometa alerta exatamente 15 minutos antes. A fonte SIROS contém planejamento, não confirmação operacional. Use apenas um registro real presente no aplicativo; se não houver voo real na janela de teste, registre “não foi possível testar” em vez de criar dados fictícios.
+**Comportamento atual a considerar:** o `FlightAlertWorker` só notifica quando o evento planejado está entre 15 e 30 minutos adiante. O trabalho periódico exige conexão de rede e tem intervalo mínimo configurado de 15 minutos; o WorkManager pode atrasar a execução e deixar a janela passar. A fonte SIROS contém planejamento, não confirmação operacional. Use apenas um registro real presente no aplicativo; se não houver voo real na janela de teste, registre “não foi possível testar” em vez de criar dados fictícios.
 
 1. Instale o APK Debug produzido pelo build validado e abra o aplicativo pelo menos uma vez.
 2. Quando solicitado, permita notificações. Confirme também nas configurações do Android que as notificações do SKY WATCH CG e o canal “Alertas de Voo” estão habilitados.
-3. Conecte o aparelho à internet e atualize a lista SIROS. Confira que existe um voo real no cache com evento programado nos próximos 120 minutos. Registre o identificador/data do registro SIROS e o horário programado local, sem afirmar que o voo está confirmado.
+3. Conecte o aparelho à internet e atualize a lista SIROS. Confira que existe um voo real no cache com evento programado entre 15 e 30 minutos adiante. Registre o identificador/data do registro SIROS e o horário programado local, sem afirmar que o voo está confirmado.
 4. Anote a hora local e UTC; reinicie o aparelho usando o menu normal de energia. Após desbloquear, mantenha a conexão de rede ativa.
 5. Aguarde o WorkManager executar. A periodicidade de 15 minutos é um intervalo mínimo aproximado, não um prazo exato. Verifique se a notificação aparece e se mostra chegada/partida e horário local compatíveis com o registro planejado.
-6. Observe se a mesma notificação reaparece ou é atualizada em execuções subsequentes. Registre repetições; o worker verifica periodicamente qualquer voo dentro da janela de duas horas.
+6. Observe se a mesma notificação reaparece ou é atualizada em execuções subsequentes. Registre repetições; após o primeiro envio registrado, o worker deve ignorar o mesmo evento.
 7. Repita, se possível, com aparelho offline durante parte do período e depois reconectado; anote horários e se o trabalho retomou. Não interprete a ausência de notificação como prova de cancelamento do voo.
 
 **Registrar no resultado:** modelo do aparelho, versão Android, versão/commit do APK, permissões, identificador SIROS e data do voo, horário programado local/UTC, horário do reinício, horário de cada notificação, estado de rede e resultado. Não publicar matrícula, posição ou status operacional sem fonte verificável.

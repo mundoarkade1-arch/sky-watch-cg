@@ -35,8 +35,8 @@ interface FollowedFlightDao {
 @Dao
 interface AlertSentDao {
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(alert: AlertSent): Long
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertIfAbsent(alert: AlertSent): Long
 
     @Query("SELECT EXISTS(SELECT 1 FROM alert_sent WHERE id = :id)")
     suspend fun isAlertSent(id: String): Boolean

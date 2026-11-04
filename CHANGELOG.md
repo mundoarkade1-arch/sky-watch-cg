@@ -1,4 +1,11 @@
 # Changelog
+## 2026-11-04 — Ajustes de alertas locais
+- Definida a janela dos alertas de voos planejados SIROS entre 15 e 30 minutos antes do evento local, com deduplicação por voo, operação e data local.
+- Corrigido o cálculo da data UTC do evento de chegada para usar `arrivalDate`, evitando deslocamento de um dia em voos que cruzam a meia-noite UTC.
+- O registro de deduplicação agora é gravado depois da chamada de publicação da notificação; o identificador de notificação estável permite atualizar a mesma notificação em uma repetição.
+- Validação local: 56 testes contabilizados (55 executados sem falhas e 1 ignorado), `assembleDebug` e `compileDebugAndroidTestKotlin` aprovados. Teste manual no aparelho após reinicialização permanece pendente.
+- CI #46 concluiu com sucesso para o commit anterior `5c7bdf5`; as mudanças desta seção ainda aguardam o próximo CI.
+
 ## 2026-11-04 — Validação focada e correção do wrapper Windows
 - Reexecutada a suíte completa: 53 testes contabilizados, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` e os 11 testes isolados de `FlightListViewModelTest` passaram. CI #41 e #42 concluídos com sucesso.
 - Corrigido `android-app/gradlew.bat` para preservar o código de saída real do Gradle, em vez de retornar falha após builds aprovados.

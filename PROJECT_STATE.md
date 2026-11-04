@@ -33,12 +33,13 @@
 - [x] **CI #41 e #42 (04/11/2026):** ambos concluídos com sucesso; #42 validou build Debug e suíte unitária para o commit `fa2712d`.
 - [x] **CI #43 e #44 (04/11/2026):** concluídos com sucesso para os commits `8aff2ce` e `dcdaddb`.
 - [x] **Documentação alinhada (04/11/2026):** `README.md`, `ROADMAP.md`, `PROJECT_STATE.md`, `TESTING.md` e `CHANGELOG.md` sincronizados com o estado comprovado do projeto.
+- [x] **Alertas locais:** janela entre 15 e 30 minutos antes do horário programado local, deduplicação por voo/operação/data local e uso de `arrivalDate` para calcular chegadas que cruzam a meia-noite UTC. Validação local: 56 testes contabilizados, 0 falhas e 1 ignorado; build Debug e compilação dos testes instrumentados concluídos.
 - [x] **Pesquisa Aena Brasil (04/11/2026):** página e sitemap oficiais de CGR consultados; não foi localizada documentação pública de painel/API para CGR. Os termos consultados restringem reprodução de conteúdo sem autorização escrita e identificam ANB, enquanto CGR é administrado pela BOAB. Sem presumir que os termos resolvam o escopo de CGR, nenhuma coleta automatizada será implementada antes de confirmação escrita e documentação apropriada. Detalhes e fontes em `docs/API_SOURCES.md`.
 - [x] **Minuta de pedido Aena/BOAB preparada (04/11/2026):** `docs/AENA_API_REQUEST.md` pede identificação da entidade responsável, documentação de API, condições de uso e autorização escrita. A minuta não foi enviada; confirmação do canal apropriado e envio pelo responsável pelo projeto continuam pendentes.
 - [x] **Fixture instrumentado corrigido (04/11/2026):** preenchido `arrivalDate` em `FlightDaoTest`; `compileDebugAndroidTestKotlin` aprovado.
 - [x] **Isolamento do pacote de teste Debug (04/11/2026):** adicionado sufixo `.debug` para evitar conflito com a instalação Release e preservar dados do app existente; o identificador Release permanece inalterado.
 - [x] **Correção e validação de migrações Room (04/11/2026):** o índice `idx_alert_sent_flight_date` que a migração v3→v4 já criava foi declarado na entidade `AlertSent`; banco atualizado para versão 5 com migração v4→v5 idempotente. Em aparelho físico Android 14, 11 testes instrumentados passaram, incluindo migração v1→v5 e v4→v5 com preservação de registro.
-- [x] **CI #45 (04/11/2026):** commit `b03ae3a` concluiu build e testes com sucesso; a correção Room v5 subsequente foi validada localmente e em aparelho, e aguarda o CI do novo commit.
+- [x] **CI #45 e #46 (04/11/2026):** ambos concluídos com sucesso; #46 validou o commit `5c7bdf5` com a correção Room v5. As alterações atuais nos alertas ainda precisam de um novo CI após o envio.
 - [x] **Roteiro manual de alertas após reinicialização:** adicionado a `TESTING.md`; execução em aparelho ainda pendente.
 
   - **6.3.1:** Download HTTP via OkHttp com parâmetros customizáveis no `SirosRemoteSource`, verificações de arquivo vazio (0 bytes) e download incompleto (Content-Length divergente).
@@ -55,7 +56,7 @@
 - Aena: Sem API pública documentada confirmada; investigar integração autorizada antes de iniciar implementação.
 - AvioADSB: Baixa cobertura em CGR (experimental).
 - **Validação manual pendente:** registrar teste ponta a ponta das notificações após reinicialização do dispositivo. Os testes instrumentados Room/DAO passaram, mas não testam o fluxo de notificações/`BootReceiver` ponta a ponta.
-- **Comportamento de alertas a validar:** o worker considera eventos nas próximas 2 horas e roda periodicamente com restrição de rede; WorkManager não garante execução exatamente a cada 15 minutos. Verificar no aparelho se uma notificação é repetida/atualizada nas execuções seguintes.
+- **Validação manual de alertas pendente:** o worker busca eventos dentro da janela de 15–30 minutos e usa rede/periodicidade gerenciadas pelo WorkManager. Atrasos podem fazer a janela passar; o WorkManager não garante execução exatamente a cada 15 minutos. Verificar em aparelho real permissões, recebimento, deduplicação e reagendamento após reinicialização.
 - **Integração SIROS:** a tela usa os dados locais do Room; a atualização manual e a sincronização periódica atualizam esse cache com o CSV remoto.
 - **Ponto em aberto (Room):** em instalações NOVAS (schema v5), o Room cria a tabela `sync_metadata` sem a restrição `CHECK (id = 1)`. A restrição é criada pelas migrações de bancos antigos, mas não se aplica uniformemente a bancos novos. Continua registrado como pendência separada.
 
