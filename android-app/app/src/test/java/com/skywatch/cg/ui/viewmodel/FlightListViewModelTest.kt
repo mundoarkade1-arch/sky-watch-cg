@@ -31,6 +31,7 @@ class FlightListViewModelTest {
     private lateinit var db: AppDatabase
     private lateinit var viewModel: FlightListViewModel
     private lateinit var testDispatcher: TestDispatcher
+    private val fixedToday = LocalDate.of(2024, 10, 15)
 
     @Before
     fun setUp() {
@@ -44,7 +45,6 @@ class FlightListViewModelTest {
             .build()
         val testRepository = com.skywatch.cg.data.siros.SirosRepository(db, testDispatcher)
         // Use fixed date provider for deterministic tests
-        val fixedToday = LocalDate.of(2024, 10, 15)
         viewModel = FlightListViewModel(
             ApplicationProvider.getApplicationContext(),
             testRepository,
@@ -236,13 +236,13 @@ class FlightListViewModelTest {
         viewModel.uiState.first { it !is FlightUiState.Loading }
         
         val today = viewModel.selectedDate.value
-        assertEquals(LocalDate.now(), today)
+        assertEquals(fixedToday, today)
         
         val finalState = viewModel.uiState.value
         assertNotNull(finalState)
         assertTrue(finalState is FlightUiState.Success || finalState is FlightUiState.Error)
         if (finalState is FlightUiState.Success) {
-            assertEquals(LocalDate.now(), finalState.selectedDate)
+            assertEquals(fixedToday, finalState.selectedDate)
         }
     }
 
