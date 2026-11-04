@@ -67,26 +67,66 @@ internal fun formatAirlineName(airline: String): String {
 
 /**
  * Formata o nome do aeroporto para exibição: "Cidade (CÓDIGO)".
- * Remove "BRASIL" e estado (ex: "- SP").
+ * Para aeroportos brasileiros no formato "NOME1 - CIDADE - UF - BRASIL (CÓDIGO)":
+ * - Separa por " - "
+ * - Remove "BRASIL" e a sigla de 2 letras do estado (SP, MS, RJ, etc.)
+ * - A cidade é o ÚLTIMO pedaço que sobrar
  * Exemplo: "VIRACOPOS - CAMPINAS - SP - BRASIL (SBKP)" -> "Campinas (SBKP)"
- * Exemplo: "GUARULHOS (SBGR)" -> "Guarulhos (SBGR)"
- * Se não conseguir separar a cidade com segurança, retorna o nome sem sufixos.
+ * Exemplo: "GUARULHOS - GOVERNADOR ANDRÉ FRANCO MONTORO - GUARULHOS - SP - BRASIL (SBGR)" -> "Guarulhos (SBGR)"
+ * Se não seguir o padrão brasileiro, retorna o nome original sem inventar.
  */
 internal fun formatAirportDisplay(name: String?, code: String): String {
-    val rawName = name ?: code
-    // Remove "BRASIL" e o que vier depois (estado, etc.)
-    val withoutBrasil = rawName.split("BRASIL", ignoreCase = true).first().trim()
-    // Remove sufixo de estado tipo " - SP", " - RJ", etc.
-    val withoutState = withoutBrasil.replace(Regex("\\s*-\\s*[A-Z]{2}\\s*$"), "").trim()
-    // Remove trailing separators
-    val cleanName = withoutState.trimEnd('-').trim()
-    // Tenta capitalizar a primeira letra de cada palavra (caso venha tudo maiúsculo)
-    val displayName = cleanName.split(" ").map { it.lowercase().replaceFirstChar { it.uppercase() } }.joinToString(" ")
-    return if (displayName.equals(code, ignoreCase = true)) {
-        code
-    } else {
-        "$displayName ($code)"
+    val rawName = name ?: return code
+    
+    // Extrai o código ICAO se estiver entre parênteses no final
+    val icaoInParens = Regex("\\(([A-Z]{4})\\)$").find(rawName)?.groupValues?.get(1)
+    val effectiveCode = icaoInParens ?: code
+    
+    // Remove o código ICAO do final se estiver lá
+    val nameWithoutIcao = rawName.replace(Regex("\\s*\\([A-Z]{4}\\)\\s*$"), "").trim()
+    
+    // Separa por " - "
+    val parts = nameWithoutIcao.split(" - ").map { it.trim() }.filter { it.isNotEmpty() }
+    
+    // Se não tem separadores ou tem poucos pedaços, não é padrão brasileiro
+    if (parts.size < 3) {
+        // Tenta usar o nome original (sem o código ICAO se tinha)
+        val displayName = nameWithoutIcao
+        return if (displayName.equals(effectiveCode, ignoreCase = true)) {
+            effectiveCode
+        } else {
+            "${capitalizeWords(displayName)} ($effectiveCode)"
+        }
     }
+    
+    // Remove "BRASIL" (case-insensitive) e siglas de estado de 2 letras
+    val brazilianStates = setOf("AC", "AL", "AP", "AM", "BA", "CE", "DF", "ES", "GO", "MA", 
+                                "MT", "MS", "MG", "PA", "PB", "PR", "PE", "PI", "RJ", "RN", 
+                                "RS", "RO", "RR", "SC", "SP", "SE", "TO")
+    
+    val filteredParts = parts.filter { part ->
+        val upper = part.uppercase()
+        !upper.equals("BRASIL") && !brazilianStates.contains(upper)
+    }
+    
+    // A cidade é o ÚLTIMO pedaço que sobrar
+    val city = filteredParts.lastOrNull() ?: parts.last()
+    
+    val displayName = capitalizeWords(city)
+    return if (displayName.equals(effectiveCode, ignoreCase = true)) {
+        effectiveCode
+    } else {
+        "$displayName ($effectiveCode)"
+    }
+}
+
+/**
+ * Capitaliza a primeira letra de cada palavra, resto minúsculo.
+ */
+private fun capitalizeWords(text: String): String {
+    return text.split(" ").map { word ->
+        if (word.isEmpty()) word else word.lowercase().replaceFirstChar { it.uppercase() }
+    }.joinToString(" ")
 }
 
 /**
