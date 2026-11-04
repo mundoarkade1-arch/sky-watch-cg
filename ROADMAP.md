@@ -2,6 +2,7 @@
 
 ## Status atual — 2026-11-04
 - A agenda foi unificada por horário local de CGR, com filtros Todos/Pousos/Decolagens e recomendação da faixa contínua de 3 horas com mais pousos e decolagens programados. A recomendação permanece baseada em todos os movimentos mesmo com um filtro selecionado; teste completo local: 75 por variante, sem falhas, 1 ignorado, builds Debug/Release e lint aprovados. APK Debug `1.0.18` aberto no telefone Android 14, sem emulador.
+- CI #58 e Release #14 passaram para o commit `951ce68`; a prévia Debug `v1.0.18` e o APK foram publicados no [GitHub Releases](https://github.com/mundoarkade1-arch/sky-watch-cg/releases/tag/v1.0.18).
 - O MVP de chegadas e partidas, ingestão SIROS, sincronização periódica e infraestrutura de notificações locais estão implementados.
 - Navegação dos cartões e do próximo voo para detalhes concluída; regressão local mais recente: 68 testes por variante (Debug/Release), 0 falhas e 1 ignorado; lint vital e builds Debug/Release aprovados. APK `1.0.17` instalado e fluxo de detalhe/Voltar verificado no telefone Android 14.
 - CI #56 passou e o workflow de Release #13 publicou a prévia Debug `v1.0.17` no GitHub. Distribuição estável/Play Store continua dependente de chave persistente de assinatura.

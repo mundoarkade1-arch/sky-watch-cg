@@ -12,6 +12,8 @@ A tela inicial combina pousos e decolagens em ordem cronológica e apresenta o h
 
 **Telefone físico:** APK Debug `1.0.18` instalado e aberto em aparelho Android 14, sem emulador. A interface apresentou, para 05/11/2026, a janela 09:05–12:05 com 10 movimentos programados (5 pousos e 5 decolagens). Esse resultado reflete os dados SIROS em cache naquela consulta, não uma confirmação de operação.
 
+**Publicação:** CI #58 e workflow de Release #14 concluídos com sucesso para `951ce68`. O APK `SKY-WATCH-CG-v1.0.18-debug.apk` foi enviado para a [prévia v1.0.18 no GitHub Releases](https://github.com/mundoarkade1-arch/sky-watch-cg/releases/tag/v1.0.18).
+
 ## Regras
 - Registrar data/hora UTC e horário local (Campo Grande, UTC-4).
 - Guardar URL/endpoint consultado, código HTTP, latência e quantidade de registros.

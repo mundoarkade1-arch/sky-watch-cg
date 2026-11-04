@@ -7,6 +7,7 @@
 - A lista mantém os movimentos de passageiros ativos encontrados no SIROS para a data e identifica a recomendação como planejamento, sem garantir operação real ou cobertura de todos os movimentos.
 - Regressão final: 75 testes Debug e 75 Release, 0 falhas, 0 erros, 1 ignorado por variante; builds Debug/Release, lint vital e compilação dos testes instrumentados aprovados.
 - APK Debug `1.0.18` instalado e aberto em telefone Android 14, sem emulador.
+- CI #58 e Release #14 aprovados para `951ce68`; prévia Debug `v1.0.18` publicada com o APK [`SKY-WATCH-CG-v1.0.18-debug.apk`](https://github.com/mundoarkade1-arch/sky-watch-cg/releases/tag/v1.0.18).
 
 ## 2026-11-04 — Detalhes de voo e prévia Debug 1.0.17
 - Cartões e próximo voo abrem a tela de detalhes; a rota é apresentada origem→destino e os horários usam o fuso do aeroporto do evento.

@@ -21,7 +21,7 @@ A validação local mais recente executou 75 testes em cada variante Debug e Rel
 
 ## APK de prévia
 
-[Baixar SKY WATCH CG 1.0.17 — prévia Debug](https://github.com/mundoarkade1-arch/sky-watch-cg/releases/tag/v1.0.17). O pacote `com.skywatch.cg.debug` é instalável em paralelo à versão Release. Esta prévia não é assinada para distribuição estável ou Play Store; devido à chave Debug do CI, instalar futuras prévias pode exigir desinstalar a anterior e apagar os dados locais.
+[Baixar SKY WATCH CG 1.0.18 — prévia Debug](https://github.com/mundoarkade1-arch/sky-watch-cg/releases/tag/v1.0.18). O pacote `com.skywatch.cg.debug` é instalável em paralelo à versão Release. Esta prévia não é assinada para distribuição estável ou Play Store; devido à chave Debug do CI, instalar futuras prévias pode exigir desinstalar a anterior e apagar os dados locais.
 
 ## Estrutura
 - `AGENTS.md`: regras para agentes de IA
