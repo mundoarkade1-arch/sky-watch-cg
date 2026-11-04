@@ -18,6 +18,8 @@ import androidx.compose.ui.unit.sp
 import com.skywatch.cg.data.siros.NormalizedFlight
 import com.skywatch.cg.data.siros.OperationType
 import com.skywatch.cg.ui.theme.SkyWatchColors
+import com.skywatch.cg.util.formatAirlineName
+import com.skywatch.cg.util.formatAirportDisplay
 
 @Composable
 fun FlightCard(
@@ -29,7 +31,8 @@ fun FlightCard(
     val flightTime = if (isArrival) flight.scheduledArrivalUtc else flight.scheduledDepartureUtc
     val city = if (isArrival) (flight.originName ?: flight.origin) else (flight.destinationName ?: flight.destination)
     val code = if (isArrival) flight.origin else flight.destination
-    val cityDisplay = if (city == code) city else "$city ($code)"
+    val cityDisplay = formatAirportDisplay(city, code)
+    val airlineDisplay = formatAirlineName(flight.airline)
 
     val alpha = if (isDimmed) 0.5f else 1f
 
@@ -65,7 +68,7 @@ fun FlightCard(
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "${flight.airline} ${flight.flightNumber}",
+                        text = "$airlineDisplay ${flight.flightNumber}",
                         style = MaterialTheme.typography.titleMedium,
                         color = SkyWatchColors.OnBackground.copy(alpha = alpha),
                         fontSize = 16.sp,
