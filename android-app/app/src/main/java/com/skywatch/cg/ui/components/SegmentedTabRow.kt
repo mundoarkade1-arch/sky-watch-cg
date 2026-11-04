@@ -82,5 +82,5 @@ fun SegmentedTabRow(
 }
 
 // Extension helper for equal weight arrangement in Row
-private val Arrangement.spacedEqual: Arrangement
+private val Arrangement.spacedEqual: Arrangement.Horizontal
     get() = Arrangement.spacedBy(4.dp)

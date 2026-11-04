@@ -6,18 +6,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.AirplaneMode
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -106,10 +102,11 @@ val isArrival = flight.operationType == OperationType.ARRIVAL
                         .clip(RoundedCornerShape(16.dp)),
                     color = accentColor.copy(alpha = 0.15f)
                 ) {
-                    Icon(
-                        imageVector = if (isArrival) Icons.Default.ArrowDownward else Icons.Default.ArrowUpward,
-                        contentDescription = null,
-                        tint = accentColor,
+                    Text(
+                        text = if (isArrival) "↓" else "↑",
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = accentColor,
                         modifier = Modifier.padding(16.dp)
                     )
                 }
@@ -135,10 +132,10 @@ Spacer(modifier = Modifier.height(8.dp))
                     )
                 }
 
-                Icon(
-                    imageVector = Icons.Default.AirplaneMode,
-                    contentDescription = null,
-                    tint = accentColor,
+                Text(
+                    text = "✈",
+                    fontSize = 28.sp,
+                    color = accentColor,
                     modifier = Modifier
                         .padding(horizontal = 16.dp)
                         .rotate(45f)
@@ -166,33 +163,33 @@ Spacer(modifier = Modifier.height(8.dp))
             // Info cards
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 InfoRow(
-                    icon = Icons.Default.Schedule,
+                    icon = "🕐",
                     label = "Horário local",
                     value = localTimeStr,
                     accentColor = accentColor
                 )
                 InfoRow(
-                    icon = Icons.Default.Schedule,
+                    icon = "🕐",
                     label = "Horário UTC",
                     value = utcTimeStr,
                     accentColor = accentColor
                 )
                 if (!flight.equipment.isNullOrBlank()) {
                     InfoRow(
-                        icon = Icons.Default.AirplaneMode,
+                        icon = "✈",
                         label = "Aeronave",
                         value = flight.equipment!!,
                         accentColor = accentColor
                     )
                 }
 InfoRow(
-                    icon = Icons.Default.Info,
+                    icon = "ℹ",
                     label = "Status SIROS",
                     value = flight.sirosStatus,
                     accentColor = accentColor
                 )
                 InfoRow(
-                    icon = Icons.Default.Info,
+                    icon = "ℹ",
                     label = "Fonte",
                     value = "SIROS/ANAC (programado)",
                     accentColor = accentColor
@@ -240,7 +237,7 @@ InfoRow(
 
 @Composable
 fun InfoRow(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: String,
     label: String,
     value: String,
     accentColor: androidx.compose.ui.graphics.Color
@@ -258,11 +255,11 @@ fun InfoRow(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = accentColor,
-                modifier = Modifier.size(24.dp).padding(end = 12.dp)
+            Text(
+                text = icon,
+                fontSize = 24.sp,
+                color = accentColor,
+                modifier = Modifier.padding(end = 12.dp)
             )
             Column(modifier = Modifier.weight(1f)) {
                 Text(
