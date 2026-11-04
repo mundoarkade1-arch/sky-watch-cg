@@ -42,9 +42,10 @@
 - [x] **Correção e validação de migrações Room (04/11/2026):** o índice `idx_alert_sent_flight_date` que a migração v3→v4 já criava foi declarado na entidade `AlertSent`; banco atualizado para versão 5 com migração v4→v5 idempotente. Na validação daquela versão em Android 14, 11 testes instrumentados passaram, incluindo migração v1→v5 e v4→v5 com preservação de registro.
 - [x] **Schema Room v6:** a migração v5→v6 remove o `CHECK` que existia apenas em bancos migrados e preserva os registros. Gatilhos de inserção/atualização agora impõem `id = 1` tanto em bancos novos como migrados. Verificado no aparelho com testes de inserção, atualização e preservação de dados.
 - [x] **Testes instrumentados no aparelho (04/11/2026):** após a alteração da janela de alertas, 11 testes passaram em telefone físico Android 14 (modelo 22101320G), sem emulador.
-- [x] **CI #45 a #48 (04/11/2026):** concluídos com sucesso. #47 validou `c8d6761`; #48 validou a documentação do teste no aparelho no commit `9e82c84`. A correção de inicialização em `MainActivity` ainda aguarda CI.
-- [x] **CI #49 (04/11/2026):** concluído com sucesso para `4b072c4`; as alterações de schema v6 ainda aguardam CI.
-- [x] **Roteiro manual de alertas após reinicialização:** adicionado a `TESTING.md`; execução em aparelho ainda pendente.
+- [x] **CI #45 a #48 (04/11/2026):** concluídos com sucesso. #47 validou `c8d6761`; #48 validou a documentação do teste no aparelho no commit `9e82c84`.
+- [x] **CI #49 (04/11/2026):** concluído com sucesso para `4b072c4`.
+- [x] **CI #50 (04/11/2026):** concluído com sucesso para `9206269`, incluindo a migração Room v5→v6.
+- [x] **Reinicialização do telefone (04/11/2026):** app Debug instalado antes do boot, Android 14 voltou a conectar; permissão de notificações concedida e dois jobs WorkManager do app observados após o boot. Não foi encontrado log direto do `BootReceiver`; sem voo SIROS na janela, entrega de alerta e execução do receiver permanecem sem comprovação.
 
   - **6.3.1:** Download HTTP via OkHttp com parâmetros customizáveis no `SirosRemoteSource`, verificações de arquivo vazio (0 bytes) e download incompleto (Content-Length divergente).
   - **6.3.2:** `syncFromRemote()` com transação Room atômica (`withTransaction`), fechamento de streams, filtro streaming de SBCG, tratamento de erros e gravação de status `FAILURE` preservando a última sincronização bem-sucedida.
@@ -59,7 +60,7 @@
 - SIROS CSV: Requer download periódico e tratamento correto da codificação UTF-8 com BOM (detectado automaticamente) e delimitador ;.
 - Aena: Sem API pública documentada confirmada; investigar integração autorizada antes de iniciar implementação.
 - AvioADSB: Baixa cobertura em CGR (experimental).
-- **Validação manual pendente:** registrar teste ponta a ponta das notificações após reinicialização do dispositivo. Os testes instrumentados Room/DAO passaram, mas não testam o fluxo de notificações/`BootReceiver` ponta a ponta.
+- **Validação ponta a ponta pendente:** após reiniciar com o app instalado, duas tarefas WorkManager foram vistas e a permissão estava concedida, mas não houve log direto confirmando a execução de `BootReceiver`. Como não havia voo SIROS entre 15 e 30 minutos, a entrega da notificação não foi testada.
 - **Validação manual de alertas pendente:** o worker busca eventos dentro da janela de 15–30 minutos e usa rede/periodicidade gerenciadas pelo WorkManager. Atrasos podem fazer a janela passar; o WorkManager não garante execução exatamente a cada 15 minutos. Verificar em aparelho real permissões, recebimento, deduplicação e reagendamento após reinicialização.
 - **Integração SIROS:** a tela usa os dados locais do Room; a atualização manual e a sincronização periódica atualizam esse cache com o CSV remoto.
 - A regra `sync_metadata.id = 1` está agora aplicada uniformemente por gatilhos no schema v6; migração v5→v6 mantém os dados. O schema legado v1 real continua indisponível, então os testes de v1 não comprovam a atualização de uma instalação legada real.

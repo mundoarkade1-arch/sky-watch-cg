@@ -4,7 +4,7 @@
 - O MVP de chegadas e partidas, ingestão SIROS, sincronização periódica e infraestrutura de notificações locais estão implementados.
 - Correção da tela Sobre e do estado de atualização concluída. Validação local: 53 testes contabilizados (52 executados sem falhas e 1 ignorado); APK Debug gerado.
 - Revalidação local completa: 53 testes contabilizados (52 aprovados e 1 ignorado), `assembleDebug` aprovado; `FlightListViewModelTest` passou isoladamente (11 testes). Wrapper Gradle do Windows corrigido para propagar corretamente o código de saída.
-- CI #43 a #49 na branch `wip-fase3`: concluídos com sucesso; as alterações de schema v6 aguardam CI.
+- CI #43 a #50 na branch `wip-fase3`: concluídos com sucesso; #50 validou a migração Room v5→v6.
 - 13 testes instrumentados passaram em aparelho físico Android 14 (modelo 22101320G), incluindo migrações v1→v6, v4→v5 e v5→v6 com preservação de dados; execução feita sem emulador.
 - A pesquisa inicial da Etapa 4 foi registrada; integração Aena depende de autorização/documentação apropriadas para CGR. Nenhuma posição ADS-B ou status operacional é apresentado como confirmado sem correspondência verificável.
 
@@ -43,8 +43,9 @@
 - [x] Definir janela de alerta SIROS de 15–30 minutos, deduplicação por voo/operação/data local e correção da data UTC de chegadas que cruzam a meia-noite; testes unitários e build local aprovados.
 - [x] Remover a inicialização duplicada de notificações, trabalhos periódicos e consulta de atualizações em `MainActivity`; 11 testes do ViewModel, APK Debug e 11 testes instrumentados no telefone aprovados.
 - [x] Uniformizar a regra `sync_metadata.id = 1` em bancos novos e migrados no schema v6; testes físicos cobrem inserção inválida, atualização inválida e migração preservando dados.
-- [ ] Registrar teste manual ponta a ponta de alertas e reinicialização em dispositivo Android. Os 11 testes instrumentados cobrem Room/DAO e migrações, não comprovam esse fluxo completo de notificações.
-- [ ] Verificar no dispositivo se o worker de alertas notifica uma vez por evento e se o `BootReceiver` reagenda o trabalho; o WorkManager pode atrasar e fazer a janela de 15–30 minutos passar.
+- [x] Reiniciar o telefone com o app Debug instalado e verificar estado após o boot: permissão de notificação concedida e dois jobs WorkManager do app visíveis.
+- [ ] Confirmar por log ou teste controlado que `BootReceiver` recebeu `BOOT_COMPLETED`; o log direto não foi localizado nesta execução.
+- [ ] Verificar a entrega/deduplicação de alerta com um voo SIROS real na janela de 15–30 minutos; não havia voo elegível nesta execução.
 
 ## Próxima etapa recomendada
-Enviar a minuta em `docs/AENA_API_REQUEST.md` pelo canal confirmado pela Aena e aguardar resposta escrita. Em paralelo, executar o roteiro manual de alertas em `TESTING.md` quando for possível conferir um voo SIROS real na janela de teste e reiniciar o aparelho. Não fazer scraping nem integrar dados Aena sem autorização clara.
+Enviar a minuta em `docs/AENA_API_REQUEST.md` pelo canal confirmado pela Aena e aguardar resposta escrita. Quando houver um voo SIROS real na janela adequada, executar a parte de entrega/deduplicação do roteiro em `TESTING.md`; o reinício já foi observado, mas a execução do `BootReceiver` ainda precisa de evidência direta. Não fazer scraping nem integrar dados Aena sem autorização clara.

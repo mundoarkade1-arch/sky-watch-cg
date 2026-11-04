@@ -279,9 +279,9 @@ Essa execução valida migrações Room e operações DAO no aparelho; não vali
 
 **Validação local complementar:** `:app:testDebugUnitTest`, `:app:assembleDebug`, `:app:compileDebugAndroidTestKotlin` e `:app:processReleaseManifest` concluíram com sucesso. Suíte unitária: 53 testes contabilizados, 0 falhas, 0 erros e 1 ignorado por depender de CSV real.
 
-**CI remoto:** CI #46 passou no commit `5c7bdf5`, incluindo a correção Room v5. O CI #47 para `c8d6761` e #48 para `9e82c84` também passaram. A correção de inicialização em `MainActivity` descrita abaixo ainda aguarda CI.
+**CI remoto:** CI #46 passou no commit `5c7bdf5`, CI #47 para `c8d6761`, #48 para `9e82c84`, #49 para `4b072c4` e #50 para `9206269` também passaram.
 
-**Teste manual de notificações após reinicialização:** permanece pendente; o aparelho não foi reiniciado, a tela do app não foi configurada para alertas e não foi verificado voo SIROS real na janela exigida. Os 11 testes instrumentados não cobrem esse fluxo ponta a ponta.
+**Teste manual após reinicialização:** execução parcial registrada abaixo. O aparelho foi reiniciado com o app Debug instalado e havia trabalhos agendados após o boot, mas não houve log direto do `BootReceiver` nem voo SIROS elegível para verificar a notificação. Os testes instrumentados não cobrem esse fluxo ponta a ponta.
 
 ## Validação local dos alertas — 2026-11-04
 
@@ -303,7 +303,7 @@ Removida a segunda execução de inicialização em `MainActivity.onCreate()`, q
 ```powershell
 .\gradlew.bat :app:testDebugUnitTest --tests com.skywatch.cg.ui.viewmodel.FlightListViewModelTest :app:assembleDebug :app:compileDebugAndroidTestKotlin --console=plain
 ```
-**Resultado:** `BUILD SUCCESSFUL`; 11 testes do `FlightListViewModelTest`, 0 falhas, 0 erros e 0 ignorados; APK Debug e compilação dos testes instrumentados aprovados. CI #47 e #48 também concluíram com sucesso para commits anteriores; a correção de `MainActivity` ainda precisa de CI.
+**Resultado:** `BUILD SUCCESSFUL`; 11 testes do `FlightListViewModelTest`, 0 falhas, 0 erros e 0 ignorados; APK Debug e compilação dos testes instrumentados aprovados. CI #47 a #50 também passaram.
 
 Após essa correção, `.\gradlew.bat :app:connectedDebugAndroidTest --console=plain` também passou no telefone físico Android 14: 11 testes, 0 falhas, 0 erros e 0 ignorados. Isso valida banco/DAO/migrações, mas não abre a tela principal nem verifica a notificação real.
 
@@ -319,9 +319,9 @@ A versão 5 tinha uma diferença: migrações antigas criavam `sync_metadata` co
 ```
 **Resultados:** suíte unitária: 56 testes, 0 falhas, 0 erros e 1 ignorado por depender de CSV local. No telefone físico Android 14 (22101320G), 13 testes instrumentados, 0 falhas, 0 erros e 0 ignorados. APK Debug e manifest Release compilados com sucesso. Os testes cobrem instalações novas, migração até v6, remoção da antiga `CHECK`, preservação dos dados e rejeição de `id != 1` em inserção/atualização. Nenhum emulador foi aberto.
 
-Schema Room exportado em `android-app/app/schemas/com.skywatch.cg.data.db.AppDatabase/6.json`. CI #49 passou para o commit anterior; o CI das alterações v6 só será iniciado após o envio.
+Schema Room exportado em `android-app/app/schemas/com.skywatch.cg.data.db.AppDatabase/6.json`. CI #50 passou para o commit `9206269`.
 
-## Roteiro manual — alertas após reinicialização (a executar no Android)
+## Roteiro manual — alertas após reinicialização (execução parcial no Android)
 
 **Objetivo:** verificar permissões e reagendamento pelo `BootReceiver` em um aparelho real. Este roteiro não substitui a informação operacional da companhia aérea nem confirma a operação do voo.
 
@@ -334,6 +334,22 @@ Schema Room exportado em `android-app/app/schemas/com.skywatch.cg.data.db.AppDat
 5. Aguarde o WorkManager executar. A periodicidade de 15 minutos é um intervalo mínimo aproximado, não um prazo exato. Verifique se a notificação aparece e se mostra chegada/partida e horário local compatíveis com o registro planejado.
 6. Observe se a mesma notificação reaparece ou é atualizada em execuções subsequentes. Registre repetições; após o primeiro envio registrado, o worker deve ignorar o mesmo evento.
 7. Repita, se possível, com aparelho offline durante parte do período e depois reconectado; anote horários e se o trabalho retomou. Não interprete a ausência de notificação como prova de cancelamento do voo.
+
+### Execução observada — 2026-11-04
+
+O telefone modelo 22101320G (Android 14/API 34) foi reiniciado manualmente depois da instalação e primeira abertura do APK Debug `com.skywatch.cg.debug`. O ADB voltou a conectar; `POST_NOTIFICATIONS` estava concedida, `RECEIVE_BOOT_COMPLETED` estava concedida e dois jobs do `SystemJobService` associados ao pacote foram encontrados no `dumpsys jobscheduler`.
+
+**Limite da evidência:** não foi localizado log do `BootReceiver` (`BOOT_COMPLETED recebido`/`re-agendando workers`). Os jobs existentes após a reinicialização comprovam que havia trabalhos registrados, mas, por si só, não comprovam que o receiver os reagendou. O usuário informou que não havia voo SIROS real programado na janela de 15–30 minutos; assim, não foi possível verificar entrega nem deduplicação de notificação. Nenhum dado de voo foi inventado.
+
+| Verificação | Resultado |
+|---|---|
+| Telefone reiniciou e ADB reconectou | Sim; modelo 22101320G, Android 14 |
+| App Debug instalado antes do boot | Sim |
+| Permissão de notificações | Concedida |
+| Jobs WorkManager visíveis após o boot | 2 jobs associados ao pacote |
+| Log direto de execução do `BootReceiver` | Não localizado |
+| Voo SIROS real na janela de alerta | Não havia |
+| Notificação real recebida | Não avaliada; sem voo elegível |
 
 **Registrar no resultado:** modelo do aparelho, versão Android, versão/commit do APK, permissões, identificador SIROS e data do voo, horário programado local/UTC, horário do reinício, horário de cada notificação, estado de rede e resultado. Não publicar matrícula, posição ou status operacional sem fonte verificável.
 

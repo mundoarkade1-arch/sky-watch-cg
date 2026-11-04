@@ -3,7 +3,8 @@
 - Adicionada migração v5→v6 que remove o `CHECK (id = 1)` presente apenas em bancos migrados e preserva os registros.
 - Adicionados gatilhos idempotentes para aplicar a regra `id = 1` em bancos novos e migrados, em inserções e atualizações.
 - Testes no telefone físico Android 14: 13 instrumentados aprovados; suíte unitária: 56 testes, 0 falhas e 1 ignorado. `assembleDebug` e `processReleaseManifest` aprovados.
-- CI #49 passou para o commit anterior; o CI das mudanças v6 será iniciado após o envio.
+- CI #50 passou para o commit `9206269`.
+- Após reinicialização manual do telefone com o APK Debug instalado, ADB reconectou, permissões permaneceram concedidas e dois jobs do app estavam visíveis. O log direto do `BootReceiver` não foi localizado; sem voo SIROS na janela, a entrega do alerta não foi avaliada. Detalhes e limites em `TESTING.md`.
 
 ## 2026-11-04 — Ajustes de alertas locais
 - Definida a janela dos alertas de voos planejados SIROS entre 15 e 30 minutos antes do evento local, com deduplicação por voo, operação e data local.
@@ -13,7 +14,7 @@
 - CI #47 concluiu com sucesso para o commit `c8d6761`, validando os ajustes desta seção.
 - Reexecutados no telefone físico Android 14 (22101320G) os testes instrumentados: 11 testes, 0 falhas, 0 erros e 0 ignorados. O teste manual de notificações após reinicialização continua pendente.
 - CI #47 (`c8d6761`) e #48 (`9e82c84`) concluíram com sucesso.
-- Removido o bloco duplicado de inicialização em `MainActivity.onCreate()`. A classe `FlightListViewModelTest` passou com 11 testes; `assembleDebug` e 11 testes instrumentados no telefone físico Android 14 concluíram sem falhas. Novo CI dessa correção ainda pendente.
+- Removido o bloco duplicado de inicialização em `MainActivity.onCreate()`. A classe `FlightListViewModelTest` passou com 11 testes; `assembleDebug` e 11 testes instrumentados no telefone físico Android 14 concluíram sem falhas. CI #49 passou para esse commit.
 
 ## 2026-11-04 — Validação focada e correção do wrapper Windows
 - Reexecutada a suíte completa: 53 testes contabilizados, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` e os 11 testes isolados de `FlightListViewModelTest` passaram. CI #41 e #42 concluídos com sucesso.
