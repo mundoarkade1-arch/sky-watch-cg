@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [FlightEntity::class, SyncMetadata::class, FollowedFlight::class, AlertSent::class], version = 5, exportSchema = true)
+@Database(entities = [FlightEntity::class, SyncMetadata::class, FollowedFlight::class, AlertSent::class], version = 6, exportSchema = true)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun flightDao(): FlightDao
@@ -49,7 +49,7 @@ abstract class AppDatabase : RoomDatabase() {
                 database.execSQL(
                     "UPDATE `flights` SET `arrivalDate` = `flightDate` WHERE `arrivalDate` = ''"
                 )
-                // Garantir CHECK (id = 1) em sync_metadata para instalações novas e migradas
+                // Preservar a regra legada; a migração v5→v6 substitui CHECK por triggers uniformes.
                 database.execSQL(
                     """
                     CREATE TABLE IF NOT EXISTS `sync_metadata_new` (
@@ -131,6 +131,29 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    """
+                    CREATE TABLE `sync_metadata_new` (
+                        `id` INTEGER NOT NULL,
+                        `lastSuccessfulSyncAt` INTEGER NOT NULL,
+                        `lastSyncStatus` TEXT NOT NULL,
+                        `lastSyncErrorMessage` TEXT,
+                        `recordsInserted` INTEGER NOT NULL,
+                        PRIMARY KEY(`id`)
+                    )
+                    """.trimIndent()
+                )
+                database.execSQL(
+                    "INSERT INTO `sync_metadata_new` SELECT * FROM `sync_metadata`"
+                )
+                database.execSQL("DROP TABLE `sync_metadata`")
+                database.execSQL("ALTER TABLE `sync_metadata_new` RENAME TO `sync_metadata`")
+                createSyncMetadataIdTriggers(database)
+            }
+        }
+
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -138,11 +161,51 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     DATABASE_NAME
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                    .addMigrations(
+                        MIGRATION_1_2,
+                        MIGRATION_2_3,
+                        MIGRATION_3_4,
+                        MIGRATION_4_5,
+                        MIGRATION_5_6
+                    )
+                    .addCallback(SYNC_METADATA_ID_CALLBACK)
                     .build()
                 INSTANCE = instance
                 instance
             }
+        }
+
+        internal val SYNC_METADATA_ID_CALLBACK = object : RoomDatabase.Callback() {
+            override fun onCreate(db: SupportSQLiteDatabase) {
+                createSyncMetadataIdTriggers(db)
+            }
+
+            override fun onOpen(db: SupportSQLiteDatabase) {
+                createSyncMetadataIdTriggers(db)
+            }
+        }
+
+        private fun createSyncMetadataIdTriggers(database: SupportSQLiteDatabase) {
+            database.execSQL(
+                """
+                CREATE TRIGGER IF NOT EXISTS `trg_sync_metadata_id_insert`
+                BEFORE INSERT ON `sync_metadata`
+                WHEN NEW.`id` != 1
+                BEGIN
+                    SELECT RAISE(ABORT, 'sync_metadata.id must be 1');
+                END
+                """.trimIndent()
+            )
+            database.execSQL(
+                """
+                CREATE TRIGGER IF NOT EXISTS `trg_sync_metadata_id_update`
+                BEFORE UPDATE OF `id` ON `sync_metadata`
+                WHEN NEW.`id` != 1
+                BEGIN
+                    SELECT RAISE(ABORT, 'sync_metadata.id must be 1');
+                END
+                """.trimIndent()
+            )
         }
     }
 }

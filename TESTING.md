@@ -139,7 +139,7 @@ cd android-app
 
 - **Ressalvas importantes:**
   1. `AppDatabaseMigrationTest.kt` valida a migração v1→v2 sobre uma "v1 provável" (tabela `flights` idêntica ao schema atual gerado pelo Room). Como o schema real da v1 nunca foi exportado e não é recuperável do Git (arquivos só existem a partir do commit 5385fe2), o teste prova o comportamento da migração para o schema simulado, mas não para a v1 antiga real de um aparelho de produção.
-  2. Naquele estado (schema v2), instalações novas criavam `sync_metadata` sem `CHECK (id = 1)`. A observação é histórica; o schema atual é v5 e o ponto permanece listado em `PROJECT_STATE.md`.
+  2. Naquele estado (schema v2), instalações novas criavam `sync_metadata` sem `CHECK (id = 1)`. A observação é histórica; o schema atual é v6 e aplica a regra `id = 1` por gatilhos tanto em bancos novos como migrados.
 
 ## Resultados dos Testes da Fase 6.3 - Ingestão Remota e Sincronização (01/11/2026)
 
@@ -271,7 +271,7 @@ Correções: preenchido `arrivalDate` no fixture; teste configurado para executa
 ```powershell
 .\gradlew.bat :app:connectedDebugAndroidTest --console=plain
 ```
-**Resultado no aparelho Android 14:** `BUILD SUCCESSFUL`; 11 testes instrumentados, 0 falhas, 0 erros e 0 ignorados. Inclui migração v1→v5, migração v4→v5 preservando registro de alerta e os testes do DAO de voos.
+**Resultado no aparelho Android 14 naquela execução:** `BUILD SUCCESSFUL`; 11 testes instrumentados, 0 falhas, 0 erros e 0 ignorados. Incluía migração v1→v5, migração v4→v5 preservando registro de alerta e os testes do DAO de voos.
 
 **Reexecução no aparelho após os ajustes de alertas — 2026-11-04:** executado `.\gradlew.bat :app:connectedDebugAndroidTest --console=plain` com o telefone físico modelo 22101320G (Android 14 / API 34), identificado pelo Android SDK. Resultado: `BUILD SUCCESSFUL`; 11 testes, 0 falhas, 0 erros e 0 ignorados. Relatório XML em `android-app\app\build\outputs\androidTest-results\connected\debug\TEST-22101320G - 14-_app-.xml`.
 
@@ -306,6 +306,20 @@ Removida a segunda execução de inicialização em `MainActivity.onCreate()`, q
 **Resultado:** `BUILD SUCCESSFUL`; 11 testes do `FlightListViewModelTest`, 0 falhas, 0 erros e 0 ignorados; APK Debug e compilação dos testes instrumentados aprovados. CI #47 e #48 também concluíram com sucesso para commits anteriores; a correção de `MainActivity` ainda precisa de CI.
 
 Após essa correção, `.\gradlew.bat :app:connectedDebugAndroidTest --console=plain` também passou no telefone físico Android 14: 11 testes, 0 falhas, 0 erros e 0 ignorados. Isso valida banco/DAO/migrações, mas não abre a tela principal nem verifica a notificação real.
+
+## Migração Room v5→v6 — 2026-11-04
+
+A versão 5 tinha uma diferença: migrações antigas criavam `sync_metadata` com `CHECK (id = 1)`, mas instalações novas usavam o schema gerado pelo Room sem esse `CHECK`. A migração v5→v6 reconstrói apenas essa tabela sem a restrição estrutural, preserva todas as colunas/linhas e adiciona gatilhos de inserção e atualização para rejeitar qualquer `id` diferente de 1. O callback idempotente também instala os gatilhos em bancos criados do zero e em aberturas futuras.
+
+**Comandos executados** (a partir de `android-app`):
+```powershell
+.\gradlew.bat :app:testDebugUnitTest :app:compileDebugAndroidTestKotlin --console=plain
+.\gradlew.bat :app:connectedDebugAndroidTest --console=plain
+.\gradlew.bat :app:assembleDebug :app:processReleaseManifest --console=plain
+```
+**Resultados:** suíte unitária: 56 testes, 0 falhas, 0 erros e 1 ignorado por depender de CSV local. No telefone físico Android 14 (22101320G), 13 testes instrumentados, 0 falhas, 0 erros e 0 ignorados. APK Debug e manifest Release compilados com sucesso. Os testes cobrem instalações novas, migração até v6, remoção da antiga `CHECK`, preservação dos dados e rejeição de `id != 1` em inserção/atualização. Nenhum emulador foi aberto.
+
+Schema Room exportado em `android-app/app/schemas/com.skywatch.cg.data.db.AppDatabase/6.json`. CI #49 passou para o commit anterior; o CI das alterações v6 só será iniciado após o envio.
 
 ## Roteiro manual — alertas após reinicialização (a executar no Android)
 

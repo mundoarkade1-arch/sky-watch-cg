@@ -1,10 +1,16 @@
 # Changelog
+## 2026-11-04 — Uniformização do schema Room v6
+- Adicionada migração v5→v6 que remove o `CHECK (id = 1)` presente apenas em bancos migrados e preserva os registros.
+- Adicionados gatilhos idempotentes para aplicar a regra `id = 1` em bancos novos e migrados, em inserções e atualizações.
+- Testes no telefone físico Android 14: 13 instrumentados aprovados; suíte unitária: 56 testes, 0 falhas e 1 ignorado. `assembleDebug` e `processReleaseManifest` aprovados.
+- CI #49 passou para o commit anterior; o CI das mudanças v6 será iniciado após o envio.
+
 ## 2026-11-04 — Ajustes de alertas locais
 - Definida a janela dos alertas de voos planejados SIROS entre 15 e 30 minutos antes do evento local, com deduplicação por voo, operação e data local.
 - Corrigido o cálculo da data UTC do evento de chegada para usar `arrivalDate`, evitando deslocamento de um dia em voos que cruzam a meia-noite UTC.
 - O registro de deduplicação agora é gravado depois da chamada de publicação da notificação; o identificador de notificação estável permite atualizar a mesma notificação em uma repetição.
 - Validação local: 56 testes contabilizados (55 executados sem falhas e 1 ignorado), `assembleDebug` e `compileDebugAndroidTestKotlin` aprovados. Teste manual no aparelho após reinicialização permanece pendente.
-- CI #46 concluiu com sucesso para o commit anterior `5c7bdf5`; as mudanças desta seção ainda aguardam o próximo CI.
+- CI #47 concluiu com sucesso para o commit `c8d6761`, validando os ajustes desta seção.
 - Reexecutados no telefone físico Android 14 (22101320G) os testes instrumentados: 11 testes, 0 falhas, 0 erros e 0 ignorados. O teste manual de notificações após reinicialização continua pendente.
 - CI #47 (`c8d6761`) e #48 (`9e82c84`) concluíram com sucesso.
 - Removido o bloco duplicado de inicialização em `MainActivity.onCreate()`. A classe `FlightListViewModelTest` passou com 11 testes; `assembleDebug` e 11 testes instrumentados no telefone físico Android 14 concluíram sem falhas. Novo CI dessa correção ainda pendente.
@@ -94,7 +100,7 @@
 - **Corrigida condição de corrida de corrotinas** no `FlightListViewModel`: adicionado controle `loadJob?.cancel()` antes de iniciar nova consulta, garantindo que apenas a consulta mais recente atualize o estado da interface. Preservado carregamento automático no `init` e funcionamento do botão refresh.
 - **Sincronização dos Testes Unitários (Etapa 5 resolvida em 01/11/2026):** Os 3 testes que falhavam em `FlightListViewModelTest` passaram com sucesso. A causa era que os testes liam o estado logo depois de `advanceUntilIdle()`, mas a consulta do Room roda em uma thread que o relógio de teste não controla. A correção foi adicionar `viewModel.uiState.first { it !is FlightUiState.Loading }` nos três testes, sem alterar o código de produção.
 ### Fase 6.1 (Revisada): Restrição de Registro Único em `sync_metadata` (2026-11-01)
-- **Correção da restrição de banco de dados:** Adicionada a restrição `CHECK (id = 1)` na instrução SQL da migração `MIGRATION_1_2` em `AppDatabase.kt`, garantindo no próprio nível do SQLite que a tabela `sync_metadata` rejeite qualquer tentativa de inserir registros com IDs diferentes de 1 (o CHECK existe apenas em bancos migrados da v1; instalações novas criadas pelo Room não o têm).
+- **Correção histórica da restrição de banco:** a migração `MIGRATION_1_2` introduziu `CHECK (id = 1)` nos bancos legados. No schema v6 essa implementação estrutural foi substituída por gatilhos comuns a instalações novas e migradas.
 - **Novos testes de rejeição:** Adicionados os testes unitários `testSyncMetadataRejectId2` e `testSyncMetadataRejectId3` em `SyncMetadataDaoTest.kt`, que verificam e comprovam com sucesso que inserções com `id = 2` ou `id = 3` lançam `SQLiteConstraintException` por violação da constraint.
 - **Resultado:** 19 unitários executados e aprovados (`BUILD SUCCESSFUL`).
 
@@ -110,7 +116,7 @@
 - **Execução de Testes Instrumentados (01/11/2026):** `connectedDebugAndroidTest` em Poco X5 Pro (modelo 22101320G, Android 14, USB): 10 testes, 0 falhas, 0 erros, 0 pulados (`AppDatabaseMigrationTest` 2, `FlightDaoTest` 8). Comando: `cmd /c "cd android-app && gradlew.bat connectedDebugAndroidTest --console=plain"` (exige aparelho com depuração USB; emulador não viável com 7,9 GB RAM).
 - **Ressalvas:**
   1. A migração foi validada sobre uma "v1 provável" (tabela `flights` idêntica ao schema atual gerado pelo Room). O schema real da v1 nunca foi exportado e não é recuperável do Git (arquivos só existem a partir do commit 5385fe2), portanto o teste não prova a migração de um aparelho real rodando a v1 antiga.
-  2. Em instalações novas (schema v2), o Room cria `sync_metadata` SEM `CHECK (id = 1)`; apenas bancos migrados da v1 possuem o CHECK. Decisão em aberto.
+  2. Na época do schema v2, instalações novas não tinham a restrição presente nas migrações. Foi normalizada na versão v6 por gatilhos em bancos novos e migrados.
 - **Resultados dos testes unitários em 01/11/2026 (`testDebugUnitTest`):** `BUILD SUCCESSFUL`, 32 testes, 0 falhas, 0 erros (distribuídos em `SyncMetadataDaoTest` 5, `SirosCsvParserTest` 4, `SirosNormalizerTest` 4, `SirosRepositoryTest` 2, `SirosStreamParserBomTest` 3, `SirosStreamParserRealFileTest` 1, `SirosStreamParserTest` 9, `FlightListViewModelTest` 4).
 - **Medição real com CSV completo (`SirosStreamParserRealFileTest`):** total_lines=65477, records=65475, sbcg=867, baseline_mb=10, peak_live_mb=10, growth_mb=0, elapsed_ms=966. A memória é amostrada a cada 50.000 registros, então é indicação, não pico exato.
 - **Pendências da Fase 6.2 (Itens NÃO validados):**
