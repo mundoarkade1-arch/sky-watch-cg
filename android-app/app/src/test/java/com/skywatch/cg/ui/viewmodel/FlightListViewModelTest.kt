@@ -89,7 +89,7 @@ class FlightListViewModelTest {
         val testDate = LocalDate.of(2024, 10, 15)
         
         // Arrival: 09:30 UTC at Campo Grande (UTC-4) = 05:30 local on 2024-10-15
-        // arrivalDate must match local date of arrival (2024-10-15), not UTC date
+        // arrivalDate is the UTC arrival date; the repository converts it to the airport's local date.
         val arrival = NormalizedFlight(
             flightId = "GLO-1234-2024-10-15",
             sirosRecordId = "GLO-001",
@@ -106,7 +106,7 @@ class FlightListViewModelTest {
             scheduledDepartureUtc = LocalTime.of(8, 0),
             scheduledArrivalUtc = LocalTime.of(9, 30),
             flightDate = testDate,
-            arrivalDate = testDate,  // Fixed: local arrival date is 2024-10-15
+            arrivalDate = testDate,
             daysOfWeek = listOf(1, 2, 3, 4, 5, 6, 7),
             validFrom = LocalDate.of(2024, 10, 1),
             validTo = LocalDate.of(2025, 3, 31),

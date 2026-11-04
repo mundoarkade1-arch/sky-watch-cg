@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.skywatch.cg.ui.theme.SkyWatchColors
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.TextStyle
 import java.util.Locale
 
@@ -26,7 +27,7 @@ fun DayStrip(
     selectedDate: LocalDate,
     onDateSelected: (LocalDate) -> Unit
 ) {
-    val today = LocalDate.now()
+    val today = LocalDate.now(ZoneId.of("America/Campo_Grande"))
     val yesterday = today.minusDays(1)
     val dates = (0..14).map { yesterday.plusDays(it.toLong()) }
     val scrollState = rememberScrollState()

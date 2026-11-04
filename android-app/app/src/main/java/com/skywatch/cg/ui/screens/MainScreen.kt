@@ -38,16 +38,18 @@ import com.skywatch.cg.data.siros.OperationType
 import com.skywatch.cg.ui.viewmodel.RadarViewModel
 import com.skywatch.cg.ui.components.DayStrip
 import com.skywatch.cg.ui.components.FlightCard
-import com.skywatch.cg.ui.components.NextFlightCard
 import com.skywatch.cg.ui.components.SegmentedTabRow
 import com.skywatch.cg.ui.viewmodel.FlightDetailUiState
 import com.skywatch.cg.ui.viewmodel.FlightListViewModel
 import com.skywatch.cg.ui.viewmodel.FlightUiState
 import com.skywatch.cg.util.getDisplayLastUpdate
+import com.skywatch.cg.util.getAirportEventDateTime
+import com.skywatch.cg.util.ObservationWindow
+import com.skywatch.cg.util.ObservationWindowCalculator
+import com.skywatch.cg.util.campoGrandeZone
+import kotlinx.coroutines.delay
 import java.time.LocalDate
-import java.time.LocalTime
-import java.time.ZoneId
-import java.time.ZoneOffset
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -183,11 +185,16 @@ fun TopAppBarWrapper(
         val currentDate = when (uiState) {
             is FlightUiState.Success -> uiState.selectedDate
             is FlightUiState.Refreshing -> uiState.selectedDate
-            else -> LocalDate.now()
+            else -> LocalDate.now(campoGrandeZone)
         }
 
-        val isToday = currentDate == LocalDate.now()
+        val isToday = currentDate == LocalDate.now(campoGrandeZone)
         val headerTitle = if (isToday) "Voos de hoje" else currentDate.format(DateTimeFormatter.ofPattern("EEEE, d 'de' MMMM", Locale("pt", "BR"))).replaceFirstChar { it.uppercase() }
+        val (arrivalsCount, departuresCount) = when (uiState) {
+            is FlightUiState.Success -> uiState.arrivals.size to uiState.departures.size
+            is FlightUiState.Refreshing -> uiState.arrivals.size to uiState.departures.size
+            else -> 0 to 0
+        }
 
         Row(
             modifier = Modifier
@@ -196,7 +203,11 @@ fun TopAppBarWrapper(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 8.dp)
+            ) {
                 Text(
                     text = "CAMPO GRANDE · SBCG",
                     style = MaterialTheme.typography.labelSmall,
@@ -211,6 +222,11 @@ fun TopAppBarWrapper(
                     color = MaterialTheme.colorScheme.onBackground,
                     fontSize = 28.sp,
                     fontWeight = FontWeight.ExtraBold
+                )
+                Text(
+                    text = "Horários locais de Campo Grande · SIROS/ANAC",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -245,6 +261,8 @@ fun TopAppBarWrapper(
 
         SegmentedTabRow(
             selectedTab = selectedTab,
+            arrivalsCount = arrivalsCount,
+            departuresCount = departuresCount,
             onTabSelected = onTabSelected
         )
 
@@ -283,9 +301,29 @@ fun MainContent(
             val departures = if (uiState is FlightUiState.Success) uiState.departures else (uiState as FlightUiState.Refreshing).departures
             val selectedDate = if (uiState is FlightUiState.Success) uiState.selectedDate else (uiState as FlightUiState.Refreshing).selectedDate
 
-            val flights = if (selectedTab == 0) arrivals else departures
-            val operationType = if (selectedTab == 0) OperationType.ARRIVAL else OperationType.DEPARTURE
-            val isToday = selectedDate == LocalDate.now()
+            val allFlights = (arrivals + departures)
+                .distinctBy { it.flightId }
+                .sortedBy { it.getAirportEventDateTime() }
+            val flights = when (selectedTab) {
+                1 -> allFlights.filter { it.operationType == OperationType.ARRIVAL }
+                2 -> allFlights.filter { it.operationType == OperationType.DEPARTURE }
+                else -> allFlights
+            }
+            val isToday = selectedDate == LocalDate.now(campoGrandeZone)
+            var now by remember(selectedDate) {
+                mutableStateOf(LocalDateTime.now(campoGrandeZone))
+            }
+            LaunchedEffect(selectedDate) {
+                while (true) {
+                    now = LocalDateTime.now(campoGrandeZone)
+                    delay(60_000)
+                }
+            }
+            val bestWindow = ObservationWindowCalculator.findBestWindow(
+                flights = allFlights,
+                selectedDate = selectedDate,
+                now = now
+            )
 
             LazyColumn(
                 modifier = Modifier
@@ -293,43 +331,35 @@ fun MainContent(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 contentPadding = innerPadding
             ) {
-                if (isToday) {
-                    val now = LocalTime.now(ZoneId.of("America/Campo_Grande"))
-                    val nextFlight = flights
-                        .filter { it.isAfter(now, ZoneId.of("America/Campo_Grande")) }
-                        .minByOrNull { it.getTimeUntil(ZoneId.of("America/Campo_Grande")) }
-
-                    if (nextFlight != null) {
-                        item {
-                            NextFlightCard(flight = nextFlight) { onFlightSelected(nextFlight) }
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
+                item {
+                    if (bestWindow != null) {
+                        ObservationWindowCard(bestWindow)
+                    } else if (isToday && allFlights.isNotEmpty()) {
+                        Text(
+                            text = "Não há mais um período completo de 3 horas com voos programados hoje.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                        )
                     }
                 }
 
-                val futureFlights = if (isToday) {
-                    flights.filter { it.isAfter(LocalTime.now(ZoneId.of("America/Campo_Grande")), ZoneId.of("America/Campo_Grande")) }
-                } else { flights }
-
-                if (futureFlights.isNotEmpty()) {
-                    item { SectionHeader("MAIS TARDE") }
-                    items(futureFlights) { flight ->
-                        FlightCard(flight = flight, onClick = { onFlightSelected(flight) })
-                    }
+                item {
+                    SectionHeader("VOOS PROGRAMADOS · ${flights.size}")
                 }
 
-                val pastFlights = if (isToday) {
-                    flights.filter { !it.isAfter(LocalTime.now(ZoneId.of("America/Campo_Grande")), ZoneId.of("America/Campo_Grande")) }
-                } else { emptyList() }
-
-                if (pastFlights.isNotEmpty()) {
-                    item { SectionHeader("JÁ PASSARAM", isDimmed = true) }
-                    items(pastFlights) { flight ->
-                        FlightCard(flight = flight, isDimmed = true, onClick = { onFlightSelected(flight) })
+                if (flights.isNotEmpty()) {
+                    items(flights, key = { it.flightId }) { flight ->
+                        val isPast = isToday && flight.getAirportEventDateTime().isBefore(now)
+                        FlightCard(
+                            flight = flight,
+                            isDimmed = isPast,
+                            onClick = { onFlightSelected(flight) }
+                        )
                     }
+                } else {
+                    item { EmptyState(selectedTab) }
                 }
-
-                if (flights.isEmpty()) { item { EmptyState(operationType = operationType) } }
 
                 item { SIROSDisclaimer() }
             }
@@ -352,7 +382,7 @@ fun SectionHeader(title: String, isDimmed: Boolean = false) {
 }
 
 @Composable
-fun EmptyState(operationType: OperationType) {
+fun EmptyState(selectedTab: Int) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -361,13 +391,17 @@ fun EmptyState(operationType: OperationType) {
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
-                text = if (operationType == OperationType.ARRIVAL) "Nenhuma chegada programada" else "Nenhuma partida programada",
+                text = when (selectedTab) {
+                    1 -> "Nenhum pouso programado"
+                    2 -> "Nenhuma decolagem programada"
+                    else -> "Nenhum voo programado para este dia"
+                },
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Os horários são programados (SIROS/ANAC) e podem não refletir a operação em tempo real.",
+                text = "A lista usa voos de passageiros registrados no SIROS/ANAC para CGR.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -379,7 +413,7 @@ fun EmptyState(operationType: OperationType) {
 @Composable
 fun SIROSDisclaimer() {
     Text(
-        text = "Horários programados (SIROS/ANAC). Não confirmam a operação em tempo real.",
+        text = "Voos de passageiros ativos encontrados no SIROS/ANAC para CGR. Horários locais de Campo Grande; não confirmam operação real e não abrangem necessariamente cargueiros, privados ou voos fora do cadastro.",
         style = MaterialTheme.typography.labelSmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
         textAlign = androidx.compose.ui.text.style.TextAlign.Center,
@@ -553,15 +587,40 @@ fun BottomNavBar(navController: androidx.navigation.NavController) {
     }
 }
 
-fun NormalizedFlight.isAfter(currentTime: LocalTime, zone: ZoneId): Boolean {
-    val flightTime = if (operationType == OperationType.ARRIVAL) scheduledArrivalUtc else scheduledDepartureUtc
-    val localFlightTime = flightTime.atDate(flightDate).atZone(ZoneOffset.UTC).withZoneSameInstant(zone).toLocalTime()
-    return localFlightTime > currentTime
-}
-
-fun NormalizedFlight.getTimeUntil(zone: ZoneId): Long {
-    val flightTime = if (operationType == OperationType.ARRIVAL) scheduledArrivalUtc else scheduledDepartureUtc
-    val localFlightTime = flightTime.atDate(flightDate).atZone(ZoneOffset.UTC).withZoneSameInstant(zone).toLocalTime()
-    val now = LocalTime.now(zone)
-    return java.time.Duration.between(now, localFlightTime).toMinutes()
+@Composable
+private fun ObservationWindowCard(window: ObservationWindow) {
+    val formatter = DateTimeFormatter.ofPattern("HH:mm")
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.primaryContainer
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "MELHOR FAIXA PARA OBSERVAR · 3 HORAS",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = "${window.start.format(formatter)}–${window.end.format(formatter)}",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+            Text(
+                text = "${window.totalMovements} movimentos: ${window.arrivals} pousos · ${window.departures} decolagens",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer
+            )
+            Text(
+                text = "Estimativa pelos horários programados no SIROS/ANAC; não garante a operação real.",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+            )
+        }
+    }
 }

@@ -18,7 +18,9 @@ import com.skywatch.cg.ui.theme.SkyWatchColors
 
 @Composable
 fun SegmentedTabRow(
-    selectedTab: Int, // 0 = Arrivals, 1 = Departures
+    selectedTab: Int,
+    arrivalsCount: Int,
+    departuresCount: Int,
     onTabSelected: (Int) -> Unit
 ) {
     Surface(
@@ -34,53 +36,59 @@ fun SegmentedTabRow(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(4.dp),
-            horizontalArrangement = Arrangement.spacedEqual
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            val isArrivals = selectedTab == 0
-            val arrivalsBg = if (isArrivals) SkyWatchColors.SurfaceContainer else Color.Transparent
-            val arrivalsText = if (isArrivals) SkyWatchColors.ArrivalAccent else SkyWatchColors.OnSurfaceVariant
-
-            val isDepartures = selectedTab == 1
-            val departuresBg = if (isDepartures) SkyWatchColors.SurfaceContainer else Color.Transparent
-            val departuresText = if (isDepartures) SkyWatchColors.DepartureAccent else SkyWatchColors.OnSurfaceVariant
-
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(arrivalsBg)
-                    .clickable { onTabSelected(0) },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Chegadas",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = arrivalsText
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(departuresBg)
-                    .clickable { onTabSelected(1) },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Partidas",
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = departuresText
-                )
-            }
+            TabItem(
+                label = "Todos",
+                count = arrivalsCount + departuresCount,
+                selected = selectedTab == 0,
+                onClick = { onTabSelected(0) },
+                modifier = Modifier.weight(1f),
+                selectedColor = SkyWatchColors.OnBackground
+            )
+            TabItem(
+                label = "Pousos",
+                count = arrivalsCount,
+                selected = selectedTab == 1,
+                onClick = { onTabSelected(1) },
+                modifier = Modifier.weight(1f),
+                selectedColor = SkyWatchColors.ArrivalAccent
+            )
+            TabItem(
+                label = "Decolagens",
+                count = departuresCount,
+                selected = selectedTab == 2,
+                onClick = { onTabSelected(2) },
+                modifier = Modifier.weight(1f),
+                selectedColor = SkyWatchColors.DepartureAccent
+            )
         }
     }
 }
 
-// Extension helper for equal weight arrangement in Row
-private val Arrangement.spacedEqual: Arrangement.Horizontal
-    get() = Arrangement.spacedBy(4.dp)
+@Composable
+private fun TabItem(
+    label: String,
+    count: Int,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier,
+    selectedColor: Color
+) {
+    Box(
+        modifier = modifier
+            .fillMaxHeight()
+            .clip(RoundedCornerShape(12.dp))
+            .background(if (selected) SkyWatchColors.SurfaceContainer else Color.Transparent)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "$label\n$count",
+            fontSize = 11.sp,
+            lineHeight = 13.sp,
+            fontWeight = FontWeight.Bold,
+            color = if (selected) selectedColor else SkyWatchColors.OnSurfaceVariant
+        )
+    }
+}

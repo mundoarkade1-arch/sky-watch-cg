@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.ZoneId
 
 sealed interface FlightUiState {
     object Loading : FlightUiState
@@ -45,7 +46,9 @@ sealed interface FlightDetailUiState {
 class FlightListViewModel(
     application: Application,
     internal val repository: SirosRepository,
-    private val todayProvider: () -> LocalDate = { LocalDate.now() }
+    private val todayProvider: () -> LocalDate = {
+        LocalDate.now(ZoneId.of("America/Campo_Grande"))
+    }
 ) : AndroidViewModel(application) {
 
     // Construtor de produção (usa banco real)

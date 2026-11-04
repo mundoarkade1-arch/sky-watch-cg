@@ -20,6 +20,7 @@ import com.skywatch.cg.data.siros.OperationType
 import com.skywatch.cg.ui.theme.SkyWatchColors
 import com.skywatch.cg.util.formatAirlineName
 import com.skywatch.cg.util.formatAirportDisplay
+import com.skywatch.cg.util.getDisplayTime
 
 @Composable
 fun FlightCard(
@@ -28,7 +29,7 @@ fun FlightCard(
     onClick: () -> Unit
 ) {
     val isArrival = flight.operationType == OperationType.ARRIVAL
-    val flightTime = if (isArrival) flight.scheduledArrivalUtc else flight.scheduledDepartureUtc
+    val flightTime = flight.getDisplayTime()
     val city = if (isArrival) (flight.originName ?: flight.origin) else (flight.destinationName ?: flight.destination)
     val code = if (isArrival) flight.origin else flight.destination
     val cityDisplay = formatAirportDisplay(city, code)
@@ -58,13 +59,22 @@ fun FlightCard(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.weight(1f)
             ) {
-                Text(
-                    text = flightTime.toString(),
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = SkyWatchColors.OnBackground.copy(alpha = alpha),
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                Column(horizontalAlignment = Alignment.Start) {
+                    Text(
+                        text = flightTime,
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = SkyWatchColors.OnBackground.copy(alpha = alpha),
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = if (isArrival) "POUSO · CGR" else "DECOLAGEM · CGR",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (isArrival) SkyWatchColors.ArrivalAccent else SkyWatchColors.DepartureAccent,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 9.sp
+                    )
+                }
 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
@@ -91,7 +101,7 @@ fun FlightCard(
                 shape = RoundedCornerShape(8.dp)
             ) {
                 Text(
-                    text = "Programado",
+                    text = "SIROS",
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Medium,

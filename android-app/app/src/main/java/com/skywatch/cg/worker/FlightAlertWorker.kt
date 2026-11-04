@@ -9,6 +9,7 @@ import com.skywatch.cg.data.db.AlertSent
 import com.skywatch.cg.data.siros.NormalizedFlight
 import com.skywatch.cg.data.siros.OperationType
 import com.skywatch.cg.notification.NotificationHelper
+import com.skywatch.cg.util.getAirportEventDateTime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.Instant
@@ -55,26 +56,7 @@ class FlightAlertWorker(
             var alertsSent = 0
 
             for (flight in allFlights) {
-                val eventTimeUtc = if (flight.operationType == OperationType.ARRIVAL) {
-                    flight.scheduledArrivalUtc
-                } else {
-                    flight.scheduledDepartureUtc
-                }
-                val eventUtcDate = eventUtcDate(
-                    flight.flightDate,
-                    flight.arrivalDate,
-                    flight.operationType
-                )
-
-                // Converte UTC para local (timezone do aeroporto)
-                val eventLocalDateTime = eventTimeUtc.atDate(eventUtcDate)
-                    .atZone(ZoneId.of("UTC"))
-                    .withZoneSameInstant(if (flight.operationType == OperationType.ARRIVAL) {
-                        ZoneId.of(flight.destinationTimezone)
-                    } else {
-                        ZoneId.of(flight.originTimezone)
-                    })
-                    .toLocalDateTime()
+                val eventLocalDateTime = flight.getAirportEventDateTime()
 
                 val minutesUntil = ChronoUnit.MINUTES.between(now, eventLocalDateTime).toInt()
 

@@ -1,6 +1,8 @@
 package com.skywatch.cg.util
 
 import com.skywatch.cg.data.siros.NormalizedFlight
+import com.skywatch.cg.data.siros.OperationType
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -15,26 +17,25 @@ internal val localDateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH
 /**
  * Retorna o horário local formatado (HH:mm) para chegada ou partida do voo.
  */
-internal fun NormalizedFlight.getDisplayTime(isArrival: Boolean): String {
+internal fun NormalizedFlight.getAirportEventDateTime(): LocalDateTime {
+    val isArrival = operationType == OperationType.ARRIVAL
     val utcTime = if (isArrival) scheduledArrivalUtc else scheduledDepartureUtc
-    val flightDateToUse = if (isArrival) arrivalDate else flightDate
-    val flightDateTime = flightDateToUse.atTime(utcTime)
-    val utcZoned = flightDateTime.atZone(ZoneId.of("UTC"))
-    val localZoned = utcZoned.withZoneSameInstant(campoGrandeZone)
-    return localZoned.format(timeFormatter)
+    val utcDate = if (isArrival) arrivalDate else flightDate
+    val airportTimezone = if (isArrival) destinationTimezone else originTimezone
+    return utcDate.atTime(utcTime)
+        .atZone(ZoneId.of("UTC"))
+        .withZoneSameInstant(ZoneId.of(airportTimezone))
+        .toLocalDateTime()
 }
 
-/**
- * Retorna a data/hora local completa formatada para exibição.
- */
-internal fun NormalizedFlight.getDisplayDateTime(isArrival: Boolean): String {
-    val utcTime = if (isArrival) scheduledArrivalUtc else scheduledDepartureUtc
-    val flightDateToUse = if (isArrival) arrivalDate else flightDate
-    val flightDateTime = flightDateToUse.atTime(utcTime)
-    val utcZoned = flightDateTime.atZone(ZoneId.of("UTC"))
-    val localZoned = utcZoned.withZoneSameInstant(campoGrandeZone)
-    return localZoned.format(localDateTimeFormatter)
-}
+internal fun NormalizedFlight.getDisplayTime(): String =
+    getAirportEventDateTime().format(timeFormatter)
+
+internal fun NormalizedFlight.getDisplayDate(): String =
+    getAirportEventDateTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+
+internal fun NormalizedFlight.getDisplayDateTime(): String =
+    getAirportEventDateTime().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
 
 /**
  * Retorna data/hora de sincronização formatada para exibição.

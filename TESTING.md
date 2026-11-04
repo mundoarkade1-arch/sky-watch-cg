@@ -1,5 +1,17 @@
 # Plano de testes
 
+## Agenda local e recomendação de observação — 2026-11-04
+
+A tela inicial combina pousos e decolagens em ordem cronológica e apresenta o horário local de Campo Grande. Os filtros Todos/Pousos/Decolagens alteram a lista, não a base da recomendação: a faixa de 3 horas sempre considera os dois tipos de movimento. A lista representa voos de passageiros ativos encontrados no SIROS para CGR, não todos os movimentos reais; a faixa é calculada a partir do planejamento e não garante operação.
+
+**Regressão final local** (executada a partir de `android-app`):
+```powershell
+.\gradlew.bat :app:testDebugUnitTest :app:testReleaseUnitTest :app:assembleDebug :app:assembleRelease :app:lintVitalRelease :app:processReleaseManifest :app:compileDebugAndroidTestKotlin --console=plain
+```
+**Resultado:** `BUILD SUCCESSFUL`; 75 testes por variante (Debug e Release), 0 falhas, 0 erros e 1 ignorado por depender de CSV real. Builds Debug/Release, lint vital, processamento do manifest Release e compilação dos testes instrumentados aprovados. APK Debug `1.0.18` gerado.
+
+**Telefone físico:** APK Debug `1.0.18` instalado e aberto em aparelho Android 14, sem emulador. A interface apresentou, para 05/11/2026, a janela 09:05–12:05 com 10 movimentos programados (5 pousos e 5 decolagens). Esse resultado reflete os dados SIROS em cache naquela consulta, não uma confirmação de operação.
+
 ## Regras
 - Registrar data/hora UTC e horário local (Campo Grande, UTC-4).
 - Guardar URL/endpoint consultado, código HTTP, latência e quantidade de registros.

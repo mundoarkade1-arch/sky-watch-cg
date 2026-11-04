@@ -20,12 +20,8 @@ import com.skywatch.cg.R
 import com.skywatch.cg.data.siros.NormalizedFlight
 import com.skywatch.cg.data.siros.OperationType
 import com.skywatch.cg.ui.theme.SkyWatchColors
-import java.time.LocalDate
-import java.time.LocalTime
-import java.time.ZoneId
-import java.time.ZoneOffset
+import com.skywatch.cg.util.getAirportEventDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,17 +30,11 @@ fun DetailScreen(
     onBack: () -> Unit
 ) {
 val isArrival = flight.operationType == OperationType.ARRIVAL
-    val localTime = if (isArrival) flight.scheduledArrivalUtc else flight.scheduledDepartureUtc
-    val localDate = if (isArrival) flight.arrivalDate else flight.flightDate
-    val localTimezone = if (isArrival) flight.destinationTimezone else flight.originTimezone
-
-    val localTimeStr = localTime.atDate(localDate)
-        .atZone(ZoneOffset.UTC)
-        .withZoneSameInstant(ZoneId.of(localTimezone))
-        .toLocalTime()
-        .format(DateTimeFormatter.ofPattern("HH:mm"))
-
-    val utcTimeStr = localTime.format(DateTimeFormatter.ofPattern("HH:mm")) + " UTC"
+val eventDateTime = flight.getAirportEventDateTime()
+val localTimeStr = eventDateTime.format(DateTimeFormatter.ofPattern("HH:mm"))
+val localDateStr = eventDateTime
+    .format(DateTimeFormatter.ofPattern("EEEE, dd 'de' MMMM 'de' yyyy", java.util.Locale("pt", "BR")))
+    .replaceFirstChar { it.uppercase(java.util.Locale("pt", "BR")) }
 
     val fromCity = flight.originName ?: flight.origin
     val toCity = flight.destinationName ?: flight.destination
@@ -90,8 +80,13 @@ val isArrival = flight.operationType == OperationType.ARRIVAL
                         color = accentColor
                     )
                     Text(
-                        text = utcTimeStr,
+                        text = "${if (isArrival) "POUSO PROGRAMADO" else "DECOLAGEM PROGRAMADA"} EM CAMPO GRANDE · HORA LOCAL",
                         style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = localDateStr,
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -111,7 +106,7 @@ val isArrival = flight.operationType == OperationType.ARRIVAL
                     )
                 }
             }
-Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Route
             Row(
@@ -162,18 +157,6 @@ Spacer(modifier = Modifier.height(8.dp))
 
             // Info cards
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                InfoRow(
-                    icon = "🕐",
-                    label = "Horário local",
-                    value = localTimeStr,
-                    accentColor = accentColor
-                )
-                InfoRow(
-                    icon = "🕐",
-                    label = "Horário UTC",
-                    value = utcTimeStr,
-                    accentColor = accentColor
-                )
                 if (!flight.equipment.isNullOrBlank()) {
                     InfoRow(
                         icon = "✈",
@@ -182,9 +165,9 @@ Spacer(modifier = Modifier.height(8.dp))
                         accentColor = accentColor
                     )
                 }
-InfoRow(
+                InfoRow(
                     icon = "ℹ",
-    label = "Situação cadastral SIROS",
+                    label = "Situação cadastral SIROS",
                     value = flight.sirosStatus,
                     accentColor = accentColor
                 )
@@ -200,7 +183,7 @@ InfoRow(
 
             // Disclaimer
             Text(
-                text = "Horários programados (SIROS/ANAC). A situação do registro não confirma a operação do voo.",
+                text = "Horário programado no SIROS/ANAC; não confirma a operação real do voo.",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,

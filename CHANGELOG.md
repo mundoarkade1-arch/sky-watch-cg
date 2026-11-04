@@ -1,4 +1,13 @@
 # Changelog
+## 2026-11-04 — Agenda cronológica e horário local
+- Unificadas chegadas e partidas numa lista cronológica, inicialmente em Todos, com filtros e contagem por tipo.
+- Cartões, detalhes e notificações usam o horário local do aeroporto do evento; para CGR, o cabeçalho identifica o horário local de Campo Grande.
+- Corrigida a seleção de chegadas pela data local do evento quando a data UTC cruza a meia-noite.
+- Adicionada recomendação da faixa contínua de 3 horas com mais pousos e decolagens SIROS; a contagem continua combinada mesmo ao filtrar a lista.
+- A lista mantém os movimentos de passageiros ativos encontrados no SIROS para a data e identifica a recomendação como planejamento, sem garantir operação real ou cobertura de todos os movimentos.
+- Regressão final: 75 testes Debug e 75 Release, 0 falhas, 0 erros, 1 ignorado por variante; builds Debug/Release, lint vital e compilação dos testes instrumentados aprovados.
+- APK Debug `1.0.18` instalado e aberto em telefone Android 14, sem emulador.
+
 ## 2026-11-04 — Detalhes de voo e prévia Debug 1.0.17
 - Cartões e próximo voo abrem a tela de detalhes; a rota é apresentada origem→destino e os horários usam o fuso do aeroporto do evento.
 - Removido o botão "Seguir voo" sem ação implementada; a situação SIROS é identificada como cadastral, sem sugerir confirmação operacional em tempo real.

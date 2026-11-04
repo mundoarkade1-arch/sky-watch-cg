@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat
 import com.skywatch.cg.MainActivity
 import com.skywatch.cg.R
 import com.skywatch.cg.data.siros.NormalizedFlight
+import com.skywatch.cg.util.getDisplayDate
 import com.skywatch.cg.util.getDisplayTime
 
 /**
@@ -76,18 +77,14 @@ object NotificationHelper {
         minutesUntilEvent: Int,
         isArrival: Boolean
     ) {
-        val eventType = if (isArrival) "chegada" else "partida"
-        val title = "${flight.airline} ${flight.flightNumber} - ${eventType.replaceFirstChar { if (it.isLowerCase()) it.titlecase(java.util.Locale.getDefault()) else it.toString() }} em $minutesUntilEvent min"
+        val eventType = if (isArrival) "Pouso" else "Decolagem"
+        val title = "${flight.airline} ${flight.flightNumber} · $eventType programado em CGR em $minutesUntilEvent min"
         val location = if (isArrival) {
-            "Origem: ${flight.origin} (${flight.originName ?: ""}) → ${flight.destination}"
+            "Rota: ${flight.origin} → CGR"
         } else {
-            "Origem: ${flight.origin} → Destino: ${flight.destination} (${flight.destinationName ?: ""})"
+            "Rota: CGR → ${flight.destination}"
         }
-        val timeText = if (isArrival) {
-            "Horário local: ${flight.getDisplayTime(true)}"
-        } else {
-            "Horário local: ${flight.getDisplayTime(false)}"
-        }
+        val timeText = "Hora local em Campo Grande: ${flight.getDisplayTime()} · ${flight.getDisplayDate()}"
 
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP

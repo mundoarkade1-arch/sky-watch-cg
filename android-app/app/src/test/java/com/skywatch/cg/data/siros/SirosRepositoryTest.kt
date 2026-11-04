@@ -5,6 +5,7 @@ import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.skywatch.cg.data.db.AppDatabase
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.*
@@ -107,6 +108,42 @@ class SirosRepositoryTest {
         val retrieved = repository.getFlightById("GLO-1234-2024-10-15")
         assertNotNull(retrieved)
         assertEquals("Confirmado", retrieved?.sirosStatus)
+    }
+
+    @Test
+    fun arrivalAfterUtcMidnightAppearsOnItsCampoGrandeLocalDate() = runBlocking {
+        val departureDateUtc = LocalDate.of(2024, 10, 15)
+        val overnightArrival = NormalizedFlight(
+            flightId = "GLO-overnight-2024-10-15",
+            sirosRecordId = "GLO-overnight",
+            airline = "GOL",
+            flightNumber = "1234",
+            equipment = "B738",
+            origin = "SBGR",
+            originName = "GUARULHOS",
+            originTimezone = "America/Sao_Paulo",
+            destination = "SBCG",
+            destinationName = "CAMPO GRANDE",
+            destinationTimezone = "America/Campo_Grande",
+            operationType = OperationType.ARRIVAL,
+            scheduledDepartureUtc = LocalTime.of(22, 0),
+            scheduledArrivalUtc = LocalTime.of(1, 0),
+            flightDate = departureDateUtc,
+            arrivalDate = departureDateUtc.plusDays(1),
+            daysOfWeek = listOf(1, 2, 3, 4, 5, 6, 7),
+            validFrom = departureDateUtc,
+            validTo = departureDateUtc.plusDays(1),
+            serviceType = "REGULAR DE PASSAGEIROS",
+            sirosStatus = "Em Operação"
+        )
+        repository.saveNormalizedFlights(listOf(overnightArrival))
+
+        val campoGrandeArrivalDate = departureDateUtc
+        val suspendingResult = repository.getArrivalsForUi(campoGrandeArrivalDate)
+        val flowResult = repository.getArrivalsForUiFlow(campoGrandeArrivalDate).first()
+
+        assertEquals(listOf(overnightArrival.flightId), suspendingResult.map { it.flightId })
+        assertEquals(listOf(overnightArrival.flightId), flowResult.map { it.flightId })
     }
 
     @Test

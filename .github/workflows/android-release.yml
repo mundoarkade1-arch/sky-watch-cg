@@ -44,6 +44,7 @@ jobs:
 
             - Pacote Android: `com.skywatch.cg.debug` (instala em paralelo à versão Release).
             - Inclui a grade SIROS e o radar ADS-B ainda experimental.
+            - A agenda usa horários locais de Campo Grande e destaca uma faixa de 3 horas com mais movimentos programados SIROS; isso não confirma operação real nem cobre necessariamente todos os movimentos do aeroporto.
             - Não é uma versão assinada para distribuição estável nem para publicação na Play Store.
             - A chave Debug do CI pode mudar entre execuções; para instalar uma nova prévia, talvez seja necessário desinstalar a anterior, apagando os dados locais.
             - A integração ADS-B aguarda confirmação de condições com a fonte; status operacional Aena não está integrado.
@@ -53,7 +54,6 @@ jobs:
           files: dist/SKY-WATCH-CG-${{ github.ref_name }}-debug.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 
 
 

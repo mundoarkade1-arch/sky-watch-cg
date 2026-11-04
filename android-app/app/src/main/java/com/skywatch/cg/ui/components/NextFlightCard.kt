@@ -23,18 +23,21 @@ import com.skywatch.cg.ui.theme.SkyWatchColors
 import com.skywatch.cg.util.formatAirlineName
 import com.skywatch.cg.util.formatAirportDisplay
 import com.skywatch.cg.util.formatTimeUntil
+import com.skywatch.cg.util.getAirportEventDateTime
+import com.skywatch.cg.util.getDisplayTime
 import java.time.Duration
-import java.time.LocalTime
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 @Composable
 fun NextFlightCard(
     flight: NormalizedFlight,
-    currentTime: LocalTime = LocalTime.now(),
+    currentTime: LocalDateTime = LocalDateTime.now(ZoneId.of("America/Campo_Grande")),
     onClick: () -> Unit
 ) {
     val isArrival = flight.operationType == OperationType.ARRIVAL
-    val flightTime = if (isArrival) flight.scheduledArrivalUtc else flight.scheduledDepartureUtc
-    val timeDiff = Duration.between(currentTime, flightTime).toMinutes()
+    val flightTime = flight.getDisplayTime()
+    val timeDiff = Duration.between(currentTime, flight.getAirportEventDateTime()).toMinutes()
     val timeDesc = formatTimeUntil(timeDiff)
 
     val city = if (isArrival) (flight.originName ?: flight.origin) else (flight.destinationName ?: flight.destination)
@@ -96,7 +99,7 @@ fun NextFlightCard(
                 ) {
                     Column {
                         Text(
-                            text = flightTime.toString(),
+                            text = flightTime,
                             style = MaterialTheme.typography.displayLarge,
                             color = SkyWatchColors.OnBackground,
                             fontSize = 38.sp,
