@@ -46,6 +46,36 @@ fun MainScreen(viewModel: FlightListViewModel) {
     val syncMetadata by viewModel.syncMetadata.collectAsState()
 
     val isRefreshing = uiState is FlightUiState.Refreshing
+    val lastSyncError = syncMetadata?.let {
+        if (it.lastSyncStatus == "FAILURE" && !it.lastSyncErrorMessage.isNullOrBlank()) {
+            it.lastSyncErrorMessage
+        } else null
+    }
+
+    val selectedTab = remember { mutableStateOf(0) }
+
+    Scaffold(
+        topBar = {
+            TopAppBarWrapper(
+                viewModel = viewModel,
+                uiState = uiState,
+                isRefreshing = isRefreshing,
+                syncMetadata = syncMetadata,
+                lastSyncError = lastSyncError,
+                selectedTab = selectedTab.value,
+                onTabSelected = { selectedTab.value = it }
+            )
+        },
+        bottomBar = { BottomNavBar(navController) }
+    ) { innerPadding ->
+        MainContent(
+            viewModel = viewModel,
+            uiState = uiState,
+            selectedTab = selectedTab.value,
+            innerPadding = innerPadding
+        )
+    }
+}
 @Composable
 fun TopAppBarWrapper(
     viewModel: FlightListViewModel,
@@ -148,7 +178,6 @@ fun TopAppBarWrapper(
         }
     }
 }
-
 @Composable
 fun MainContent(
     viewModel: FlightListViewModel,
@@ -191,9 +220,7 @@ fun MainContent(
 
                 val futureFlights = if (isToday) {
                     flights.filter { it.isAfter(LocalTime.now(ZoneId.of("America/Campo_Grande")), ZoneId.of("America/Campo_Grande")) }
-                } else {
-                    flights
-                }
+                } else { flights }
 
                 if (futureFlights.isNotEmpty()) {
                     item { SectionHeader("MAIS TARDE") }
@@ -216,17 +243,7 @@ fun MainContent(
         }
     }
 }
-    val lastSyncError = syncMetadata?.let {
-        if (it.lastSyncStatus == "FAILURE" && !it.lastSyncErrorMessage.isNullOrBlank()) {
-            it.lastSyncErrorMessage
-        } else null
-    }
 
-    val selectedTab = remember { mutableStateOf(0) } // 0 = Arrivals, 1 = Departures
-
-    Scaffold(
-        topBar = { TopAppBarWrapper(viewModel, uiState, isRefreshing, syncMetadata, lastSyncError, selectedTab.value) { selectedTab.value = it } },
-        bottomBar = { BottomNavBar(navController) }
 @Composable
 fun SectionHeader(title: String, isDimmed: Boolean = false) {
     Text(
@@ -288,7 +305,6 @@ fun LoadingState() {
         Text(text = "Carregando voos...", color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
-
 @Composable
 fun ErrorState(message: String, onRetry: () -> Unit) {
     Box(
@@ -345,13 +361,4 @@ fun NormalizedFlight.getTimeUntil(zone: ZoneId): Long {
     val localFlightTime = flightTime.atDate(flightDate).atZone(ZoneOffset.UTC).withZoneSameInstant(zone).toLocalTime()
     val now = LocalTime.now(zone)
     return java.time.Duration.between(now, localFlightTime).toMinutes()
-}
-    ) { innerPadding ->
-        MainContent(
-            viewModel = viewModel,
-            uiState = uiState,
-            selectedTab = selectedTab.value,
-            innerPadding = innerPadding
-        )
-    }
 }
