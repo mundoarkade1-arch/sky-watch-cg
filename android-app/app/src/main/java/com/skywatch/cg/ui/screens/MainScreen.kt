@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.skywatch.cg.BuildConfig
 import com.skywatch.cg.R
@@ -55,7 +56,7 @@ fun MainScreen(viewModel: FlightListViewModel) {
             )
         }
         composable("sobre") {
-            AboutScreen(navController = navController)
+            AboutScreen(onNavigateBack = { navController.popBackStack() })
         }
     }
 }
