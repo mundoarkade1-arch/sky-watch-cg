@@ -28,6 +28,7 @@ Conclusão e decisão:
 - **Integração automatizada não autorizada/validada.** Não fazer scraping nem reutilizar dados da interface até obter confirmação escrita da entidade responsável por CGR, esclarecer a aplicabilidade dos termos e receber documentação, licença e limites de uso de uma API apropriada.
 - Se não houver autorização/API, manter SIROS como fonte de planejamento e encaminhar o passageiro à companhia aérea/Aena para confirmação operacional. Não rotular horário planejado como status real.
 - Canal oficial para solicitar orientação: Central de Atendimento ao Usuário; a página lista o contato do Aeroporto Internacional de Campo Grande como `(34) 2512-1803`. A central também publica `institucional@aenabrasil.com.br` para comunicações administrativas. Confirmar com a própria Aena o canal adequado para pedido técnico/jurídico e solicitar resposta escrita.
+- Uma minuta pronta para iniciar esse pedido está em [`AENA_API_REQUEST.md`](./AENA_API_REQUEST.md); ela ainda precisa ser enviada pelo responsável pelo projeto e não constitui autorização.
 
 ## 3. Aena Espanha — nota de escopo
 

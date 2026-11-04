@@ -33,6 +33,7 @@
 - [x] **CI #41 e #42 (04/11/2026):** ambos concluídos com sucesso; #42 validou build Debug e suíte unitária para o commit `fa2712d`.
 - [x] **Documentação alinhada (04/11/2026):** `README.md`, `ROADMAP.md`, `PROJECT_STATE.md`, `TESTING.md` e `CHANGELOG.md` sincronizados com o estado comprovado do projeto.
 - [x] **Pesquisa Aena Brasil (04/11/2026):** página e sitemap oficiais de CGR consultados; não foi localizada documentação pública de painel/API para CGR. Os termos consultados restringem reprodução de conteúdo sem autorização escrita e identificam ANB, enquanto CGR é administrado pela BOAB. Sem presumir que os termos resolvam o escopo de CGR, nenhuma coleta automatizada será implementada antes de confirmação escrita e documentação apropriada. Detalhes e fontes em `docs/API_SOURCES.md`.
+- [x] **Minuta de pedido Aena/BOAB preparada (04/11/2026):** `docs/AENA_API_REQUEST.md` pede identificação da entidade responsável, documentação de API, condições de uso e autorização escrita. A minuta não foi enviada; confirmação do canal apropriado e envio pelo responsável pelo projeto continuam pendentes.
 - [x] **Roteiro manual de alertas após reinicialização:** adicionado a `TESTING.md`; execução em aparelho ainda pendente.
 
   - **6.3.1:** Download HTTP via OkHttp com parâmetros customizáveis no `SirosRemoteSource`, verificações de arquivo vazio (0 bytes) e download incompleto (Content-Length divergente).
@@ -55,5 +56,6 @@
 
 ## Próxima etapa
 - Solicitar à entidade responsável pelo aeroporto de Campo Grande (BOAB/Aena Brasil), usando a Central de Atendimento oficial indicada em `docs/API_SOURCES.md`, confirmação escrita das condições de uso e documentação de uma eventual API de status operacional.
+- Enviar a minuta preparada em `docs/AENA_API_REQUEST.md` e registrar protocolo/resposta sem expor dados pessoais.
 - Executar e registrar o roteiro de notificações após reinicialização descrito em `TESTING.md`.
 - Só então decidir se uma integração Aena é permitida e adequada; avaliar cobertura/termos ADS-B separadamente.
