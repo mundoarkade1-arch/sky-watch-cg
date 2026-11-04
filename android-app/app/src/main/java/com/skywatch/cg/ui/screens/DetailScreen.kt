@@ -1,0 +1,283 @@
+package com.skywatch.cg.ui.screens
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.AirplaneMode
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
+import com.skywatch.cg.R
+import com.skywatch.cg.data.siros.NormalizedFlight
+import com.skywatch.cg.data.siros.OperationType
+import com.skywatch.cg.ui.theme.SkyWatchColors
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.util.Locale
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DetailScreen(
+    flight: NormalizedFlight,
+    onBack: () -> Unit
+) {
+val isArrival = flight.operationType == OperationType.ARRIVAL
+    val localTime = if (isArrival) flight.scheduledArrivalUtc else flight.scheduledDepartureUtc
+    val localDate = if (isArrival) flight.arrivalDate else flight.flightDate
+
+    val localTimeStr = localTime.atDate(localDate)
+        .atZone(ZoneOffset.UTC)
+        .withZoneSameInstant(ZoneId.of("America/Campo_Grande"))
+        .toLocalTime()
+        .format(DateTimeFormatter.ofPattern("HH:mm"))
+
+    val utcTimeStr = localTime.format(DateTimeFormatter.ofPattern("HH:mm")) + " UTC"
+
+    val fromCity = if (isArrival) (flight.originName ?: flight.origin) else (flight.destinationName ?: flight.destination)
+    val toCity = if (isArrival) (flight.destinationName ?: flight.destination) else (flight.originName ?: flight.origin)
+    val fromCode = if (isArrival) flight.origin else flight.destination
+    val toCode = if (isArrival) flight.destination else flight.origin
+
+    val accentColor = if (isArrival) SkyWatchColors.ArrivalAccent else SkyWatchColors.DepartureAccent
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(text = "${flight.airline} ${flight.flightNumber}", style = MaterialTheme.typography.titleLarge) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Voltar")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
+            )
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Giant time
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = localTimeStr,
+                        style = MaterialTheme.typography.displayLarge,
+                        fontSize = 48.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = accentColor
+                    )
+                    Text(
+                        text = utcTimeStr,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                Surface(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(RoundedCornerShape(16.dp)),
+                    color = accentColor.copy(alpha = 0.15f)
+                ) {
+                    Icon(
+                        imageVector = if (isArrival) Icons.Default.ArrowDownward else Icons.Default.ArrowUpward,
+                        contentDescription = null,
+                        tint = accentColor,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
+Spacer(modifier = Modifier.height(8.dp))
+
+            // Route
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = fromCity.split(" ").firstOrNull() ?: fromCity,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    Text(
+                        text = fromCode,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                Icon(
+                    imageVector = Icons.Default.AirplaneMode,
+                    contentDescription = null,
+                    tint = accentColor,
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .rotate(45f)
+                )
+
+                Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = toCity.split(" ").firstOrNull() ?: toCity,
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        textAlign = androidx.compose.ui.text.TextAlign.End
+                    )
+                    Text(
+                        text = toCode,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = androidx.compose.ui.text.TextAlign.End
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Info cards
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                InfoRow(
+                    icon = Icons.Default.Schedule,
+                    label = "Horário local",
+                    value = localTimeStr,
+                    accentColor = accentColor
+                )
+                InfoRow(
+                    icon = Icons.Default.Schedule,
+                    label = "Horário UTC",
+                    value = utcTimeStr,
+                    accentColor = accentColor
+                )
+                if (!flight.equipment.isNullOrBlank()) {
+                    InfoRow(
+                        icon = Icons.Default.AirplaneMode,
+                        label = "Aeronave",
+                        value = flight.equipment!!,
+                        accentColor = accentColor
+                    )
+                }
+InfoRow(
+                    icon = Icons.Default.Info,
+                    label = "Status SIROS",
+                    value = flight.sirosStatus,
+                    accentColor = accentColor
+                )
+                InfoRow(
+                    icon = Icons.Default.Info,
+                    label = "Fonte",
+                    value = "SIROS/ANAC (programado)",
+                    accentColor = accentColor
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Follow button placeholder
+            if (false) { // TODO: check if flight is followed
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { /* unfollow */ },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    )
+                ) {
+                    Text(text = "Deixar de seguir", fontWeight = FontWeight.Bold)
+                }
+            } else {
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { /* follow */ },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = accentColor
+                    )
+                ) {
+                    Text(text = "Seguir voo", fontWeight = FontWeight.Bold)
+                }
+            }
+
+            // Disclaimer
+            Text(
+                text = "Sem confirmação em tempo real. Horários programados (SIROS/ANAC).",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                textAlign = androidx.compose.ui.text.TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun InfoRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    value: String,
+    accentColor: androidx.compose.ui.graphics.Color
+) {
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp)),
+        color = MaterialTheme.colorScheme.surface,
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = accentColor,
+                modifier = Modifier.size(24.dp).padding(end = 12.dp)
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = value,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onBackground,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+        }
+    }
+}

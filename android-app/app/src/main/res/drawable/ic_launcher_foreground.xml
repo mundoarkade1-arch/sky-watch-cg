@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Radar ring - soft sky blue -->
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#5538BDF8"
+        android:strokeWidth="2"
+        android:pathData="M54,24a30,30 0 1,0 0.001,0z"/>
+    <!-- Amber dot on the ring -->
+    <path
+        android:fillColor="#FBBF24"
+        android:pathData="M30.5,70.5m-4.5,0a4.5,4.5 0 1,0 9,0a4.5,4.5 0 1,0 -9,0"/>
+    <!-- Airplane pointing up-right, centered in 66x66 area -->
+    <group
+        android:pivotX="54"
+        android:pivotY="54"
+        android:rotation="45"
+        android:scaleX="1.8"
+        android:scaleY="1.8"
+        android:translateX="-6"
+        android:translateY="-6">
+        <path
+            android:fillColor="#38BDF8"
+            android:pathData="M21,16v-2l-8,-5V3.5c0,-0.83 -0.67,-1.5 -1.5,-1.5S10,2.67 10,3.5V9l-8,5v2l8,-2.5V19l-2,1.5V22l3.5,-1l3.5,1v-1.5L13,19v-5.5L21,16z"/>
+    </group>
+</vector>

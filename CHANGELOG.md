@@ -1,4 +1,34 @@
 # Changelog
+## 2026-11-03 — Redesenho Visual Completo (Partes 1-4)
+### Parte 1 - Tema e Fontes
+- Novo tema escuro "painel de aeroporto" (`SkyWatchTheme`) com cores: fundo `#0A0F1C`, cartão `#121A2B`, borda `#1E2A42`, texto `#F1F5F9`, secundário `#8A97B1`, azul-céu `#38BDF8` (chegadas), âmbar `#FBBF24` (partidas).
+- Fontes Google Fonts via `androidx.compose.ui:ui-text-google-fonts:1.6.0`: **Manrope** para textos, **Space Grotesk** para horários/números.
+- Fallback para fonte do sistema se provedor indisponível.
+- `MainActivity` atualizado para usar `SkyWatchTheme` e status bar transparente (edge-to-edge).
+
+### Parte 2 - Tela Principal
+- Cabeçalho: "CAMPO GRANDE · SBCG" (maiúsculas, espaçado), título dinâmico "Voos de hoje" ou dia/semana/data, botão de refresh quadrado 44dp.
+- Faixa de datas deslizante (chips) de ontem a +14 dias; selecionado em azul-céu com texto escuro.
+- Segmentos "Chegadas | Partidas" substituindo abas; fundo `#121A2B`, selecionado em `#1C2842`.
+- Cartão "PRÓXIMO VOO" (só hoje): horário 38sp, "Cia nº · Cidade (código)", contagem regressiva "35 min / para chegar".
+- Lista em duas seções: "MAIS TARDE" e "JÁ PASSARAM" (opacidade 50%).
+- Cards: horário local 24sp Space Grotesk, "CIA 1234" negrito, "Cidade (CÓD)" secundário, etiqueta "Programado".
+- Rodapé SIROS discreto, sem aviso vermelho no topo.
+- Barra inferior só para telas existentes: "Voos" e "Sobre".
+- Estados: carregando (esqueletos animados 200ms), vazio (ícone + texto), erro (botão "Tentar de novo").
+
+### Parte 3 - Tela de Detalhe
+- Horário gigante 48sp, rota "GRU → CGR" com nomes de cidades.
+- Linhas de informação: horário local, UTC, aeronave, status SIROS, fonte.
+- Botão "Seguir voo" (só se existir); aviso "Sem confirmação em tempo real".
+
+### Parte 4 - Ícone do App
+- Drawables: `ic_launcher_background.xml` (fundo `#0A0F1C`), `ic_launcher_foreground.xml` (anel radar azul-céu suave + avião `#38BDF8` + ponto âmbar `#FBBF24`).
+- Mipmaps adaptativos `ic_launcher.xml` / `ic_launcher_round.xml` para anydpi-v26 e anydpi-v24.
+- `AndroidManifest.xml`: adicionados `android:icon` e `android:roundIcon`.
+
+### Dependências
+- Adicionada `androidx.compose.ui:ui-text-google-fonts:1.6.0` (autorizada única dependência nova).
 
 ## 2026-11-02 — Correção e Conclusão da Etapa A (36 testes verdes)
 - **Correção em `FlightListViewModelTest` (`testRefreshStateEmitsRefreshing`):** O teste falhava inicialmente por tentar ler o estado logo após `viewModel.refresh()` sem ceder a execução à corrotina, além de tentar acessar a rede real. A solução pontual consistiu em injetar uma fonte remota simulada (`SirosRemoteSource` apontando para `http://localhost:0/dummy.csv`) via o construtor do `SirosRepository`, permitindo que o teste valide a emissão do estado `Refreshing` e a conclusão bem-sucedida sem dependência de rede externa.
