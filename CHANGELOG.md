@@ -1,4 +1,9 @@
 # Changelog
+## 2026-11-04 — Validação focada e correção do wrapper Windows
+- Reexecutada a suíte completa: 53 testes contabilizados, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` e os 11 testes isolados de `FlightListViewModelTest` passaram. CI #41 e #42 concluídos com sucesso.
+- Corrigido `android-app/gradlew.bat` para preservar o código de saída real do Gradle, em vez de retornar falha após builds aprovados.
+- O teste físico de notificações após reinicialização continua pendente; não havia `adb` nem aparelho detectado no ambiente.
+
 ## 2026-11-04 — Pesquisa de fonte Aena e validação manual de alertas
 - Documentadas as páginas, sitemap, `robots.txt` e termos oficiais consultados para Aena Brasil. Não foi encontrada documentação pública de uma API de status para CGR; os termos consultados restringem reutilização sem autorização escrita e a entidade indicada nos termos não é a mesma identificada para a concessão de CGR.
 - Sem scraping nem integração: solicitar esclarecimento/autorização escrita e documentação apropriada à entidade responsável por CGR.

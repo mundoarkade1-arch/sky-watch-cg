@@ -247,6 +247,22 @@ cd android-app
 
 **Escopo ainda não coberto por esta execução:** teste manual ponta a ponta das notificações após reinicialização do dispositivo. A conclusão do CI não representa esse teste físico.
 
+## Revalidação dos testes de atualização — 2026-11-04
+
+**Comando local** (executado a partir de `android-app`):
+```powershell
+.\gradlew.bat :app:testDebugUnitTest --tests "com.skywatch.cg.ui.viewmodel.FlightListViewModelTest" --console=plain
+```
+**Resultado:** `BUILD SUCCESSFUL`; 11 testes, 0 falhas, 0 erros e 0 ignorados. O código de saída foi 0.
+
+**Suíte completa e APK Debug:** executados `.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug --console=plain` a partir de `android-app`. Resultado: `BUILD SUCCESSFUL`; 53 testes contabilizados, 0 falhas, 0 erros e 1 ignorado (`SirosStreamParserRealFileTest`, depende de CSV real local). APK gerado em `android-app\app\build\outputs\apk\debug\app-debug.apk` (11.019.269 bytes).
+
+Durante essa validação foi corrigido `android-app/gradlew.bat`: o script caía sempre no caminho de falha ao terminar, mesmo quando o Gradle era bem-sucedido. Após o ajuste, confirmou-se saída 0 para o teste aprovado e saída 1 para uma tarefa inexistente.
+
+**CI remoto:** execuções #41 e #42 concluídas com sucesso; a #42 validou o build Debug e a suíte unitária no commit `fa2712d`. [Ver execução #42 no GitHub Actions](https://github.com/mundoarkade1-arch/sky-watch-cg/actions/runs/41896892995).
+
+**Teste físico pendente:** não foi possível executar o roteiro abaixo neste ambiente porque `adb` não está disponível no PATH e nenhum dispositivo Android foi detectado. Não marcar o teste de notificações após reinicialização como concluído com base nos testes unitários/CI.
+
 ## Roteiro manual — alertas após reinicialização (a executar no Android)
 
 **Objetivo:** verificar permissões e reagendamento pelo `BootReceiver` em um aparelho real. Este roteiro não substitui a informação operacional da companhia aérea nem confirma a operação do voo.

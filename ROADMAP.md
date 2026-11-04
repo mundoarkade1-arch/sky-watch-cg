@@ -3,7 +3,8 @@
 ## Status atual — 2026-11-04
 - O MVP de chegadas e partidas, ingestão SIROS, sincronização periódica e infraestrutura de notificações locais estão implementados.
 - Correção da tela Sobre e do estado de atualização concluída. Validação local: 53 testes contabilizados (52 executados sem falhas e 1 ignorado); APK Debug gerado.
-- CI #39 para o commit `bccfd48` na branch `wip-fase3`: concluído com sucesso.
+- Revalidação local completa: 53 testes contabilizados (52 aprovados e 1 ignorado), `assembleDebug` aprovado; `FlightListViewModelTest` passou isoladamente (11 testes). Wrapper Gradle do Windows corrigido para propagar corretamente o código de saída.
+- CI #42 para o commit `fa2712d` na branch `wip-fase3`: build e testes concluídos com sucesso.
 - A pesquisa inicial da Etapa 4 foi registrada; integração Aena depende de autorização/documentação apropriadas para CGR. Nenhuma posição ADS-B ou status operacional é apresentado como confirmado sem correspondência verificável.
 
 ## Etapa 1 — Validação das fontes e arquitetura (Concluída)

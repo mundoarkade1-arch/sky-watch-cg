@@ -15,7 +15,7 @@ Exibir voos planejados para Campo Grande com fontes documentadas, distinguindo p
 - Prioridade: fontes gratuitas
 
 ## Estado atual
-Projeto em desenvolvimento ativo. O MVP Android, a sincronização SIROS, a sincronização periódica e a base de notificações locais estão implementados. A última validação local contabilizou 53 testes: 52 executados sem falhas e 1 ignorado por depender de CSV real; o APK Debug foi gerado e o CI #39 concluiu com sucesso. Status operacional Aena e radar ADS-B continuam planejados e dependem de fontes autorizadas e verificáveis.
+Projeto em desenvolvimento ativo. O MVP Android, a sincronização SIROS, a sincronização periódica e a base de notificações locais estão implementados. A validação local mais recente executou 53 testes: 52 sem falhas e 1 ignorado por depender de CSV real; `FlightListViewModelTest` também passou isoladamente (11 testes). O APK Debug foi gerado e o CI #42 concluiu com sucesso. O wrapper Gradle para Windows foi corrigido para devolver o código de saída real do build. Status operacional Aena e radar ADS-B continuam planejados e dependem de fontes autorizadas e verificáveis.
 
 ## Estrutura
 - `AGENTS.md`: regras para agentes de IA
