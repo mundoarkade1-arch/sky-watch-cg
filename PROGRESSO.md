@@ -44,6 +44,19 @@ Daemon will be stopped at the end of the build
 - Teste unitário cobre próximo pouso/decolagem e nenhum movimento restante. O rolar automático e o botão “Ir para o próximo” ainda ficaram pendentes para uma iteração visual posterior.
 - Próximo passo exato: reestruturar notificações do Bloco 5 para AlarmManager exato quando permitido, receiver, boot e reagendamento por configurações.
 
+## Bloco 5 — diagnóstico do alerta anterior (05/11/2026)
+1. O alerta era agendado como `FlightAlertWorker` periódico do WorkManager, com intervalo mínimo de 15 minutos.
+2. A checagem ocorria no worker, consultando o cache SIROS apenas quando o sistema executava o trabalho.
+3. A janela de 15–30 minutos podia ser perdida porque o WorkManager não garante horário exato.
+4. O trabalho também era enfileirado no `onCreate` e no boot, por isso parecia disparar ao entrar e sair do app.
+5. O caminho anterior não usava `AlarmManager`, não verificava `canScheduleExactAlarms()` e não reagendava alarmes individuais após configurações.
+
+## Bloco 5 — implementação em andamento (05/11/2026)
+- Criados plano puro `eventAtMillis - minutos`, `AlarmManager` exato quando permitido, fallback `setAndAllowWhileIdle`, receiver e deduplicação em `alert_sent` antes de publicar.
+- `POST_NOTIFICATIONS`, canal de importância alta e texto de otimização de bateria continuam documentados; a tela de configurações e o reagendamento automático ao mudar preferências ainda estão pendentes.
+- O WorkManager periódico foi retirado do caminho de alertas e mantido somente para sincronização SIROS.
+- Próximo passo exato: revisar imports Kotlin, atualizar documentação final e aguardar CI remoto; Gradle local permanece proibido.
+
 ## Fase 0 - Limpeza e verdade
 - [x] Apagar gradle-output-*.log da raiz e siros_temp_*.csv (já limpos no repositório)
 - [x] Ajustar .gitignore (logs, build-logs/, siros_temp_*.csv)

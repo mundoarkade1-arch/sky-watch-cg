@@ -30,22 +30,15 @@ class BootReceiverTest {
     }
 
     @Test
-    fun bootCompletedSchedulesSyncAndAlertWork() {
+    fun bootCompletedSchedulesOnlySyncWork() {
         BootReceiver().onReceive(context, Intent(Intent.ACTION_BOOT_COMPLETED))
 
         val workManager = WorkManager.getInstance(context)
         val syncWork = workManager
             .getWorkInfosForUniqueWork("siros_periodic_sync")
             .get(5, TimeUnit.SECONDS)
-        val alertWork = workManager
-            .getWorkInfosForUniqueWork("flight_alert_check")
-            .get(5, TimeUnit.SECONDS)
-
         assertEquals(1, syncWork.size)
-        assertEquals(1, alertWork.size)
         assertEquals(WorkInfo.State.ENQUEUED, syncWork.single().state)
-        assertEquals(WorkInfo.State.ENQUEUED, alertWork.single().state)
         assertTrue(syncWork.single().tags.any { it.contains("SirosSyncWorker") })
-        assertTrue(alertWork.single().tags.any { it.contains("FlightAlertWorker") })
     }
 }

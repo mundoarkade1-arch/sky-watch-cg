@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,6 +35,8 @@ import com.skywatch.cg.BuildConfig
 import com.skywatch.cg.R
 import com.skywatch.cg.data.db.SyncMetadata
 import com.skywatch.cg.data.siros.NormalizedFlight
+import com.skywatch.cg.data.prefs.AppPreferences
+import com.skywatch.cg.notification.NotificationHelper
 import com.skywatch.cg.data.siros.OperationType
 import com.skywatch.cg.ui.viewmodel.RadarViewModel
 import com.skywatch.cg.ui.components.DayStrip
@@ -524,6 +527,9 @@ fun AboutScreen(
     navController: androidx.navigation.NavController,
     onNavigateBack: () -> Unit
 ) {
+    val context = LocalContext.current
+    val preferences = remember { AppPreferences.getInstance(context) }
+    var soundVibration by remember { mutableStateOf(preferences.soundVibration) }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -556,6 +562,31 @@ fun AboutScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            Card(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Som e vibração", modifier = Modifier.weight(1f))
+                        Switch(
+                            checked = soundVibration,
+                            onCheckedChange = {
+                                soundVibration = it
+                                preferences.soundVibration = it
+                            }
+                        )
+                    }
+                    Button(onClick = {
+                        NotificationHelper.showTextAlert(
+                            context, "Teste de notificação",
+                            "Notificação de teste do SKY WATCH CG", 0x534B59
+                        )
+                    }) { Text("Testar notificação") }
+                    Text(
+                        "Em alguns celulares (ex.: Xiaomi), libere o app em Bateria > Sem restrições.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(

@@ -1,5 +1,11 @@
 # Estado do projeto
 
+## Alterações da rodada wip-fase3 (05/11/2026)
+- O radar padrão usa adsb.lol, airplanes.live e adsb.fi em failover; HTTP 429 recebe cooldown e a UI não fixa erro vermelho.
+- O ciclo de atualização de voos é vinculado a `Lifecycle.State.STARTED`; a sincronização SIROS continua separada.
+- Alertas ADS-B e próximos movimentos têm funções puras e testes adicionados.
+- Alertas de voos seguidos usam AlarmManager/receiver no caminho novo; a restauração completa de cada alarme no boot e a UI de configurações ainda precisam de CI e revisão.
+
 ## Identidade
 - Nome: SKY WATCH CG
 - Plataforma: Android

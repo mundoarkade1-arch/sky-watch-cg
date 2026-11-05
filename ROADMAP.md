@@ -67,3 +67,9 @@
 ## Pendências independentes
 - Enviar a minuta em `docs/AENA_API_REQUEST.md` pelo canal confirmado pela Aena e aguardar resposta escrita; não fazer scraping nem integrar dados Aena sem autorização.
 - Quando houver voo SIROS real na janela de 15–30 minutos, concluir o teste de entrega/deduplicação de alerta descrito em `TESTING.md`.
+# Próxima rodada — wip-fase3
+
+- Validar no CI a compilação e a suíte unitária após os blocos 0–5.
+- Completar a UI de preferências de som/vibração, teste de notificação e reagendamento dos alarmes quando configurações mudarem.
+- Completar rolagem automática até o próximo voo e botão para voltar ao próximo movimento.
+

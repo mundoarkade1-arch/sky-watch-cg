@@ -188,3 +188,9 @@
 - Definido alerta padrão de 15 minutos.
 - Identificadas Aena, AvioADSB e OpenSky como fontes candidatas.
 - Registradas limitações iniciais e necessidade de validação de cobertura.
+# Próxima versão
+
+- Radar ADS-B com failover entre três fontes, cooldown após HTTP 429 e limite de uma chamada por segundo por servidor.
+- Atualização de voos em primeiro plano a cada minuto, cartões de próximos movimentos e regras experimentais de alerta ADS-B.
+- Alertas planejados individuais iniciados por AlarmManager, com fallback durante modo ocioso e deduplicação no receiver.
+
