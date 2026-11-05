@@ -57,6 +57,12 @@ Daemon will be stopped at the end of the build
 - O WorkManager periódico foi retirado do caminho de alertas e mantido somente para sincronização SIROS.
 - Próximo passo exato: revisar imports Kotlin, atualizar documentação final e aguardar CI remoto; Gradle local permanece proibido.
 
+## Correção do CI após execução vermelha (05/11/2026)
+- A API/página pública do repositório retornou HTTP 404, portanto os logs da execução vermelha não puderam ser lidos sem autenticação.
+- Corrigido `.github/workflows/ci.yml`: removidos escapes de crase incompatíveis com Bash no Summary e tornado condicional o upload do APK quando o build falha.
+- Commit enviado: `c9a8f82`.
+- Próximo passo exato: aguardar a nova execução automática e conferir o Summary/log do runner; nenhum Gradle foi executado localmente.
+
 ## Fase 0 - Limpeza e verdade
 - [x] Apagar gradle-output-*.log da raiz e siros_temp_*.csv (já limpos no repositório)
 - [x] Ajustar .gitignore (logs, build-logs/, siros_temp_*.csv)
