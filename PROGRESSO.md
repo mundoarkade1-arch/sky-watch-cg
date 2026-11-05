@@ -37,6 +37,13 @@ Daemon will be stopped at the end of the build
 - Testes adicionados para chegada, saída, voo alto, cooldown e tipos independentes; a execução depende do CI porque Gradle local é proibido.
 - Próximo passo exato: concluir o Bloco 4 com agrupamento visual da lista, seção recolhida de voos passados e testes de troca de data.
 
+## Bloco 4 — próximo voo e lista diária (05/11/2026)
+- A função pura `nextMovements(voos, agoraLocal)` fornece o próximo pouso e a próxima decolagem respeitando a hora local do aeroporto.
+- A tela de voos mostra os dois cartões fixos no topo, usa o relógio do Bloco 2 para contagem regressiva e separa voos passados em `JÁ PASSARAM (N)` recolhível.
+- Nomes de companhia removem o marcador cadastral `(EX- VRG )`; quando não há movimento restante a tela preserva o estado vazio sem inventar dados.
+- Teste unitário cobre próximo pouso/decolagem e nenhum movimento restante. O rolar automático e o botão “Ir para o próximo” ainda ficaram pendentes para uma iteração visual posterior.
+- Próximo passo exato: reestruturar notificações do Bloco 5 para AlarmManager exato quando permitido, receiver, boot e reagendamento por configurações.
+
 ## Fase 0 - Limpeza e verdade
 - [x] Apagar gradle-output-*.log da raiz e siros_temp_*.csv (já limpos no repositório)
 - [x] Ajustar .gitignore (logs, build-logs/, siros_temp_*.csv)

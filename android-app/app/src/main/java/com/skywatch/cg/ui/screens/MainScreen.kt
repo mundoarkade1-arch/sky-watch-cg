@@ -335,6 +335,7 @@ fun MainContent(
             }
             val isToday = selectedDate == LocalDate.now(campoGrandeZone)
             val now = currentLocalDateTime
+            var showPast by remember(selectedDate, selectedTab) { mutableStateOf(false) }
             val bestWindow = ObservationWindowCalculator.findBestWindow(
                 flights = allFlights,
                 selectedDate = selectedDate,
@@ -374,16 +375,31 @@ fun MainContent(
                     SectionHeader("VOOS PROGRAMADOS · ${flights.size}")
                 }
 
-                if (flights.isNotEmpty()) {
-                    items(flights, key = { it.flightId }) { flight ->
-                        val isPast = isToday && flight.getAirportEventDateTime().isBefore(now)
+                val pastFlights = flights.filter { isToday && it.getAirportEventDateTime().isBefore(now) }
+                val upcomingFlights = flights.filterNot { it in pastFlights }
+                if (pastFlights.isNotEmpty()) {
+                    item {
+                        TextButton(onClick = { showPast = !showPast }) {
+                            Text("JÁ PASSARAM (${pastFlights.size})")
+                        }
+                    }
+                    if (showPast) items(pastFlights, key = { "past-${it.flightId}" }) { flight ->
                         FlightCard(
                             flight = flight,
-                            isDimmed = isPast,
+                            isDimmed = true,
                             onClick = { onFlightSelected(flight) }
                         )
                     }
-                } else {
+                }
+                if (upcomingFlights.isNotEmpty()) {
+                    items(upcomingFlights, key = { it.flightId }) { flight ->
+                        FlightCard(
+                            flight = flight,
+                            isDimmed = false,
+                            onClick = { onFlightSelected(flight) }
+                        )
+                    }
+                } else if (pastFlights.isEmpty()) {
                     item { EmptyState(selectedTab) }
                 }
 
