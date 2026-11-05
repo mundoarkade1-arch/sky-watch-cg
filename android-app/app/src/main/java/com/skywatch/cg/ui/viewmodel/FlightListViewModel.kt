@@ -3,7 +3,9 @@ package com.skywatch.cg.ui.viewmodel
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.skywatch.cg.data.db.AppDatabase
 import com.skywatch.cg.data.db.SyncMetadata
 import com.skywatch.cg.data.siros.NormalizedFlight
@@ -19,7 +21,10 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.ZoneId
 
 sealed interface FlightUiState {
@@ -83,6 +88,9 @@ class FlightListViewModel(
     private var loadJob: Job? = null
     private var refreshJob: Job? = null
     private var flightDetailJob: Job? = null
+    private var autoRefreshJob: Job? = null
+    private val _currentLocalDateTime = MutableStateFlow(LocalDateTime.now(ZoneId.of("America/Campo_Grande")))
+    val currentLocalDateTime: StateFlow<LocalDateTime> = _currentLocalDateTime.asStateFlow()
 
     init {
         Log.d("FlightListViewModelDiag", "ViewModel created. Starting reactive flows.")
@@ -216,6 +224,22 @@ class FlightListViewModel(
     fun setDate(date: LocalDate) {
         Log.d("FlightListViewModelDiag", "setDate() called with date: $date")
         loadFlights(date)
+    }
+
+    fun startAutoRefresh(lifecycle: Lifecycle): Job {
+        if (autoRefreshJob?.isActive == true) return autoRefreshJob!!
+        autoRefreshJob = viewModelScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                refresh()
+                while (isActive) {
+                    _currentLocalDateTime.value = LocalDateTime.now(ZoneId.of("America/Campo_Grande"))
+                    delay(60_000L)
+                    _currentLocalDateTime.value = LocalDateTime.now(ZoneId.of("America/Campo_Grande"))
+                    refresh()
+                }
+            }
+        }
+        return autoRefreshJob!!
     }
 
     fun goToPreviousDay() {

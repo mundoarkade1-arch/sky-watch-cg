@@ -47,6 +47,9 @@ import com.skywatch.cg.util.getAirportEventDateTime
 import com.skywatch.cg.util.ObservationWindow
 import com.skywatch.cg.util.ObservationWindowCalculator
 import com.skywatch.cg.util.campoGrandeZone
+import com.skywatch.cg.util.formatAirlineName
+import com.skywatch.cg.util.formatTimeUntil
+import com.skywatch.cg.util.nextMovements
 import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -129,6 +132,7 @@ fun FlightsScreen(
     navController: androidx.navigation.NavController
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val currentLocalDateTime by viewModel.currentLocalDateTime.collectAsState()
     val syncMetadata by viewModel.syncMetadata.collectAsState()
 
     val isRefreshing = uiState is FlightUiState.Refreshing
@@ -158,6 +162,7 @@ fun FlightsScreen(
             viewModel = viewModel,
             uiState = uiState,
             selectedTab = selectedTab.value,
+            currentLocalDateTime = currentLocalDateTime,
             onFlightSelected = { flight ->
                 navController.navigate("detalhe/${Uri.encode(flight.flightId)}")
             },
@@ -290,6 +295,7 @@ fun MainContent(
     viewModel: FlightListViewModel,
     uiState: FlightUiState,
     selectedTab: Int,
+    currentLocalDateTime: LocalDateTime,
     onFlightSelected: (NormalizedFlight) -> Unit,
     innerPadding: PaddingValues
 ) {
@@ -310,15 +316,7 @@ fun MainContent(
                 else -> allFlights
             }
             val isToday = selectedDate == LocalDate.now(campoGrandeZone)
-            var now by remember(selectedDate) {
-                mutableStateOf(LocalDateTime.now(campoGrandeZone))
-            }
-            LaunchedEffect(selectedDate) {
-                while (true) {
-                    now = LocalDateTime.now(campoGrandeZone)
-                    delay(60_000)
-                }
-            }
+            val now = currentLocalDateTime
             val bestWindow = ObservationWindowCalculator.findBestWindow(
                 flights = allFlights,
                 selectedDate = selectedDate,
@@ -331,6 +329,16 @@ fun MainContent(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 contentPadding = innerPadding
             ) {
+                item {
+                    val next = nextMovements(allFlights, now)
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        NextMovementCard("PRÓXIMO POUSO", next.nextArrival, now, Modifier.weight(1f))
+                        NextMovementCard("PRÓXIMA DECOLAGEM", next.nextDeparture, now, Modifier.weight(1f))
+                    }
+                }
                 item {
                     if (bestWindow != null) {
                         ObservationWindowCard(bestWindow)
@@ -362,6 +370,29 @@ fun MainContent(
                 }
 
                 item { SIROSDisclaimer() }
+            }
+        }
+    }
+}
+
+@Composable
+private fun NextMovementCard(
+    title: String,
+    flight: NormalizedFlight?,
+    now: LocalDateTime,
+    modifier: Modifier
+) {
+    Card(modifier = modifier, colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(title, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold)
+            if (flight == null) {
+                Text("—", style = MaterialTheme.typography.titleLarge)
+            } else {
+                val event = flight.getAirportEventDateTime()
+                Text(flight.getDisplayTime(), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                Text(formatAirlineName(flight.airline), style = MaterialTheme.typography.labelMedium)
+                Text("${flight.origin} → ${flight.destination}", style = MaterialTheme.typography.labelSmall)
+                Text(formatTimeUntil(java.time.Duration.between(now, event).toMinutes()), style = MaterialTheme.typography.labelSmall)
             }
         }
     }

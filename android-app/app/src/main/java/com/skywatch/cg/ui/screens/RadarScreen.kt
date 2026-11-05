@@ -1,5 +1,6 @@
 package com.skywatch.cg.ui.screens
 
+import android.app.Activity
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,9 +28,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -44,6 +50,7 @@ import com.skywatch.cg.R
 import com.skywatch.cg.data.radar.RadarAircraft
 import com.skywatch.cg.data.radar.RadarRemoteSource
 import com.skywatch.cg.data.radar.RadarSnapshot
+import com.skywatch.cg.data.prefs.AppPreferences
 import com.skywatch.cg.ui.theme.SkyWatchColors
 import com.skywatch.cg.ui.viewmodel.RadarViewModel
 import com.skywatch.cg.ui.viewmodel.RadarUiState
@@ -61,6 +68,15 @@ fun RadarScreen(
     navController: NavController
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    val preferences = remember { AppPreferences.getInstance(context) }
+    var keepScreenOn by remember { mutableStateOf(preferences.keepScreenOn) }
+    DisposableEffect(keepScreenOn) {
+        val window = (context as? Activity)?.window
+        if (keepScreenOn) window?.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        else window?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        onDispose { window?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
+    }
 
     LaunchedEffect(viewModel) {
         viewModel.refresh()
@@ -84,6 +100,13 @@ fun RadarScreen(
                     }
                 },
                 actions = {
+                    androidx.compose.material3.Switch(
+                        checked = keepScreenOn,
+                        onCheckedChange = {
+                            keepScreenOn = it
+                            preferences.keepScreenOn = it
+                        }
+                    )
                     IconButton(onClick = viewModel::refresh, enabled = !uiState.isLoading) {
                         if (uiState.isLoading) {
                             CircularProgressIndicator(

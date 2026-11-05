@@ -47,6 +47,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        viewModel.startAutoRefresh(lifecycle)
         
         // Cria o canal de notificação para alertas de voo
         NotificationHelper.createNotificationChannel(this)

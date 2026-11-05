@@ -23,6 +23,13 @@ Daemon will be stopped at the end of the build
 - Ajustado `.github/workflows/ci.yml` para manter build e testes em passos separados, capturar logs e escrever no `GITHUB_STEP_SUMMARY` as linhas de compilação iniciadas por `e:` e os nomes/indicadores de testes falhos, com falha final agregada.
 - Próximo passo exato: implementar o Bloco 1 (failover, cooldown e limite por servidor do radar ADS-B), registrar as 3 linhas exigidas antes da alteração, testar no CI e atualizar este arquivo.
 
+## Bloco 2 — atualização em primeiro plano (05/11/2026)
+- `FlightListViewModel.startAutoRefresh()` usa um único `repeatOnLifecycle(STARTED)`, busca ao entrar e repete em 60 segundos; o ciclo é cancelado ao sair para segundo plano.
+- O relógio local de Campo Grande passou a ser exposto pelo ViewModel e consumido pela lista; a composição não mantém laço próprio.
+- Radar ganhou a chave `Manter tela ligada`, persistida com padrão ligado e aplicada por `FLAG_KEEP_SCREEN_ON`.
+- Botões existentes continuam protegidos pelo `refreshJob`, evitando pedidos simultâneos; o tratamento de erro já encerra o estado girando.
+- Próximo passo exato: implementar e testar as regras do Bloco 3 (chegada, saída, voo alto e deduplicação de 20 minutos).
+
 ## Fase 0 - Limpeza e verdade
 - [x] Apagar gradle-output-*.log da raiz e siros_temp_*.csv (já limpos no repositório)
 - [x] Ajustar .gitignore (logs, build-logs/, siros_temp_*.csv)
