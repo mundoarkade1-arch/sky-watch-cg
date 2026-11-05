@@ -34,6 +34,7 @@ jobs:
           ./gradlew assembleDebug --console=plain --no-daemon 2>&1 | tee "$RUNNER_TEMP/build-debug.log"
 
       - name: Upload APK
+        if: steps.build-debug.outcome == 'success'
         uses: actions/upload-artifact@v4
         with:
           name: app-debug
@@ -52,9 +53,9 @@ jobs:
         shell: bash
         run: |
           {
-            echo "## Diagnóstico do CI"
+            echo "## CI diagnostics"
             echo
-            echo "### Erros de compilação (linhas iniciadas por \\`e:\\`)"
+            echo "### Compilation errors (lines starting with e:)"
             found=0
             for log in "$RUNNER_TEMP/build-debug.log" "$RUNNER_TEMP/unit-tests.log"; do
               if [ -f "$log" ]; then
@@ -62,9 +63,9 @@ jobs:
                 if grep -qE '^e:' "$log"; then found=1; fi
               fi
             done
-            if [ "$found" -eq 0 ]; then echo "Nenhum erro de compilação iniciado por e: foi encontrado."; fi
+            if [ "$found" -eq 0 ]; then echo "No compilation error line starting with e: was found."; fi
             echo
-            echo "### Testes falhos"
+            echo "### Failed tests"
             test_found=0
             for report in android-app/app/build/test-results/testDebugUnitTest android-app/app/build/reports/tests/testDebugUnitTest; do
               if [ -d "$report" ]; then
@@ -72,7 +73,7 @@ jobs:
                 if grep -RqiE 'failure|FAILED' "$report" 2>/dev/null; then test_found=1; fi
               fi
             done
-            if [ "$test_found" -eq 0 ]; then echo "Nenhum teste falho identificado nos relatórios."; fi
+            if [ "$test_found" -eq 0 ]; then echo "No failed test was identified in the reports."; fi
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Check Build and Test Results
@@ -90,5 +91,3 @@ jobs:
           path: |
             android-app/app/build/reports/tests
             android-app/app/build/test-results
-
-
