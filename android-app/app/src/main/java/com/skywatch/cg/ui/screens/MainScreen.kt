@@ -60,7 +60,9 @@ import java.util.Locale
 @Composable
 fun MainScreen(viewModel: FlightListViewModel, radarViewModel: RadarViewModel) {
     val navController = rememberNavController()
+    val radarState by radarViewModel.uiState.collectAsState()
     
+    Box(modifier = Modifier.fillMaxSize()) {
     NavHost(navController, startDestination = "voos") {
         composable("voos") {
             FlightsScreen(
@@ -122,6 +124,22 @@ fun MainScreen(viewModel: FlightListViewModel, radarViewModel: RadarViewModel) {
                 navController = navController
             )
         }
+    }
+    radarState.radarAlert?.let { alert ->
+        Surface(
+            modifier = Modifier.fillMaxWidth().align(Alignment.TopCenter),
+            color = MaterialTheme.colorScheme.tertiaryContainer
+        ) {
+            Text(
+                text = if (alert.type.name == "ARRIVAL") {
+                    "Avião chegando · a ${alert.distanceNauticalMiles.toInt()} NM · pouso estimado em ~${alert.estimatedMinutes ?: 0} min"
+                } else "Avião saindo",
+                modifier = Modifier.padding(16.dp),
+                color = MaterialTheme.colorScheme.onTertiaryContainer,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
     }
 }
 

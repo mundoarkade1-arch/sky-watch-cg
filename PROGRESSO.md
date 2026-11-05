@@ -30,6 +30,13 @@ Daemon will be stopped at the end of the build
 - Botões existentes continuam protegidos pelo `refreshJob`, evitando pedidos simultâneos; o tratamento de erro já encerra o estado girando.
 - Próximo passo exato: implementar e testar as regras do Bloco 3 (chegada, saída, voo alto e deduplicação de 20 minutos).
 
+## Bloco 3 — regras de alerta ADS-B (05/11/2026)
+- Criado `RadarAlertRules` com limiares centralizados para chegada, saída e exclusão de tráfego acima de 20.000 pés.
+- Criada deduplicação por `hex + tipo` com cooldown de 20 minutos e estimativa calculada apenas quando há velocidade válida.
+- A faixa global passa a exibir a detecção enquanto o estado do radar a mantém; a associação a voo SIROS ainda não é feita e nenhum callsign é tratado como companhia.
+- Testes adicionados para chegada, saída, voo alto, cooldown e tipos independentes; a execução depende do CI porque Gradle local é proibido.
+- Próximo passo exato: concluir o Bloco 4 com agrupamento visual da lista, seção recolhida de voos passados e testes de troca de data.
+
 ## Fase 0 - Limpeza e verdade
 - [x] Apagar gradle-output-*.log da raiz e siros_temp_*.csv (já limpos no repositório)
 - [x] Ajustar .gitignore (logs, build-logs/, siros_temp_*.csv)

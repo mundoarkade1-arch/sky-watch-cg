@@ -6,6 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.skywatch.cg.data.radar.RadarRepository
 import com.skywatch.cg.data.radar.RadarSnapshot
 import com.skywatch.cg.data.radar.RadarUnavailableException
+import com.skywatch.cg.data.radar.RadarAlert
+import com.skywatch.cg.data.radar.RadarAlertDeduplicator
+import com.skywatch.cg.data.radar.RadarAlertRules
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +20,8 @@ data class RadarUiState(
     val isLoading: Boolean = false,
     val snapshot: RadarSnapshot? = null,
     val errorMessage: String? = null,
-    val retryAfterSeconds: Long? = null
+    val retryAfterSeconds: Long? = null,
+    val radarAlert: RadarAlert? = null
 )
 
 class RadarViewModel(
@@ -27,6 +31,7 @@ class RadarViewModel(
     constructor(application: Application) : this(application, RadarRepository())
 
     private val mutableUiState = MutableStateFlow(RadarUiState())
+    private val alertDeduplicator = RadarAlertDeduplicator()
     val uiState: StateFlow<RadarUiState> = mutableUiState.asStateFlow()
 
     fun refresh() {
@@ -39,7 +44,12 @@ class RadarViewModel(
         viewModelScope.launch {
             try {
                 val snapshot = repository.refresh()
-                mutableUiState.value = RadarUiState(snapshot = snapshot)
+                val detectedAlert = snapshot.aircraft.asSequence().mapNotNull { aircraft ->
+                    RadarAlertRules.evaluate(aircraft)?.takeIf {
+                        alertDeduplicator.shouldAlert(aircraft.icaoHex, it.type)
+                    }
+                }.firstOrNull()
+                mutableUiState.value = RadarUiState(snapshot = snapshot, radarAlert = detectedAlert)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: RadarUnavailableException) {
