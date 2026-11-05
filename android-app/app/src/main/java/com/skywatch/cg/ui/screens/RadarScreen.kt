@@ -136,14 +136,20 @@ private fun RadarContent(
             item {
                 Card(
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer
                     )
                 ) {
                     Column(
                         modifier = Modifier.padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(message, color = MaterialTheme.colorScheme.onErrorContainer)
+                        val retrySeconds = uiState.retryAfterSeconds
+                        Text(
+                            text = if (retrySeconds != null) {
+                                stringResource(R.string.radar_sources_unavailable, retrySeconds)
+                            } else message,
+                            color = MaterialTheme.colorScheme.onTertiaryContainer
+                        )
                         if (uiState.snapshot == null) {
                             Button(onClick = onRefresh) {
                                 Text(stringResource(R.string.radar_retry))
@@ -292,7 +298,12 @@ private fun SnapshotTime(snapshot: RadarSnapshot) {
         .atZone(ZoneId.of("America/Campo_Grande"))
         .format(DateTimeFormatter.ofPattern("HH:mm:ss", Locale.forLanguageTag("pt-BR")))
     Text(
-        text = stringResource(R.string.radar_snapshot_time, observedAt),
+        text = stringResource(
+            R.string.radar_source_status,
+            snapshot.sourceName,
+            snapshot.aircraft.size,
+            observedAt
+        ),
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )

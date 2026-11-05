@@ -65,6 +65,8 @@
     <string name="radar_speed_unknown">velocidade indisponível</string>
     <string name="radar_aircraft_metrics">%1$s · %2$s · %3$d NM · rumo %4$d°</string>
     <string name="radar_position_age">Posição recebida há %1$d s</string>
-    <string name="radar_attribution">Fonte: ADSB.lol · ODbL 1.0 (opendatacommons.org/licenses/odbl/1-0/). Observações experimentais; disponibilidade e precisão podem variar. Uso em produção requer contato com a fonte.</string>
+    <string name="radar_attribution">Fontes ADS-B: adsb.lol, airplanes.live e adsb.fi. Observações experimentais; não são horário nem confirmação operacional.</string>
+    <string name="radar_source_status">Fonte: %1$s · %2$d aeronaves · atualizado %3$s</string>
+    <string name="radar_sources_unavailable">Fontes indisponíveis, tentando de novo em %1$d s</string>
     <string name="radar_load">Carregar radar</string>
 </resources>

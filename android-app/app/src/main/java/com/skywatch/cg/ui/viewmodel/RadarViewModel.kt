@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.skywatch.cg.data.radar.RadarRepository
 import com.skywatch.cg.data.radar.RadarSnapshot
+import com.skywatch.cg.data.radar.RadarUnavailableException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +16,8 @@ import java.io.IOException
 data class RadarUiState(
     val isLoading: Boolean = false,
     val snapshot: RadarSnapshot? = null,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
+    val retryAfterSeconds: Long? = null
 )
 
 class RadarViewModel(
@@ -40,10 +42,16 @@ class RadarViewModel(
                 mutableUiState.value = RadarUiState(snapshot = snapshot)
             } catch (e: CancellationException) {
                 throw e
+            } catch (e: RadarUnavailableException) {
+                mutableUiState.value = mutableUiState.value.copy(
+                    isLoading = false,
+                    errorMessage = e.message,
+                    retryAfterSeconds = e.retryAfterSeconds
+                )
             } catch (e: IOException) {
                 mutableUiState.value = mutableUiState.value.copy(
                     isLoading = false,
-                    errorMessage = e.message ?: "Não foi possível consultar a fonte ADS-B."
+                    errorMessage = e.message ?: "Não foi possível consultar as fontes ADS-B."
                 )
             }
         }

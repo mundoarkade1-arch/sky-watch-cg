@@ -6,6 +6,7 @@ data class RadarAircraft(
     val latitude: Double,
     val longitude: Double,
     val altitudeFeet: Int?,
+    val barometricRateFeetPerMinute: Int?,
     val groundSpeedKnots: Double?,
     val trackDegrees: Double?,
     val secondsSincePosition: Double?,
@@ -15,5 +16,6 @@ data class RadarAircraft(
 
 data class RadarSnapshot(
     val observedAtMillis: Long,
-    val aircraft: List<RadarAircraft>
+    val aircraft: List<RadarAircraft>,
+    val sourceName: String = "desconhecida"
 )

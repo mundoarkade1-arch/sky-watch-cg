@@ -56,6 +56,7 @@ internal object RadarSnapshotParser {
                             altitudeFeet = item.optionalDouble("alt_baro")
                                 ?.takeIf { it >= 0.0 }
                                 ?.toInt(),
+                            barometricRateFeetPerMinute = item.optionalDouble("baro_rate")?.toInt(),
                             groundSpeedKnots = item.optionalDouble("gs")
                                 ?.takeIf { it >= 0.0 },
                             trackDegrees = item.optionalDouble("track")

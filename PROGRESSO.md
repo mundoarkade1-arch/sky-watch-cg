@@ -12,6 +12,11 @@ Daemon will be stopped at the end of the build
 
 # Progresso do Projeto SKY WATCH CG
 
+## Bloco 1 — estado da fonte ADS-B antes da alteração (05/11/2026)
+1. URL/servidor atual: `https://api.adsb.lol/v2/lat/-20.4686/lon/-54.6724/dist/50`, servidor `api.adsb.lol`.
+2. Frequência atual: somente ao abrir a tela Radar ou ao tocar manualmente em Atualizar; não havia laço periódico.
+3. HTTP 429 atual: não havia cooldown, nova tentativa automática nem mensagem específica; qualquer HTTP não bem-sucedido virava erro fixo.
+
 ## Bloco 0 — estado e diagnóstico do CI (05/11/2026)
 - Branch confirmada: `wip-fase3`; `git status` contém apenas o arquivo não rastreado preexistente `old_MainScreen.kt`, preservado.
 - `git log --oneline -5` inicia em `a6f1d38`; o último CI não pôde ser consultado porque o executável `gh` não está instalado neste ambiente.

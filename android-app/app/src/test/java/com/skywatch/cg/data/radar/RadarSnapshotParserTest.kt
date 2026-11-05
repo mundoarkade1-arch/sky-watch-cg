@@ -22,6 +22,7 @@ class RadarSnapshotParserTest {
                     "lat": -20.802658,
                     "lon": -55.400129,
                     "alt_baro": 38375,
+                    "baro_rate": -500,
                     "gs": 293.5,
                     "track": 128.08,
                     "seen_pos": 0.4,
@@ -44,6 +45,7 @@ class RadarSnapshotParserTest {
         assertEquals("abc123", snapshot.aircraft[0].icaoHex)
         assertEquals("TEST123", snapshot.aircraft[0].callsign)
         assertEquals(38375, snapshot.aircraft[0].altitudeFeet)
+        assertEquals(-500, snapshot.aircraft[0].barometricRateFeetPerMinute)
         assertEquals(45.472, snapshot.aircraft[0].distanceNauticalMiles, 0.001)
         assertEquals(243.7, snapshot.aircraft[0].bearingDegrees, 0.001)
         assertNull(snapshot.aircraft[1].callsign)

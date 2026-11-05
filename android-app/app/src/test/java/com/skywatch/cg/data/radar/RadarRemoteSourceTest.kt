@@ -41,7 +41,7 @@ class RadarRemoteSourceTest {
         val request = server.takeRequest()
 
         assertEquals("/radar", request.path)
-        assertEquals("SKYWATCH-CG/1.0 (experimental ADS-B radar)", request.getHeader("User-Agent"))
+        assertEquals("SkyWatchCG/1.0 (app pessoal)", request.getHeader("User-Agent"))
         assertEquals(1793827327001L, snapshot.observedAtMillis)
         assertEquals("abc123", snapshot.aircraft.single().icaoHex)
     }
@@ -55,6 +55,45 @@ class RadarRemoteSourceTest {
             runBlocking { source.fetchSnapshot() }
         }
 
-        assertEquals("Fonte ADS-B respondeu HTTP 503", error.message)
+        assertEquals("Fontes indisponíveis: teste: Fonte ADS-B respondeu HTTP 503", error.message)
+    }
+
+    @Test
+    fun failsOverAfterRateLimit() = runBlocking {
+        server.enqueue(MockResponse().setResponseCode(429))
+        server.enqueue(MockResponse().setBody("""{"now":1793827327001,"ac":[]}"""))
+        val source = RadarRemoteSource(
+            endpoints = listOf(
+                RadarEndpoint("primeira", server.url("/one").toString()),
+                RadarEndpoint("segunda", server.url("/two").toString())
+            ),
+            client = OkHttpClient()
+        )
+
+        val snapshot = source.fetchSnapshot()
+
+        assertEquals("segunda", snapshot.sourceName)
+        assertEquals("/one", server.takeRequest().path)
+        assertEquals("/two", server.takeRequest().path)
+    }
+
+    @Test
+    fun respectsRetryAfterCooldownUsingFakeClock() = runBlocking {
+        var now = 1_000L
+        server.enqueue(MockResponse().setResponseCode(429).setHeader("Retry-After", "60"))
+        server.enqueue(MockResponse().setBody("""{"now":1793827327001,"ac":[]}"""))
+        val source = RadarRemoteSource(
+            endpoints = listOf(RadarEndpoint("fonte", server.url("/radar").toString())),
+            client = OkHttpClient(),
+            clockMillis = { now },
+            wait = {}
+        )
+
+        assertThrows(RadarUnavailableException::class.java) { runBlocking { source.fetchSnapshot() } }
+        assertThrows(RadarUnavailableException::class.java) { runBlocking { source.fetchSnapshot() } }
+        assertEquals(1, server.requestCount)
+        now += 60_000L
+        source.fetchSnapshot()
+        assertEquals(2, server.requestCount)
     }
 }
