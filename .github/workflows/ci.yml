@@ -26,8 +26,12 @@ jobs:
         run: chmod +x android-app/gradlew
 
       - name: Build Debug APK
+        id: build-debug
         working-directory: android-app
-        run: ./gradlew assembleDebug --console=plain --no-daemon
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          ./gradlew assembleDebug --console=plain --no-daemon 2>&1 | tee "$RUNNER_TEMP/build-debug.log"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
@@ -39,7 +43,44 @@ jobs:
         id: run-tests
         working-directory: android-app
         continue-on-error: true
-        run: ./gradlew testDebugUnitTest --console=plain --no-daemon
+        run: |
+          set -o pipefail
+          ./gradlew testDebugUnitTest --console=plain --no-daemon 2>&1 | tee "$RUNNER_TEMP/unit-tests.log"
+
+      - name: Write diagnostics to job summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## Diagnóstico do CI"
+            echo
+            echo "### Erros de compilação (linhas iniciadas por \\`e:\\`)"
+            found=0
+            for log in "$RUNNER_TEMP/build-debug.log" "$RUNNER_TEMP/unit-tests.log"; do
+              if [ -f "$log" ]; then
+                grep -E '^e:' "$log" || true
+                if grep -qE '^e:' "$log"; then found=1; fi
+              fi
+            done
+            if [ "$found" -eq 0 ]; then echo "Nenhum erro de compilação iniciado por e: foi encontrado."; fi
+            echo
+            echo "### Testes falhos"
+            test_found=0
+            for report in android-app/app/build/test-results/testDebugUnitTest android-app/app/build/reports/tests/testDebugUnitTest; do
+              if [ -d "$report" ]; then
+                grep -RhoE 'testcase[^>]*name="[^"]+"[^>]*>[^<]*<failure|FAILED[^<]+' "$report" 2>/dev/null || true
+                if grep -RqiE 'failure|FAILED' "$report" 2>/dev/null; then test_found=1; fi
+              fi
+            done
+            if [ "$test_found" -eq 0 ]; then echo "Nenhum teste falho identificado nos relatórios."; fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Check Build and Test Results
+        if: always()
+        run: |
+          if [ "${{ steps.build-debug.outcome }}" != "success" ] || [ "${{ steps.run-tests.outcome }}" != "success" ]; then
+            exit 1
+          fi
 
       - name: Upload Test Reports
         if: always()
@@ -50,7 +91,4 @@ jobs:
             android-app/app/build/reports/tests
             android-app/app/build/test-results
 
-      - name: Check Test Result
-        if: steps.run-tests.outcome != 'success'
-        run: exit 1
 

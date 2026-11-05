@@ -12,6 +12,12 @@ Daemon will be stopped at the end of the build
 
 # Progresso do Projeto SKY WATCH CG
 
+## Bloco 0 — estado e diagnóstico do CI (05/11/2026)
+- Branch confirmada: `wip-fase3`; `git status` contém apenas o arquivo não rastreado preexistente `old_MainScreen.kt`, preservado.
+- `git log --oneline -5` inicia em `a6f1d38`; o último CI não pôde ser consultado porque o executável `gh` não está instalado neste ambiente.
+- Ajustado `.github/workflows/ci.yml` para manter build e testes em passos separados, capturar logs e escrever no `GITHUB_STEP_SUMMARY` as linhas de compilação iniciadas por `e:` e os nomes/indicadores de testes falhos, com falha final agregada.
+- Próximo passo exato: implementar o Bloco 1 (failover, cooldown e limite por servidor do radar ADS-B), registrar as 3 linhas exigidas antes da alteração, testar no CI e atualizar este arquivo.
+
 ## Fase 0 - Limpeza e verdade
 - [x] Apagar gradle-output-*.log da raiz e siros_temp_*.csv (já limpos no repositório)
 - [x] Ajustar .gitignore (logs, build-logs/, siros_temp_*.csv)
