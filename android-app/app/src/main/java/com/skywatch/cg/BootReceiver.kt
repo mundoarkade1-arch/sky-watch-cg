@@ -10,6 +10,11 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.skywatch.cg.worker.SirosSyncWorker
+import com.skywatch.cg.data.db.AppDatabase
+import com.skywatch.cg.notification.FlightAlertScheduler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
 class BootReceiver : BroadcastReceiver() {
@@ -21,7 +26,18 @@ class BootReceiver : BroadcastReceiver() {
         WorkManager.getInstance(context).enqueueUniquePeriodicWork(
             "siros_periodic_sync", ExistingPeriodicWorkPolicy.KEEP, request
         )
+        val pendingResult = goAsync()
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val database = AppDatabase.getDatabase(context.applicationContext)
+                val flights = database.flightDao().getAllArrivals().map { it.toNormalizedFlight() } +
+                    database.flightDao().getAllDepartures().map { it.toNormalizedFlight() }
+                FlightAlertScheduler.scheduleUpcomingFlights(context.applicationContext, flights)
+            } finally {
+                pendingResult.finish()
+            }
+        }
         Log.d("BootReceiver", "BOOT_COMPLETED recebido; sincronização SIROS reagendada")
-        // AlarmManager mantém cada alerta individual; o receiver é persistente após boot.
+        Log.d("BootReceiver", "Alertas de voos futuros restaurados após boot")
     }
 }

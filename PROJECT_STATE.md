@@ -1,5 +1,11 @@
 # Estado do projeto
 
+## Correcao de alertas em segundo plano (06/11/2026)
+- O agendamento de alertas SIROS passou a ser chamado na abertura do app, apos sincronizacao periodica e apos `BOOT_COMPLETED`; antes, o `FlightAlertScheduler` existia, mas nao era acionado pelo fluxo de producao.
+- Alarmes sao criados para movimentos planejados futuros no cache local, com janela de 48 horas e antecedencia padrao de 15 minutos. Se o app for aberto dentro dessa antecedencia, o alarme e programado para execucao imediata.
+- O instante do evento agora interpreta corretamente data/horario armazenados em UTC; a notificacao exibe o horario local calculado por aeroporto e identifica o movimento como programado.
+- A entrega continua dependente de `POST_NOTIFICATIONS`, canal habilitado e politicas de bateria do fabricante. A entrega em aparelho com voo real elegivel ainda nao foi demonstrada.
+
 ## Release assinada e atualizacao do app (06/11/2026)
 - O modulo `:app` continua em Kotlin + Jetpack Compose, com `applicationId` `com.skywatch.cg`.
 - `build.gradle.kts` le assinatura Release de `KEYSTORE_PATH`, `KEYSTORE_PASSWORD`, `KEY_ALIAS` e `KEY_PASSWORD`; sem essas variaveis o build local permanece configuravel e nao exige segredo.

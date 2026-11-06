@@ -6,9 +6,12 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import com.skywatch.cg.data.db.FollowedFlight
-import java.time.LocalDate
-import java.time.LocalTime
-import java.time.ZoneId
+import com.skywatch.cg.data.siros.NormalizedFlight
+import com.skywatch.cg.data.siros.OperationType
+import com.skywatch.cg.util.getDisplayDateTime
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import kotlin.math.max
 
 data class AlertSchedulePlan(
     val flightId: String,
@@ -25,7 +28,16 @@ object FlightAlertScheduleLogic {
 }
 
 object FlightAlertScheduler {
-    fun schedule(context: Context, plan: AlertSchedulePlan, title: String, text: String) {
+    const val DEFAULT_MINUTES_BEFORE = 15
+    private const val SCHEDULE_HORIZON_MILLIS = 48 * 60 * 60 * 1_000L
+
+    fun schedule(
+        context: Context,
+        plan: AlertSchedulePlan,
+        title: String,
+        text: String,
+        alarmAtMillis: Long = plan.triggerAtMillis
+    ) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, FlightAlertReceiver::class.java).apply {
             putExtra(FlightAlertReceiver.EXTRA_ALERT_ID, plan.alertId)
@@ -38,18 +50,54 @@ object FlightAlertScheduler {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && alarmManager.canScheduleExactAlarms()) {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, plan.triggerAtMillis, pendingIntent)
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmAtMillis, pendingIntent)
         } else {
-            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, plan.triggerAtMillis, pendingIntent)
+            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmAtMillis, pendingIntent)
         }
     }
 
     fun eventAtMillis(flight: FollowedFlight): Long {
         val isArrival = flight.operationType == "ARRIVAL"
-        val date = LocalDate.parse(if (isArrival) flight.arrivalDate else flight.flightDate)
+        val date = if (isArrival) flight.arrivalDate else flight.flightDate
         val utcMinutes = if (isArrival) flight.scheduledArrivalUtc else flight.scheduledDepartureUtc
-        val time = LocalTime.ofSecondOfDay(utcMinutes * 60)
-        val zone = ZoneId.of(if (isArrival) flight.destinationTimezone else flight.originTimezone)
-        return date.atTime(time).atZone(zone).toInstant().toEpochMilli()
+        return LocalDateTime.of(java.time.LocalDate.parse(date), java.time.LocalTime.ofSecondOfDay(utcMinutes * 60))
+            .toInstant(ZoneOffset.UTC)
+            .toEpochMilli()
+    }
+
+    fun eventAtMillis(flight: NormalizedFlight): Long {
+        val date = if (flight.operationType == OperationType.ARRIVAL) flight.arrivalDate else flight.flightDate
+        val time = if (flight.operationType == OperationType.ARRIVAL) flight.scheduledArrivalUtc else flight.scheduledDepartureUtc
+        return LocalDateTime.of(date, time).toInstant(ZoneOffset.UTC).toEpochMilli()
+    }
+
+    /** Agenda alertas para movimentos SIROS futuros já persistidos no cache local. */
+    fun scheduleUpcomingFlights(
+        context: Context,
+        flights: Iterable<NormalizedFlight>,
+        nowMillis: Long = System.currentTimeMillis()
+    ): Int {
+        var scheduled = 0
+        flights.forEach { flight ->
+            val eventAt = eventAtMillis(flight)
+            val triggerAt = max(nowMillis + 1_000L, eventAt - DEFAULT_MINUTES_BEFORE * 60_000L)
+            if (eventAt > nowMillis && eventAt <= nowMillis + SCHEDULE_HORIZON_MILLIS) {
+                val eventType = if (flight.operationType == OperationType.ARRIVAL) "Pouso" else "Decolagem"
+                val route = if (flight.operationType == OperationType.ARRIVAL) {
+                    "Rota planejada: ${flight.origin} → CGR"
+                } else {
+                    "Rota planejada: CGR → ${flight.destination}"
+                }
+                schedule(
+                    context = context,
+                    plan = FlightAlertScheduleLogic.plan(flight.flightId, eventAt, DEFAULT_MINUTES_BEFORE),
+                    title = "${flight.airline} ${flight.flightNumber} · $eventType programado",
+                    text = "$route\nHorário programado local: ${flight.getDisplayDateTime()}",
+                    alarmAtMillis = triggerAt
+                )
+                scheduled++
+            }
+        }
+        return scheduled
     }
 }

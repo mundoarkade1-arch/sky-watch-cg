@@ -1,5 +1,11 @@
 # Roadmap
 
+## Correcao de alertas em segundo plano - 06/11/2026
+- [x] Acionar o agendamento de alertas futuros na abertura, na sincronizacao SIROS e apos reinicializacao do dispositivo.
+- [x] Corrigir conversao de horarios SIROS UTC para o instante real do evento.
+- [x] Garantir canal de notificacao no receiver e cobertura unitaria do calculo UTC.
+- [ ] Validar entrega/deduplicacao no aparelho com um voo SIROS real na janela de 15-30 minutos.
+
 ## Release e atualizacao - implementacao inicial (06/11/2026)
 - [x] Configurar assinatura Release sem expor secrets e com fallback local.
 - [x] Publicar `app-release.apk` automaticamente a partir da `main` usando GitHub Actions.

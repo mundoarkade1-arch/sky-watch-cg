@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -16,6 +17,10 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.skywatch.cg.notification.NotificationHelper
+import com.skywatch.cg.notification.FlightAlertScheduler
+import com.skywatch.cg.data.db.AppDatabase
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import com.skywatch.cg.ui.screens.MainScreen
 import com.skywatch.cg.ui.theme.SkyWatchTheme
 import com.skywatch.cg.ui.viewmodel.FlightListViewModel
@@ -37,6 +42,7 @@ class MainActivity : ComponentActivity() {
             requestNotificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
         }
         schedulePeriodicSync()
+        scheduleUpcomingAlerts()
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             SkyWatchTheme {
@@ -44,6 +50,15 @@ class MainActivity : ComponentActivity() {
                     MainScreen(viewModel, radarViewModel)
                 }
             }
+        }
+    }
+
+    private fun scheduleUpcomingAlerts() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val database = AppDatabase.getDatabase(applicationContext)
+            val flights = database.flightDao().getAllArrivals().map { it.toNormalizedFlight() } +
+                database.flightDao().getAllDepartures().map { it.toNormalizedFlight() }
+            FlightAlertScheduler.scheduleUpcomingFlights(applicationContext, flights)
         }
     }
 

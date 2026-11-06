@@ -1,5 +1,19 @@
 # Plano de testes
 
+## 2026-11-06 - Alertas em segundo plano
+
+Alteracoes verificadas: o agendamento agora e acionado na abertura, apos sincronizacao SIROS e apos `BOOT_COMPLETED`; o calculo do instante usa UTC; o receiver cria o canal antes de publicar a notificacao.
+
+Comando executado a partir de `android-app`:
+
+```powershell
+.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug --console=plain --no-daemon
+```
+
+Resultado: `BUILD SUCCESSFUL`. A suite unitária Debug concluiu sem falhas; o teste `SirosStreamParserRealFileTest` foi ignorado por depender do CSV real. O APK Debug foi gerado por `assembleDebug`.
+
+Limitacao: ainda nao ha evidencia de entrega de um alerta com voo SIROS real no aparelho; essa validacao requer um movimento programado dentro da janela de 15-30 minutos, com permissao de notificacoes concedida e sem restricao de bateria.
+
 ## Release assinada e atualizacao (06/11/2026)
 
 Implementacao registrada sem executar Gradle localmente. O CI deve validar `assembleRelease` com os secrets ja configurados no repositorio. A API de releases e publica; nao ha token embutido no APK.

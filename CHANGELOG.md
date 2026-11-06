@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-06 - Alertas em segundo plano
+- Corrigido o fluxo que nao criava alarmes: voos planejados futuros em cache agora sao agendados ao abrir o app, apos sincronizacao SIROS e depois do boot.
+- Restaurados alarmes individuais apos `BOOT_COMPLETED`, com `goAsync()` para concluir a leitura do Room antes de encerrar o receiver.
+- Corrigido o calculo do instante do voo, respeitando os horarios SIROS armazenados em UTC e convertendo somente na apresentacao para o fuso do aeroporto.
+- Mantida a distincao entre horario planejado SIROS/ANAC e status operacional; a notificacao informa que o movimento e programado.
+- Validacao: `:app:testDebugUnitTest` e `:app:assembleDebug` concluidos com `BUILD SUCCESSFUL`; o teste de CSV real permaneceu ignorado por depender de arquivo externo.
+
 ## 2026-11-06 - Release assinada e verificacao de atualizacao
 
 - Configurado o build Release com assinatura opcional por variaveis de ambiente e versao por `VERSION_CODE`/`VERSION_NAME`.

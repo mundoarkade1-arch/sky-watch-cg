@@ -20,6 +20,7 @@ class FlightAlertReceiver : BroadcastReceiver() {
                     AlertSent(alertId, intent.getStringExtra(EXTRA_FLIGHT_ID).orEmpty(), "SCHEDULED", "", 0, System.currentTimeMillis())
                 )
                 if (inserted != -1L && NotificationHelper.hasNotificationPermission(context)) {
+                    NotificationHelper.createNotificationChannel(context)
                     NotificationHelper.showTextAlert(
                         context,
                         intent.getStringExtra(EXTRA_TITLE) ?: "Alerta de voo",
