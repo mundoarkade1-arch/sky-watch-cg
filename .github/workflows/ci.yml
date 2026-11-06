@@ -1,0 +1,96 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Make gradlew executable
+        run: chmod +x android-app/gradlew
+
+      - name: Build Debug APK
+        id: build-debug
+        working-directory: android-app
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          ./gradlew assembleDebug --console=plain --no-daemon 2>&1 | tee "$RUNNER_TEMP/build-debug.log"
+
+      - name: Upload APK
+        if: steps.build-debug.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug
+          path: android-app/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Run Unit Tests
+        id: run-tests
+        working-directory: android-app
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          ./gradlew testDebugUnitTest --console=plain --no-daemon 2>&1 | tee "$RUNNER_TEMP/unit-tests.log"
+
+      - name: Write diagnostics to job summary
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## CI diagnostics"
+            echo
+            echo "### Compilation errors (lines starting with e:)"
+            found=0
+            for log in "$RUNNER_TEMP/build-debug.log" "$RUNNER_TEMP/unit-tests.log"; do
+              if [ -f "$log" ]; then
+                grep -E '^e:' "$log" || true
+                if grep -qE '^e:' "$log"; then found=1; fi
+              fi
+            done
+            if [ "$found" -eq 0 ]; then echo "No compilation error line starting with e: was found."; fi
+            echo
+            echo "### Failed tests"
+            test_found=0
+            for report in android-app/app/build/test-results/testDebugUnitTest android-app/app/build/reports/tests/testDebugUnitTest; do
+              if [ -d "$report" ]; then
+                grep -RhoE 'testcase[^>]*name="[^"]+"[^>]*>[^<]*<failure|FAILED[^<]+' "$report" 2>/dev/null || true
+                if grep -RqiE 'failure|FAILED' "$report" 2>/dev/null; then test_found=1; fi
+              fi
+            done
+            if [ "$test_found" -eq 0 ]; then echo "No failed test was identified in the reports."; fi
+            echo
+            echo "### Test totals"
+            python3 -c 'import glob, xml.etree.ElementTree as ET; t={k:0 for k in ("tests","skipped","failures","errors")}; [t.__setitem__(k,t[k]+int(r.attrib.get(k,"0"))) for f in glob.glob("android-app/app/build/test-results/testDebugUnitTest/*.xml") for r in [ET.parse(f).getroot()] for k in t]; print("Total: %d" % t["tests"]); print("Pulados: %d" % t["skipped"]); print("Falhas: %d" % (t["failures"]+t["errors"]))'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Check Build and Test Results
+        if: always()
+        run: |
+          if [ "${{ steps.build-debug.outcome }}" != "success" ] || [ "${{ steps.run-tests.outcome }}" != "success" ]; then
+            exit 1
+          fi
+
+      - name: Upload Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            android-app/app/build/reports/tests
+            android-app/app/build/test-results

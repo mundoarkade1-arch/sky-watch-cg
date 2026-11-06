@@ -4,6 +4,7 @@ import android.util.Log
 import com.skywatch.cg.data.db.AppDatabase
 import com.skywatch.cg.data.db.FlightEntity
 import com.skywatch.cg.data.db.SyncMetadata
+import com.skywatch.cg.util.getAirportEventDateTime
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -79,7 +80,9 @@ class SirosRepository(
      * Se falhar a qualquer momento, o banco antigo permanece intacto.
      * Em qualquer Failure grava em sync_metadata (id=1) lastSyncStatus="FAILURE" preservando lastSuccessfulSyncAt e recordsInserted anteriores.
      */
-    suspend fun syncFromRemote(referenceDate: LocalDate = LocalDate.now()): SyncResult = withContext(ioDispatcher) {
+    suspend fun syncFromRemote(
+        referenceDate: LocalDate = LocalDate.now(ZoneId.of("America/Campo_Grande"))
+    ): SyncResult = withContext(ioDispatcher) {
         val startTime = System.currentTimeMillis()
         val dbPath = database.openHelper.writableDatabase.path ?: "."
         val parentDir = File(dbPath).parentFile ?: File(".")
@@ -219,12 +222,13 @@ class SirosRepository(
             entities.map { it.toNormalizedFlight() }
                 .filter { flight ->
                     // Compute local date from UTC arrival time + destination timezone
-                    val localDate = LocalDateTime.of(flight.flightDate, flight.scheduledArrivalUtc)
+                    val localDate = LocalDateTime.of(flight.arrivalDate, flight.scheduledArrivalUtc)
                         .atZone(ZoneId.of("UTC"))
                         .withZoneSameInstant(ZoneId.of(flight.destinationTimezone))
                         .toLocalDate()
                     localDate == date
                 }
+                .sortedBy { it.getAirportEventDateTime() }
         }
     }
 
@@ -243,6 +247,7 @@ class SirosRepository(
                         .toLocalDate()
                     localDate == date
                 }
+                .sortedBy { it.getAirportEventDateTime() }
         }
     }
 
@@ -259,12 +264,13 @@ class SirosRepository(
         entities.map { it.toNormalizedFlight() }
             .filter { flight ->
                 // Compute local date from UTC arrival time + destination timezone
-                val localDate = LocalDateTime.of(flight.flightDate, flight.scheduledArrivalUtc)
+                val localDate = LocalDateTime.of(flight.arrivalDate, flight.scheduledArrivalUtc)
                     .atZone(ZoneId.of("UTC"))
                     .withZoneSameInstant(ZoneId.of(flight.destinationTimezone))
                     .toLocalDate()
                 localDate == date
             }
+            .sortedBy { it.getAirportEventDateTime() }
     }
 
     suspend fun getDeparturesForUi(date: LocalDate): List<NormalizedFlight> = withContext(ioDispatcher) {
@@ -286,5 +292,6 @@ class SirosRepository(
                     .toLocalDate()
                 localDate == date
             }
+            .sortedBy { it.getAirportEventDateTime() }
     }
 }

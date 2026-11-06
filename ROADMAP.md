@@ -1,33 +1,75 @@
 # Roadmap
 
-## Status atual
-- **Fase 0 (Limpeza e Verdade)**: Concluída. Limpeza de logs antigos, ajuste do `.gitignore`, normalização da faixa de datas do SIROS (`referenceDate - 1` a `referenceDate + 45`), correção do teste unitário `testSyncFromRemoteSuccess` e atualização da documentação.
+## Status atual — 2026-11-04
+- A agenda foi unificada por horário local de CGR, com filtros Todos/Pousos/Decolagens e recomendação da faixa contínua de 3 horas com mais pousos e decolagens programados. A recomendação permanece baseada em todos os movimentos mesmo com um filtro selecionado; teste completo local: 75 por variante, sem falhas, 1 ignorado, builds Debug/Release e lint aprovados. APK Debug `1.0.18` aberto no telefone Android 14, sem emulador.
+- CI #58 e Release #14 passaram para o commit `951ce68`; a prévia Debug `v1.0.18` e o APK foram publicados no [GitHub Releases](https://github.com/mundoarkade1-arch/sky-watch-cg/releases/tag/v1.0.18).
+- O MVP de chegadas e partidas, ingestão SIROS, sincronização periódica e infraestrutura de notificações locais estão implementados.
+- Navegação dos cartões e do próximo voo para detalhes concluída; regressão local mais recente: 68 testes por variante (Debug/Release), 0 falhas e 1 ignorado; lint vital e builds Debug/Release aprovados. APK `1.0.17` instalado e fluxo de detalhe/Voltar verificado no telefone Android 14.
+- CI #56 passou e o workflow de Release #13 publicou a prévia Debug `v1.0.17` no GitHub. Distribuição estável/Play Store continua dependente de chave persistente de assinatura.
+- Correção da tela Sobre e do estado de atualização concluída. Validação local: 53 testes contabilizados (52 executados sem falhas e 1 ignorado); APK Debug gerado.
+- Revalidação local completa: 53 testes contabilizados (52 aprovados e 1 ignorado), `assembleDebug` aprovado; `FlightListViewModelTest` passou isoladamente (11 testes). Wrapper Gradle do Windows corrigido para propagar corretamente o código de saída.
+- CI #43 a #54 na branch `wip-fase3`: concluídos com sucesso; #50 validou a migração Room v5→v6, #51 documentação do reinício, #52 teste de boot, #53 evidência de logcat e #54 protótipo do radar.
+- 13 testes instrumentados passaram em aparelho físico Android 14 (modelo 22101320G), incluindo migrações v1→v6, v4→v5 e v5→v6 com preservação de dados; execução feita sem emulador.
+- A pesquisa inicial da Etapa 4 foi registrada; integração Aena depende de autorização/documentação apropriadas para CGR. Nenhuma posição ADS-B ou status operacional é apresentado como confirmado sem correspondência verificável.
 
-## Etapa 1 — Validação das fontes e Arquitetura (Concluído)
+## Etapa 1 — Validação das fontes e arquitetura (Concluída)
 - [x] Investigar acesso ao painel Aena e portal SIROS/ANAC.
-- [x] Realizar Prova de Conceito (PoC) do CSV de registros vigentes do SIROS.
-- [x] Avaliar AvioADSB e OpenSky Network.
-- [x] Definir modelo de dados normalizado (identificador SIROS original, data específica do voo, fusos horários por aeroporto, delay_minutes como null quando sem confirmação).
-- [x] Definir estratégia de alertas locais (AlarmManager / WorkManager com tratamento de reinicialização via BOOT_COMPLETED).
+- [x] Realizar PoC do CSV de registros vigentes do SIROS.
+- [x] Fazer avaliação inicial de AvioADSB e OpenSky como candidatos, sem validar integração, termos ou cobertura local.
+- [x] Definir modelo de dados normalizado, identificador SIROS e fusos horários por aeroporto.
+- [x] Definir estratégia de alertas locais com tratamento de reinicialização via `BOOT_COMPLETED`.
 
-## Etapa 2 — MVP Android e Ingestão SIROS (Concluído)
+## Etapa 2 — MVP Android e ingestão SIROS (Concluída)
 - [x] Criar projeto Kotlin + Jetpack Compose.
-- [x] Implementar módulo de leitura e normalização do CSV do SIROS.
-- [x] **Configurar Room Database para persistência local e cache.**
+- [x] Implementar parser CSV e normalizador SIROS.
+- [x] Configurar Room Database para persistência local e cache.
 
-## Etapa 3 — Telas do MVP (Chegadas e Partidas) — **CONCLUÍDA**
-- [x] Tela de chegadas consumindo Room.
-- [x] Tela de partidas consumindo Room.
-- [x] Indicadores de última sincronização e status desatualizado.
+## Etapa 3 — Telas do MVP (Concluída)
+- [x] Implementar telas de chegadas e partidas conectadas ao Room.
+- [x] Exibir atualização e estados de carregamento, vazio e erro.
+- [x] Implementar navegação para Sobre e retorno à tela de voos.
+- [x] Abrir detalhes a partir dos cartões/próximo voo; exibir rota e horário local, identificar SIROS como cadastro e não como status operacional em tempo real.
 
-## Etapa 4 — Status em Tempo Real e Radar ADS-B (Planejado / Estrutura Inicial)
-- [x] Interfaces básicas planejadas. Implementação real nas Fases 4 e 5.
-- [x] Correção de rotas de documentação.
+## Etapa 4 — Status operacional e radar ADS-B (Aena depende de autorização; avaliação ADS-B em andamento)
+- [x] Conferir página/sitemap oficial Aena Brasil e identificar as condições de uso públicas consultadas; registrar os resultados em `docs/API_SOURCES.md`.
+- [x] Preparar minuta para solicitar orientação e autorização à entidade responsável por CGR; envio e resposta ainda pendentes (`docs/AENA_API_REQUEST.md`).
+- [ ] Solicitar confirmação escrita à entidade responsável por CGR (BOAB/Aena Brasil), usando a Central de Atendimento oficial indicada em `docs/API_SOURCES.md`, sobre termos aplicáveis e autorização/documentação para uma API de status.
+- [ ] Exibir status operacional separado dos horários planejados SIROS, apenas quando houver dado verificável.
+- [ ] Avaliar cobertura, termos e atribuição de fonte ADS-B para CGR antes de qualquer exibição.
+- [ ] Associar observações ADS-B a voos somente com correspondência verificável; caso contrário, identificá-las apenas como observações experimentais.
 
+## Etapa 6 — Integração SIROS, alertas locais e qualidade
+- [x] **Fase 6.1:** `SyncMetadata`, DAO, migração Room e testes.
+- [x] **Fase 6.2:** parser streaming e sincronização SIROS transacional no repositório.
+- [x] **Fase 6.3:** download remoto, atualização manual, WorkManager periódico e apresentação do status de sincronização.
+- [x] **Fase 6.4:** notificações locais, `FlightAlertWorker` e `BootReceiver`.
+- [x] Corrigir atualização que podia permanecer carregando; remover rede real dos testes de ViewModel.
+- [x] Validar suíte unitária e gerar APK Debug em 2026-11-04.
+- [x] Definir janela de alerta SIROS de 15–30 minutos, deduplicação por voo/operação/data local e correção da data UTC de chegadas que cruzam a meia-noite; testes unitários e build local aprovados.
+- [x] Remover a inicialização duplicada de notificações, trabalhos periódicos e consulta de atualizações em `MainActivity`; 11 testes do ViewModel, APK Debug e 11 testes instrumentados no telefone aprovados.
+- [x] Uniformizar a regra `sync_metadata.id = 1` em bancos novos e migrados no schema v6; testes físicos cobrem inserção inválida, atualização inválida e migração preservando dados.
+- [x] Reiniciar o telefone com o app Debug instalado e confirmar no logcat a execução natural do `BootReceiver`, permissão concedida e jobs WorkManager após o boot.
+- [x] Testar o contrato do `BootReceiver` em Robolectric: `BOOT_COMPLETED` agenda os trabalhos únicos de sync e alertas; teste de código, não prova de entrega do broadcast pelo Android.
+- [ ] Verificar a entrega/deduplicação de alerta com um voo SIROS real na janela de 15–30 minutos; não havia voo elegível nesta execução.
 
-## Etapa 6 — Integração Real SIROS, Alertas Locais e Qualidade
-- [x] **Fase 6.1:** Entidade `SyncMetadata`, `SyncMetadataDao`, migração Room v1→v2 e testes de migração e DAO.
-- [ ] **Fase 6.2:** Parser streaming e sincronização no SirosRepository.
-- [ ] **Fase 6.3:** Sincronização periódica em background (WorkManager).
-- [ ] **Fase 6.4:** Agendamento de notificações e tratamento de reinicialização (BOOT_COMPLETED).
-- [ ] Testes em dispositivo Android real e geração de APK de teste.
+## Etapa 7 — Radar ADS-B (protótipo experimental implementado)
+- [x] Avaliar documentação e licença da ADSB.lol: API pública, dados ODbL 1.0; contactar a fonte antes de uso em produção.
+- [x] Fazer uma consulta pontual centrada em SBCG/CGR (50 NM): a resposta continha uma posição reportada a 45.472 NM às 21:22:07 UTC de 04/11/2026. A observação é apenas um recorte daquele instante e não prova cobertura contínua nem identifica voo comercial.
+- [x] Implementar cliente HTTP no OkHttp existente, parser com validação de coordenadas e estado de erro explícito, sem adicionar dependências.
+- [x] Adicionar atualização manual, indicador de carregamento/erro/vazio, escopo radial e lista com posição, altitude, velocidade, distância e idade da posição.
+- [x] Exibir atribuição ADSB.lol/ODbL e avisos distinguindo observações ADS-B de planejamento/status operacional.
+- [x] Abrir a tela no aparelho Android 14 sem emulador; a resposta atual sem posições exibiu o estado vazio e o horário da fonte, sem crash.
+- [x] Revalidar a atualização manual no aparelho Android 14: a tela permaneceu aberta e o horário da consulta mudou de 17:41:43 para 17:42:08; resposta vazia, sem exceção fatal ou ANR observados no logcat.
+- [ ] Contactar ADSB.lol para confirmar condições/limites antes de uso em produção.
+- [ ] Revalidar legibilidade/usabilidade no telefone físico e amostrar cobertura em dias/horários diferentes.
+- [ ] Associar observações ADS-B a voo apenas com correspondência verificável; o protótipo não faz essa associação.
+
+## Pendências independentes
+- Enviar a minuta em `docs/AENA_API_REQUEST.md` pelo canal confirmado pela Aena e aguardar resposta escrita; não fazer scraping nem integrar dados Aena sem autorização.
+- Quando houver voo SIROS real na janela de 15–30 minutos, concluir o teste de entrega/deduplicação de alerta descrito em `TESTING.md`.
+# Próxima rodada — wip-fase3
+
+- Validar no CI a compilação e a suíte unitária após os blocos 0–5.
+- Completar a UI de preferências de som/vibração, teste de notificação e reagendamento dos alarmes quando configurações mudarem.
+- Completar rolagem automática até o próximo voo e botão para voltar ao próximo movimento.
+

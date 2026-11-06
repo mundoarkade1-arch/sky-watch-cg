@@ -1,5 +1,11 @@
 # Estado do projeto
 
+## Alterações da rodada wip-fase3 (05/11/2026)
+- O radar padrão usa adsb.lol, airplanes.live e adsb.fi em failover; HTTP 429 recebe cooldown e a UI não fixa erro vermelho.
+- O ciclo de atualização de voos é vinculado a `Lifecycle.State.STARTED`; a sincronização SIROS continua separada.
+- Alertas ADS-B e próximos movimentos têm funções puras e testes adicionados.
+- Alertas de voos seguidos usam AlarmManager/receiver no caminho novo; a restauração completa de cada alarme no boot e a UI de configurações ainda precisam de CI e revisão.
+
 ## Identidade
 - Nome: SKY WATCH CG
 - Plataforma: Android
@@ -24,9 +30,44 @@
 - [x] Testes unitários do módulo SIROS criados e passando.
 - [x] **Implementar persistência local (Room) e distinção entre data de sincronização geral e última atualização de status.**
 - [x] **Implementar telas do MVP (Chegadas e Partidas) e sincronização de testes do ViewModel (Etapa 5 concluída com sucesso — BUILD SUCCESSFUL).**
-- [x] **Fase 6.1 (SyncMetadata) validada nos testes unitários e instrumentados:** entidade `SyncMetadata`, `SyncMetadataDao`, migração Room v1→v2 com restrição `CHECK (id = 1)`. Testes instrumentados (`AppDatabaseMigrationTest`, `FlightDaoTest`) executados com sucesso em aparelho real (Poco X5 Pro, Android 14, USB): 10 testes, 0 falhas, 0 erros. **Ressalvas:** a migração foi validada sobre uma "v1 provável" (tabela flights idêntica ao schema atual gerado pelo Room); o schema real da v1 nunca foi exportado e não é recuperável do Git (arquivos só existem a partir do commit 5385fe2), portanto o teste não prova a migração de um aparelho real rodando a v1 antiga. Além disso, em instalações novas (schema v2), o Room cria `sync_metadata` SEM o `CHECK (id = 1)`; apenas bancos migrados da v1 possuem o CHECK.
+- [x] **Fase 6.1 (histórico, schema v2):** entidade `SyncMetadata`, `SyncMetadataDao` e migração Room v1→v2. A validação daquela fase usou uma "v1 provável"; o schema real v1 não foi exportado e não é recuperável do Git, portanto não prova migração de um aparelho legado real. O schema atual é v6.
 - [x] **Fase 6.3 (Corrigida): Ingestão remota, transação atômica, última atualização na interface, WorkManager e APK de debug.**
 - [x] **Etapa A concluída:** Correção do teste `testRefreshStateEmitsRefreshing` em `FlightListViewModelTest` utilizando fonte remota falsa (`SirosRemoteSource` com localhost fictício) e controle de corrotinas (`yield()` / `advanceUntilIdle()`). 36 testes unitários verdes (0 falhas). Código enviado para o repositório remoto via `git push origin main` (após `git commit --amend`).
+- [x] **Estabilização da Fase 3 (04/11/2026):** investigada a falha do CI #38 (2 testes de atualização falhando). A causa era a dependência de rede real em testes do ViewModel; os testes agora usam fonte remota controlada. O estado `Refreshing` é mantido durante emissões do Room, atualizações repetidas são evitadas, falhas preservam dados em cache e a tela Sobre usa retorno acessível e conteúdo rolável. Validação local em 18:59 UTC / 14:59 Campo Grande: 53 testes contabilizados (52 executados, 0 falhas e 1 ignorado); `assembleDebug` bem-sucedido.
+- [x] **CI #39 (04/11/2026):** commit `bccfd48` na branch `wip-fase3` concluído com sucesso no GitHub Actions.
+- [x] **Revalidação de testes (04/11/2026):** suíte completa: 53 testes, 0 falhas, 0 erros, 1 ignorado; `assembleDebug` bem-sucedido. `FlightListViewModelTest` também passou isoladamente (11 testes). Corrigido `android-app/gradlew.bat`, que sempre retornava código 1 mesmo quando o Gradle concluía com sucesso; validado retorno 0 em build bem-sucedido e retorno 1 em tarefa inexistente.
+- [x] **CI #41 e #42 (04/11/2026):** ambos concluídos com sucesso; #42 validou build Debug e suíte unitária para o commit `fa2712d`.
+- [x] **CI #43 e #44 (04/11/2026):** concluídos com sucesso para os commits `8aff2ce` e `dcdaddb`.
+- [x] **Documentação alinhada (04/11/2026):** `README.md`, `ROADMAP.md`, `PROJECT_STATE.md`, `TESTING.md` e `CHANGELOG.md` sincronizados com o estado comprovado do projeto.
+- [x] **Alertas locais:** janela entre 15 e 30 minutos antes do horário programado local, deduplicação por voo/operação/data local e uso de `arrivalDate` para calcular chegadas que cruzam a meia-noite UTC. Validação local: 56 testes contabilizados, 0 falhas e 1 ignorado; build Debug e compilação dos testes instrumentados concluídos.
+- [x] **Inicialização da tela principal:** removidas chamadas duplicadas de canal/permissão de notificações, agendamento WorkManager e consulta de atualização dentro de `MainActivity.onCreate()`. `FlightListViewModelTest`: 11 testes aprovados; `assembleDebug` e 11 testes instrumentados no aparelho físico aprovados.
+- [x] **Pesquisa Aena Brasil (04/11/2026):** página e sitemap oficiais de CGR consultados; não foi localizada documentação pública de painel/API para CGR. Os termos consultados restringem reprodução de conteúdo sem autorização escrita e identificam ANB, enquanto CGR é administrado pela BOAB. Sem presumir que os termos resolvam o escopo de CGR, nenhuma coleta automatizada será implementada antes de confirmação escrita e documentação apropriada. Detalhes e fontes em `docs/API_SOURCES.md`.
+- [x] **Minuta de pedido Aena/BOAB preparada (04/11/2026):** `docs/AENA_API_REQUEST.md` pede identificação da entidade responsável, documentação de API, condições de uso e autorização escrita. A minuta não foi enviada; confirmação do canal apropriado e envio pelo responsável pelo projeto continuam pendentes.
+- [x] **Fixture instrumentado corrigido (04/11/2026):** preenchido `arrivalDate` em `FlightDaoTest`; `compileDebugAndroidTestKotlin` aprovado.
+- [x] **Isolamento do pacote de teste Debug (04/11/2026):** adicionado sufixo `.debug` para evitar conflito com a instalação Release e preservar dados do app existente; o identificador Release permanece inalterado.
+- [x] **Correção e validação de migrações Room (04/11/2026):** o índice `idx_alert_sent_flight_date` que a migração v3→v4 já criava foi declarado na entidade `AlertSent`; banco atualizado para versão 5 com migração v4→v5 idempotente. Na validação daquela versão em Android 14, 11 testes instrumentados passaram, incluindo migração v1→v5 e v4→v5 com preservação de registro.
+- [x] **Schema Room v6:** a migração v5→v6 remove o `CHECK` que existia apenas em bancos migrados e preserva os registros. Gatilhos de inserção/atualização agora impõem `id = 1` tanto em bancos novos como migrados. Verificado no aparelho com testes de inserção, atualização e preservação de dados.
+- [x] **Testes instrumentados no aparelho (04/11/2026):** após a alteração da janela de alertas, 11 testes passaram em telefone físico Android 14 (modelo 22101320G), sem emulador.
+- [x] **CI #45 a #48 (04/11/2026):** concluídos com sucesso. #47 validou `c8d6761`; #48 validou a documentação do teste no aparelho no commit `9e82c84`.
+- [x] **CI #49 (04/11/2026):** concluído com sucesso para `4b072c4`.
+- [x] **CI #50 (04/11/2026):** concluído com sucesso para `9206269`, incluindo a migração Room v5→v6.
+- [x] **Reinicialização do telefone (04/11/2026):** app Debug instalado antes do boot. Logcat do boot natural registrou `BOOT_COMPLETED recebido` e o reagendamento de sync e alertas às 17:06:21–17:06:21.258; `boot_count=69` e uptime de 864 s quando conferidos. Permissão concedida e dois jobs WorkManager visíveis. Sem voo SIROS na janela, não houve teste de entrega de alerta.
+- [x] **Teste automatizado do `BootReceiver` (04/11/2026):** teste Robolectric envia a ação `BOOT_COMPLETED` ao receiver e verifica que os trabalhos únicos de sincronização e alertas ficam enfileirados. Não simula nem comprova entrega pelo sistema operacional no boot real.
+- [x] **CI #51 (04/11/2026):** concluído com sucesso para o commit `ad4db53`.
+- [x] **CI #52 e #53 (04/11/2026):** concluídos com sucesso para os commits `fe84e0b` e `6f0ba0e`.
+- [x] **CI #54 (04/11/2026):** concluído com sucesso para o protótipo de radar no commit `e65bb63`.
+- [x] **Pesquisa inicial de fonte ADS-B (04/11/2026):** documentação oficial OpenSky descreve state vectors em tempo real e consultas por área; uso informado para pesquisa/não comercial. Termos completos não puderam ser consultados (HTTP 403) e a cobertura de CGR não foi verificada. Nenhuma integração foi feita.
+- [x] **Radar ADS-B experimental (04/11/2026):** primeira versão usa a API ADSB.lol com raio de 50 NM, botão de consulta manual, apresentação de observações em escopo radial e lista com timestamp/idade, sem associação a voos SIROS. Atribuição ODbL exibida na tela. A fonte solicita contato antes de uso em produção; não foi feito esse contato.
+- [x] **Testes do radar:** parser de payload, posições inválidas/ausentes, resposta vazia, timestamp obrigatório, integração HTTP bem-sucedida e erro HTTP cobertos por 6 testes unitários.
+- [x] **Teste físico inicial do radar (04/11/2026):** instalada e aberta apenas a variante Debug no aparelho 22101320G, sem emulador; a tela carregou resposta sem posições e exibiu estado vazio e horário da fonte, sem crash. Isso não prova ausência de tráfego nem cobertura contínua.
+- [x] **Atualização manual do radar revalidada (04/11/2026):** no aparelho 22101320G, o botão “Atualizar observações ADS-B” manteve a tela aberta e atualizou o horário da consulta de 17:41:43 para 17:42:08; a resposta continuou vazia. A captura posterior não mostrou exceção fatal nem ANR no logcat; a primeira tentativa, que retornou ao launcher, não foi reproduzida.
+- [x] **Detalhes de voo e versão de prévia (04/11/2026):** cartões e próximo voo abrem a tela de detalhes com rota e horário local; removido o botão "Seguir voo" sem implementação. A situação SIROS está identificada como cadastral e não como confirmação em tempo real. Comparação de versões numérica e versão Debug `1.0.17`/código 17.
+- [x] **Regressão local final (04/11/2026):** `testDebugUnitTest` e `testReleaseUnitTest`: 68 testes por variante, 0 falhas, 0 erros e 1 ignorado por depender de CSV local. `assembleDebug`, `assembleRelease`, `lintVitalRelease` e `processReleaseManifest` concluídos em `BUILD SUCCESSFUL`.
+- [x] **Verificação física da prévia (04/11/2026):** APK Debug de 11.091.182 bytes instalado no aparelho Android 14; pacote `com.skywatch.cg.debug`, versão 1.0.17/código 17. Abertura, cartão→detalhes e botão Voltar verificados sem exceção fatal no logcat. Não foi aberto emulador.
+- [x] **Pré-lançamento GitHub (04/11/2026):** CI #56 passou para `3858738`; o workflow de Release #13 concluiu testes, build e upload do APK para a tag `v1.0.17`. [Release no GitHub](https://github.com/mundoarkade1-arch/sky-watch-cg/releases/tag/v1.0.17). É uma prévia Debug, não uma versão assinada para distribuição estável; a assinatura do runner pode exigir desinstalar a prévia anterior para atualizar.
+- [x] **Agenda e horários locais (04/11/2026):** tela principal unificada em ordem cronológica, com filtros Todos/Pousos/Decolagens e horário local de CGR consistente em cartões, detalhes e notificações. A recomendação de 3 horas calcula pousos e decolagens juntos mesmo quando a lista está filtrada; a lista continua mostrando todos os voos de passageiros ativos encontrados no SIROS para a data, sem afirmar cobertura de todos os movimentos reais.
+- [x] **Validação da agenda (04/11/2026):** 75 testes Debug e 75 Release, 0 falhas, 0 erros e 1 ignorado por variante; `assembleDebug`, `assembleRelease`, `lintVitalRelease`, `processReleaseManifest` e `compileDebugAndroidTestKotlin` concluídos com sucesso. APK Debug `1.0.18` instalado e aberto no Android 14 sem emulador. Em consulta visual, a janela para 05/11/2026 foi 09:05–12:05, com 10 movimentos programados (5 pousos e 5 decolagens); é uma estimativa baseada no SIROS, não confirmação operacional.
+- [x] **Pré-lançamento GitHub 1.0.18 (04/11/2026):** CI #58 e workflow de Release #14 concluídos com sucesso para o commit `951ce68`; APK `SKY-WATCH-CG-v1.0.18-debug.apk` publicado em [GitHub Releases](https://github.com/mundoarkade1-arch/sky-watch-cg/releases/tag/v1.0.18). Continua sendo uma prévia Debug, sem assinatura estável/Play Store.
 
   - **6.3.1:** Download HTTP via OkHttp com parâmetros customizáveis no `SirosRemoteSource`, verificações de arquivo vazio (0 bytes) e download incompleto (Content-Length divergente).
   - **6.3.2:** `syncFromRemote()` com transação Room atômica (`withTransaction`), fechamento de streams, filtro streaming de SBCG, tratamento de erros e gravação de status `FAILURE` preservando a última sincronização bem-sucedida.
@@ -39,13 +80,21 @@
 
 ## Bloqueios e riscos
 - SIROS CSV: Requer download periódico e tratamento correto da codificação UTF-8 com BOM (detectado automaticamente) e delimitador ;.
-- Aena: Sem API pública documentada, sujeito a tratamento de frontend.
-- AvioADSB: Baixa cobertura em CGR (experimental).
-- Alertas locais: Exigem receptor de boot (BOOT_COMPLETED) para reagendar alarmes após reiniciar o aparelho.
-- **Limitação atual:** A ingestão remota automatizada do CSV SIROS/ANAC ainda não está totalmente integrada no fluxo de tela (as telas consultam diretamente o banco local Room).
-- **Ponto em aberto (Room):** em instalações NOVAS (schema v2), o Room cria a tabela sync_metadata SEM a restrição CHECK (id = 1). Somente bancos que passaram pela MIGRATION_1_2 têm o CHECK. Ou seja, o CHECK não vale em todos os bancos. Nenhum código foi alterado por causa disso; a decisão fica para depois.
+- Aena: Sem API pública documentada confirmada; investigar integração autorizada antes de iniciar implementação.
+- AvioADSB: não foi possível confirmar uma documentação/API oficial ou os termos a partir dos materiais disponíveis; cobertura de CGR não deve ser presumida.
+- ADSB.lol: API ODbL 1.0 usada em protótipo experimental. A documentação pede contato antes de uso em produção; a cobertura foi apenas amostrada uma vez e não garante disponibilidade. Atribuição e separação SIROS/ADS-B estão implementadas.
+- OpenSky: candidato alternativo; termos completos não foram acessados e não está integrado.
+- **Notificação ponta a ponta pendente:** o `BootReceiver` foi confirmado pelo logcat após reinício natural e o teste automatizado cobre seu agendamento; sem voo SIROS entre 15 e 30 minutos, entrega e deduplicação do alerta não foram observadas.
+- **Validação manual de alertas pendente:** o worker busca eventos dentro da janela de 15–30 minutos e usa rede/periodicidade gerenciadas pelo WorkManager. Atrasos podem fazer a janela passar; o WorkManager não garante execução exatamente a cada 15 minutos. Verificar em aparelho real permissões, recebimento, deduplicação e reagendamento após reinicialização.
+- **Integração SIROS:** a tela usa os dados locais do Room; a atualização manual e a sincronização periódica atualizam esse cache com o CSV remoto.
+- A regra `sync_metadata.id = 1` está agora aplicada uniformemente por gatilhos no schema v6; migração v5→v6 mantém os dados. O schema legado v1 real continua indisponível, então os testes de v1 não comprovam a atualização de uma instalação legada real.
+- **Testes instrumentados nesta rodada:** a instalação do APK de teste foi bloqueada por `INSTALL_FAILED_VERIFICATION_FAILURE`; a proteção do Android não foi desativada. A instalação e abertura do APK Debug normal passaram.
+- **Distribuição estável pendente:** não há assinatura persistente de produção/Play Store configurada. O APK publicado é uma prévia Debug; a instalação de atualização entre execuções do CI pode exigir remover a anterior e perder os dados locais.
 
-## Próxima etapa
-- [x] **Fase 6.4 (Notificações Locais):** `NotificationHelper`, `FlightAlertWorker` e `BootReceiver` (BOOT_COMPLETED) implementados e integrados para alertas de voos nas próximas 2 horas.
-
-- Iniciar a implementação do sistema de alertas locais com AlarmManager/WorkManager.
+## Próximas etapas — dependem de validação externa
+- Contatar ADSB.lol antes de distribuir/usar a integração em produção; confirmar condições, limites de frequência e atribuição adequados.
+- Avaliar cobertura em diferentes dias/horários e documentar quando não houver observações; uma resposta isolada não representa cobertura contínua.
+- Concluir o teste de entrega/deduplicação de alertas quando houver um voo SIROS real elegível na janela de 15–30 minutos.
+- Solicitar confirmação escrita à entidade responsável por CGR sobre acesso autorizado a status operacional Aena.
+- Manter observações ADS-B separadas do planejamento SIROS; não associar a voo comercial sem correspondência verificável.
+- A integração Aena permanece uma frente separada e depende de resposta escrita; a minuta não foi enviada.

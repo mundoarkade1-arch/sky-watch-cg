@@ -1,0 +1,97 @@
+package com.skywatch.cg.ui.theme
+
+import androidx.compose.material3.Typography
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.googlefonts.Font
+import androidx.compose.ui.text.googlefonts.GoogleFont
+import androidx.compose.ui.unit.sp
+import com.skywatch.cg.R
+
+// Google Fonts provider setup with fallback to system fonts if network/provider unavailable
+val provider = GoogleFont.Provider(
+    providerAuthority = "com.google.android.gms.fonts",
+    providerPackage = "com.google.android.gms",
+    certificates = R.array.com_google_android_gms_fonts_certs
+)
+
+val manropeFont = GoogleFont("Manrope")
+val spaceGroteskFont = GoogleFont("Space Grotesk")
+
+val ManropeFamily = FontFamily(
+    Font(googleFont = manropeFont, fontProvider = provider, weight = FontWeight.Normal),
+    Font(googleFont = manropeFont, fontProvider = provider, weight = FontWeight.Medium),
+    Font(googleFont = manropeFont, fontProvider = provider, weight = FontWeight.Bold),
+    Font(googleFont = manropeFont, fontProvider = provider, weight = FontWeight.ExtraBold)
+)
+
+val SpaceGroteskFamily = FontFamily(
+    Font(googleFont = spaceGroteskFont, fontProvider = provider, weight = FontWeight.Normal),
+    Font(googleFont = spaceGroteskFont, fontProvider = provider, weight = FontWeight.Medium),
+    Font(googleFont = spaceGroteskFont, fontProvider = provider, weight = FontWeight.Bold)
+)
+
+val SkyWatchTypography = Typography(
+    displayLarge = TextStyle(
+        fontFamily = SpaceGroteskFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 38.sp,
+        lineHeight = 44.sp,
+        letterSpacing = (-0.5).sp
+    ),
+    headlineLarge = TextStyle(
+        fontFamily = ManropeFamily,
+        fontWeight = FontWeight.ExtraBold,
+        fontSize = 28.sp,
+        lineHeight = 34.sp
+    ),
+    headlineMedium = TextStyle(
+        fontFamily = SpaceGroteskFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 24.sp,
+        lineHeight = 30.sp
+    ),
+    titleLarge = TextStyle(
+        fontFamily = ManropeFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 20.sp,
+        lineHeight = 26.sp
+    ),
+    titleMedium = TextStyle(
+        fontFamily = ManropeFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 16.sp,
+        lineHeight = 22.sp
+    ),
+    bodyLarge = TextStyle(
+        fontFamily = ManropeFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 15.sp,
+        lineHeight = 22.sp
+    ),
+    bodyMedium = TextStyle(
+        fontFamily = ManropeFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 14.sp,
+        lineHeight = 20.sp
+    ),
+    labelLarge = TextStyle(
+        fontFamily = ManropeFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 13.sp,
+        lineHeight = 18.sp
+    ),
+    labelMedium = TextStyle(
+        fontFamily = SpaceGroteskFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 12.sp,
+        lineHeight = 16.sp
+    ),
+    labelSmall = TextStyle(
+        fontFamily = ManropeFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 11.sp,
+        lineHeight = 14.sp
+    )
+)

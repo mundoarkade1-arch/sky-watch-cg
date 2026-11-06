@@ -3,7 +3,9 @@ package com.skywatch.cg.ui.viewmodel
 import android.app.Application
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.skywatch.cg.data.db.AppDatabase
 import com.skywatch.cg.data.db.SyncMetadata
 import com.skywatch.cg.data.siros.NormalizedFlight
@@ -19,7 +21,11 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 sealed interface FlightUiState {
     object Loading : FlightUiState
@@ -36,9 +42,18 @@ sealed interface FlightUiState {
     ) : FlightUiState
 }
 
+sealed interface FlightDetailUiState {
+    data class Loading(val flightId: String) : FlightDetailUiState
+    data class Success(val flightId: String, val flight: NormalizedFlight) : FlightDetailUiState
+    data class Error(val flightId: String, val message: String) : FlightDetailUiState
+}
+
 class FlightListViewModel(
     application: Application,
-    private val repository: SirosRepository
+    internal val repository: SirosRepository,
+    private val todayProvider: () -> LocalDate = {
+        LocalDate.now(ZoneId.of("America/Campo_Grande"))
+    }
 ) : AndroidViewModel(application) {
 
     // Construtor de produção (usa banco real)
@@ -47,7 +62,7 @@ class FlightListViewModel(
         SirosRepository(AppDatabase.getDatabase(application))
     )
 
-    private val _selectedDate = MutableStateFlow(LocalDate.now())
+    private val _selectedDate = MutableStateFlow(todayProvider())
     val selectedDate: StateFlow<LocalDate> = _selectedDate.asStateFlow()
 
     // Flows from repository for reactive updates
@@ -67,7 +82,15 @@ class FlightListViewModel(
     val syncMetadata: StateFlow<SyncMetadata?> = syncMetadataFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
+    private val _flightDetailUiState = MutableStateFlow<FlightDetailUiState?>(null)
+    val flightDetailUiState: StateFlow<FlightDetailUiState?> = _flightDetailUiState.asStateFlow()
+
     private var loadJob: Job? = null
+    private var refreshJob: Job? = null
+    private var flightDetailJob: Job? = null
+    private var autoRefreshJob: Job? = null
+    private val _currentLocalDateTime = MutableStateFlow(LocalDateTime.now(ZoneId.of("America/Campo_Grande")))
+    val currentLocalDateTime: StateFlow<LocalDateTime> = _currentLocalDateTime.asStateFlow()
 
     init {
         Log.d("FlightListViewModelDiag", "ViewModel created. Starting reactive flows.")
@@ -80,7 +103,14 @@ class FlightListViewModel(
             combine(arrivalsFlow, departuresFlow, _selectedDate) { arrivals, departures, date ->
                 FlightUiState.Success(arrivals, departures, date)
             }.collect { state ->
-                _uiState.value = state
+                _uiState.value = when (val currentState = _uiState.value) {
+                    is FlightUiState.Refreshing -> currentState.copy(
+                        arrivals = state.arrivals,
+                        departures = state.departures,
+                        selectedDate = state.selectedDate
+                    )
+                    else -> state
+                }
             }
         }
     }
@@ -97,35 +127,95 @@ class FlightListViewModel(
         _selectedDate.value = date
     }
 
+    fun loadFlightDetails(flightId: String) {
+        if (flightDetailJob?.isActive == true &&
+            (_flightDetailUiState.value as? FlightDetailUiState.Loading)?.flightId == flightId
+        ) return
+
+        flightDetailJob?.cancel()
+        _flightDetailUiState.value = FlightDetailUiState.Loading(flightId)
+        flightDetailJob = viewModelScope.launch {
+            try {
+                val flight = repository.getFlightById(flightId)?.toNormalizedFlight()
+                _flightDetailUiState.value = if (flight == null) {
+                    FlightDetailUiState.Error(flightId, "Voo não encontrado no cache local.")
+                } else {
+                    FlightDetailUiState.Success(flightId, flight)
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e("FlightListViewModel", "Falha ao carregar detalhes do voo $flightId", e)
+                _flightDetailUiState.value = FlightDetailUiState.Error(
+                    flightId,
+                    e.localizedMessage ?: "Não foi possível carregar os detalhes do voo."
+                )
+            }
+        }
+    }
+
     fun refresh() {
         Log.d("FlightListViewModelDiag", "refresh() called with current selectedDate: ${_selectedDate.value}")
-        viewModelScope.launch {
-            // Mostra estado de atualizando se já temos dados
-            val currentState = _uiState.value
-            if (currentState is FlightUiState.Success) {
-                _uiState.value = FlightUiState.Refreshing(
-                    arrivals = currentState.arrivals,
-                    departures = currentState.departures,
-                    selectedDate = currentState.selectedDate
-                )
-            } else if (currentState is FlightUiState.Refreshing) {
-                // Já está atualizando, mantém
-            } else {
-                _uiState.value = FlightUiState.Loading
-            }
+        if (refreshJob?.isActive == true) return
 
-            val result = repository.syncFromRemote()
-            loadSyncMetadata()
-            loadFlights(_selectedDate.value)
-            
-            // O estado final será definido por loadFlights (Success ou Error)
-            // Mas podemos logar o resultado da sync
-            when (result) {
-                is SirosRepository.SyncResult.Success -> {
-                    Log.d("FlightListViewModel", "Sync manual bem-sucedida: ${result.totalSynced} voos")
+        refreshJob = viewModelScope.launch {
+            val currentState = _uiState.value
+            val previousArrivals = when (currentState) {
+                is FlightUiState.Success -> currentState.arrivals
+                is FlightUiState.Refreshing -> currentState.arrivals
+                else -> emptyList()
+            }
+            val previousDepartures = when (currentState) {
+                is FlightUiState.Success -> currentState.departures
+                is FlightUiState.Refreshing -> currentState.departures
+                else -> emptyList()
+            }
+            val refreshDate = _selectedDate.value
+            _uiState.value = FlightUiState.Refreshing(
+                arrivals = previousArrivals,
+                departures = previousDepartures,
+                selectedDate = refreshDate
+            )
+
+            try {
+                val result = repository.syncFromRemote()
+                val arrivals = repository.getArrivalsForUi(_selectedDate.value)
+                val departures = repository.getDeparturesForUi(_selectedDate.value)
+
+                when (result) {
+                    is SirosRepository.SyncResult.Success -> {
+                        _uiState.value = FlightUiState.Success(
+                            arrivals = arrivals,
+                            departures = departures,
+                            selectedDate = _selectedDate.value
+                        )
+                        Log.d("FlightListViewModel", "Sync manual bem-sucedida: ${result.totalSynced} voos")
+                    }
+                    is SirosRepository.SyncResult.Failure -> {
+                        Log.w("FlightListViewModel", "Sync manual falhou: ${result.errorMessage}")
+                        if (arrivals.isEmpty() && departures.isEmpty()) {
+                            _uiState.value = FlightUiState.Error(result.errorMessage)
+                        } else {
+                            _uiState.value = FlightUiState.Success(
+                                arrivals = arrivals,
+                                departures = departures,
+                                selectedDate = _selectedDate.value
+                            )
+                        }
+                    }
                 }
-                is SirosRepository.SyncResult.Failure -> {
-                    Log.w("FlightListViewModel", "Sync manual falhou: ${result.errorMessage}")
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Log.e("FlightListViewModel", "Exceção no refresh: ${e.message}", e)
+                if (previousArrivals.isEmpty() && previousDepartures.isEmpty()) {
+                    _uiState.value = FlightUiState.Error(e.localizedMessage ?: "Erro desconhecido")
+                } else {
+                    _uiState.value = FlightUiState.Success(
+                        arrivals = previousArrivals,
+                        departures = previousDepartures,
+                        selectedDate = refreshDate
+                    )
                 }
             }
         }
@@ -136,6 +226,22 @@ class FlightListViewModel(
         loadFlights(date)
     }
 
+    fun startAutoRefresh(lifecycle: Lifecycle): Job {
+        if (autoRefreshJob?.isActive == true) return autoRefreshJob!!
+        autoRefreshJob = viewModelScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                refresh()
+                while (isActive) {
+                    _currentLocalDateTime.value = LocalDateTime.now(ZoneId.of("America/Campo_Grande"))
+                    delay(60_000L)
+                    _currentLocalDateTime.value = LocalDateTime.now(ZoneId.of("America/Campo_Grande"))
+                    refresh()
+                }
+            }
+        }
+        return autoRefreshJob!!
+    }
+
     fun goToPreviousDay() {
         val newDate = _selectedDate.value.minusDays(1)
         Log.d("FlightListViewModelDiag", "goToPreviousDay() -> $newDate")
@@ -143,7 +249,7 @@ class FlightListViewModel(
     }
 
     fun goToToday() {
-        val today = LocalDate.now()
+        val today = todayProvider()
         Log.d("FlightListViewModelDiag", "goToToday() -> $today")
         loadFlights(today)
     }

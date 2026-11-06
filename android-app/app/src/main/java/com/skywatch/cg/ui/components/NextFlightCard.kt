@@ -1,0 +1,121 @@
+package com.skywatch.cg.ui.components
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.skywatch.cg.data.siros.NormalizedFlight
+import com.skywatch.cg.data.siros.OperationType
+import com.skywatch.cg.ui.theme.SkyWatchColors
+import com.skywatch.cg.util.formatAirlineName
+import com.skywatch.cg.util.formatAirportDisplay
+import com.skywatch.cg.util.formatTimeUntil
+import com.skywatch.cg.util.getAirportEventDateTime
+import com.skywatch.cg.util.getDisplayTime
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.ZoneId
+
+@Composable
+fun NextFlightCard(
+    flight: NormalizedFlight,
+    currentTime: LocalDateTime = LocalDateTime.now(ZoneId.of("America/Campo_Grande")),
+    onClick: () -> Unit
+) {
+    val isArrival = flight.operationType == OperationType.ARRIVAL
+    val flightTime = flight.getDisplayTime()
+    val timeDiff = Duration.between(currentTime, flight.getAirportEventDateTime()).toMinutes()
+    val timeDesc = formatTimeUntil(timeDiff)
+
+    val city = if (isArrival) (flight.originName ?: flight.origin) else (flight.destinationName ?: flight.destination)
+    val code = if (isArrival) flight.origin else flight.destination
+    val cityDisplay = formatAirportDisplay(city, code)
+    val airlineDisplay = formatAirlineName(flight.airline)
+
+    val accentColor = if (isArrival) SkyWatchColors.ArrivalAccent else SkyWatchColors.DepartureAccent
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clip(RoundedCornerShape(20.dp))
+            .clickable { onClick() },
+        shape = RoundedCornerShape(20.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, SkyWatchColors.NextFlightBorder),
+        color = Color.Transparent
+    ) {
+        Box(
+            modifier = Modifier
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            SkyWatchColors.NextFlightGradientStart,
+                            SkyWatchColors.NextFlightGradientEnd
+                        )
+                    )
+                )
+                .padding(20.dp)
+        ) {
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "PRÓXIMO VOO · ${if (isArrival) "CHEGADA" else "PARTIDA"}",
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = accentColor,
+                        letterSpacing = 1.sp
+                    )
+                    Text(
+                        text = timeDesc,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = SkyWatchColors.OnSurfaceVariant
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.Bottom
+                ) {
+                    Column {
+                        Text(
+                            text = flightTime,
+                            style = MaterialTheme.typography.displayLarge,
+                            color = SkyWatchColors.OnBackground,
+                            fontSize = 38.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "$airlineDisplay ${flight.flightNumber} · $cityDisplay",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = SkyWatchColors.OnSurface,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+        }
+    }
+}

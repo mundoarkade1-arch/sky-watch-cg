@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat
 import com.skywatch.cg.MainActivity
 import com.skywatch.cg.R
 import com.skywatch.cg.data.siros.NormalizedFlight
+import com.skywatch.cg.util.getDisplayDate
 import com.skywatch.cg.util.getDisplayTime
 
 /**
@@ -76,18 +77,14 @@ object NotificationHelper {
         minutesUntilEvent: Int,
         isArrival: Boolean
     ) {
-        val eventType = if (isArrival) "chegada" else "partida"
-        val title = "${flight.airline} ${flight.flightNumber} - ${eventType.capitalize()} em $minutesUntilEvent min"
+        val eventType = if (isArrival) "Pouso" else "Decolagem"
+        val title = "${flight.airline} ${flight.flightNumber} · $eventType programado em CGR em $minutesUntilEvent min"
         val location = if (isArrival) {
-            "Origem: ${flight.origin} (${flight.originName ?: ""}) → ${flight.destination}"
+            "Rota: ${flight.origin} → CGR"
         } else {
-            "Origem: ${flight.origin} → Destino: ${flight.destination} (${flight.destinationName ?: ""})"
+            "Rota: CGR → ${flight.destination}"
         }
-        val timeText = if (isArrival) {
-            "Horário local: ${flight.getDisplayTime(true)}"
-        } else {
-            "Horário local: ${flight.getDisplayTime(false)}"
-        }
+        val timeText = "Hora local em Campo Grande: ${flight.getDisplayTime()} · ${flight.getDisplayDate()}"
 
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -110,17 +107,33 @@ object NotificationHelper {
             .setAutoCancel(true)
             .build()
 
-        val notificationId = NOTIFICATION_ID_BASE + (flight.flightNumber.toIntOrNull() ?: flight.flightNumber.hashCode())
+        // ID baseado no hash do flightId (único por voo+data), não só no número do voo
+        val notificationId = flight.flightId.hashCode()
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(notificationId, notification)
     }
 
     /**
-     * Cancela notificação de um voo específico.
+     * Cancela notificação de um voo específico pelo flightId.
      */
-    fun cancelFlightAlert(context: Context, flightNumber: String) {
-        val notificationId = NOTIFICATION_ID_BASE + (flightNumber.toIntOrNull() ?: flightNumber.hashCode())
+    fun cancelFlightAlert(context: Context, flightId: String) {
+        val notificationId = flightId.hashCode()
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.cancel(notificationId)
+    }
+
+    fun showTextAlert(context: Context, title: String, text: String, notificationId: Int) {
+        if (!hasNotificationPermission(context)) return
+        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_notification_flight)
+            .setContentTitle(title)
+            .setContentText(text)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .setAutoCancel(true)
+            .build()
+        (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+            .notify(notificationId, notification)
     }
 }

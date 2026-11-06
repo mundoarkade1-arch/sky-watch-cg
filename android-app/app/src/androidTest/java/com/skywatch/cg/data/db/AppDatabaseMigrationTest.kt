@@ -57,13 +57,20 @@ class AppDatabaseMigrationTest {
 
     private fun openMigrated(): AppDatabase {
         return Room.databaseBuilder(context, AppDatabase::class.java, dbName)
-            .addMigrations(AppDatabase.MIGRATION_1_2)
+            .addMigrations(
+                AppDatabase.MIGRATION_1_2,
+                AppDatabase.MIGRATION_2_3,
+                AppDatabase.MIGRATION_3_4,
+                AppDatabase.MIGRATION_4_5,
+                AppDatabase.MIGRATION_5_6
+            )
+            .addCallback(AppDatabase.SYNC_METADATA_ID_CALLBACK)
             .allowMainThreadQueries()
             .build()
     }
 
     @Test
-    fun migration1To2CreatesSyncMetadataAndKeepsFlights() = runBlocking {
+    fun migration1To6CreatesSyncMetadataAndKeepsFlights() = runBlocking {
         createV1Database()
         val database = openMigrated()
         try {
@@ -78,6 +85,38 @@ class AppDatabaseMigrationTest {
     }
 
     @Test
+    fun migration4To5AddsAlertIndexAndKeepsSentRecords() {
+        val initialDatabase = Room.databaseBuilder(context, AppDatabase::class.java, dbName)
+            .allowMainThreadQueries()
+            .build()
+        initialDatabase.openHelper.writableDatabase.execSQL(
+            "INSERT INTO alert_sent (id, flightId, operationType, eventDate, minutesBefore, sentAt) " +
+                "VALUES ('alert-1', 'flight-1', 'ARRIVAL', '2024-01-15', 15, 0)"
+        )
+        initialDatabase.close()
+
+        context.openOrCreateDatabase(dbName, 0, null).use { database ->
+            database.execSQL("DROP INDEX IF EXISTS `idx_alert_sent_flight_date`")
+            database.version = 4
+        }
+
+        val database = openMigrated()
+        try {
+            val sqlite = database.openHelper.writableDatabase
+            sqlite.query(
+                "SELECT name FROM sqlite_master WHERE type='index' AND name='idx_alert_sent_flight_date'"
+            ).use { cursor ->
+                assertEquals(1, cursor.count)
+            }
+            sqlite.query("SELECT id FROM alert_sent WHERE id = 'alert-1'").use { cursor ->
+                assertEquals(1, cursor.count)
+            }
+        } finally {
+            database.close()
+        }
+    }
+
+    @Test
     fun migratedSyncMetadataRejectsIdDifferentFromOne() {
         createV1Database()
         val database = openMigrated()
@@ -85,12 +124,99 @@ class AppDatabaseMigrationTest {
             val sqlite = database.openHelper.writableDatabase
             try {
                 sqlite.execSQL("INSERT INTO sync_metadata (id, lastSuccessfulSyncAt, lastSyncStatus, recordsInserted) VALUES (2, 0, 'OK', 0)")
-                fail("CHECK (id = 1) deveria rejeitar id = 2")
+                fail("A regra id = 1 deveria rejeitar id = 2")
             } catch (expected: SQLiteConstraintException) {
                 // esperado
             }
         } finally {
             database.close()
+        }
+    }
+
+    @Test
+    fun freshSyncMetadataRejectsInvalidIdOnInsertAndUpdate() = runBlocking {
+        val database = Room.databaseBuilder(context, AppDatabase::class.java, dbName)
+            .addCallback(AppDatabase.SYNC_METADATA_ID_CALLBACK)
+            .allowMainThreadQueries()
+            .build()
+        try {
+            val sqlite = database.openHelper.writableDatabase
+            assertInvalidSyncMetadataId(
+                sqlite,
+                "INSERT INTO sync_metadata " +
+                    "(id, lastSuccessfulSyncAt, lastSyncStatus, recordsInserted) " +
+                    "VALUES (2, 0, 'IDLE', 0)"
+            )
+            database.syncMetadataDao().upsertSyncMetadata(SyncMetadata(id = 1))
+            assertInvalidSyncMetadataId(sqlite, "UPDATE sync_metadata SET id = 2 WHERE id = 1")
+        } finally {
+            database.close()
+        }
+    }
+
+    @Test
+    fun migration5To6RemovesCheckConstraintAndPreservesMetadata() = runBlocking {
+        val initialDatabase = Room.databaseBuilder(context, AppDatabase::class.java, dbName)
+            .allowMainThreadQueries()
+            .build()
+        initialDatabase.openHelper.writableDatabase.execSQL(
+            "INSERT INTO sync_metadata (id, lastSuccessfulSyncAt, lastSyncStatus, recordsInserted) " +
+                "VALUES (1, 123, 'SUCCESS', 7)"
+        )
+        initialDatabase.close()
+
+        context.openOrCreateDatabase(dbName, 0, null).use { database ->
+            database.execSQL("DROP TRIGGER IF EXISTS `trg_sync_metadata_id_insert`")
+            database.execSQL("DROP TRIGGER IF EXISTS `trg_sync_metadata_id_update`")
+            database.execSQL("ALTER TABLE `sync_metadata` RENAME TO `sync_metadata_old`")
+            database.execSQL(
+                """
+                CREATE TABLE `sync_metadata` (
+                    `id` INTEGER NOT NULL,
+                    `lastSuccessfulSyncAt` INTEGER NOT NULL,
+                    `lastSyncStatus` TEXT NOT NULL,
+                    `lastSyncErrorMessage` TEXT,
+                    `recordsInserted` INTEGER NOT NULL,
+                    PRIMARY KEY(`id`),
+                    CHECK (`id` = 1)
+                )
+                """.trimIndent()
+            )
+            database.execSQL("INSERT INTO `sync_metadata` SELECT * FROM `sync_metadata_old`")
+            database.execSQL("DROP TABLE `sync_metadata_old`")
+            database.version = 5
+        }
+
+        val database = openMigrated()
+        try {
+            val sqlite = database.openHelper.writableDatabase
+            val metadata = database.syncMetadataDao().getSyncMetadata()
+            assertNotNull(metadata)
+            assertEquals(123L, metadata?.lastSuccessfulSyncAt)
+            assertEquals(7, metadata?.recordsInserted)
+            sqlite.query(
+                "SELECT sql FROM sqlite_master WHERE type='table' AND name='sync_metadata'"
+            ).use { cursor ->
+                assertEquals(true, cursor.moveToFirst())
+                assertEquals(false, cursor.getString(0).contains("CHECK"))
+            }
+            assertInvalidSyncMetadataId(
+                sqlite,
+                "INSERT INTO sync_metadata " +
+                    "(id, lastSuccessfulSyncAt, lastSyncStatus, recordsInserted) " +
+                    "VALUES (2, 0, 'IDLE', 0)"
+            )
+        } finally {
+            database.close()
+        }
+    }
+
+    private fun assertInvalidSyncMetadataId(database: SupportSQLiteDatabase, sql: String) {
+        try {
+            database.execSQL(sql)
+            fail("A tabela sync_metadata deveria rejeitar id diferente de 1")
+        } catch (expected: SQLiteConstraintException) {
+            // esperado
         }
     }
 }

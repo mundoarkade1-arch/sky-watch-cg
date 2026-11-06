@@ -48,4 +48,25 @@
     <string name="sources_and_warnings">Fontes e avisos</string>
     <string name="radar_experimental">Radar (experimental)</string>
     <string name="adsb_disclaimer">Posição observada via ADS-B. Pode haver poucas ou nenhuma aeronave nesta região.</string>
+    <string name="radar_range_label">Observações em até 50 milhas náuticas de CGR</string>
+    <string name="radar_refresh">Atualizar observações ADS-B</string>
+    <string name="radar_disclaimer">Posições ADS-B observadas, não são horários planejados nem confirmação operacional. Callsign é transmitido pela aeronave e não comprova companhia ou voo.</string>
+    <string name="radar_retry">Tentar novamente</string>
+    <string name="radar_empty">Nenhuma observação ADS-B com posição foi retornada nesta consulta. Isso não prova que não há aeronaves na região.</string>
+    <string name="radar_aircraft_count">Observações com posição: %1$d</string>
+    <string name="radar_center_marker">CGR · SBCG</string>
+    <string name="radar_snapshot_time">Dados da fonte consultados às %1$s (horário de Campo Grande)</string>
+    <string name="radar_callsign">Callsign transmitido: %1$s</string>
+    <string name="radar_no_callsign">Callsign não informado</string>
+    <string name="radar_hex">Endereço ICAO observado: %1$s</string>
+    <string name="radar_altitude">altitude %1$d ft</string>
+    <string name="radar_altitude_unknown">altitude indisponível</string>
+    <string name="radar_speed">velocidade %1$d kt</string>
+    <string name="radar_speed_unknown">velocidade indisponível</string>
+    <string name="radar_aircraft_metrics">%1$s · %2$s · %3$d NM · rumo %4$d°</string>
+    <string name="radar_position_age">Posição recebida há %1$d s</string>
+    <string name="radar_attribution">Fontes ADS-B: adsb.lol, airplanes.live e adsb.fi. Observações experimentais; não são horário nem confirmação operacional.</string>
+    <string name="radar_source_status">Fonte: %1$s · %2$d aeronaves · atualizado %3$s</string>
+    <string name="radar_sources_unavailable">Fontes indisponíveis, tentando de novo em %1$d s</string>
+    <string name="radar_load">Carregar radar</string>
 </resources>

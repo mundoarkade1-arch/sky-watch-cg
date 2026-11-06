@@ -2,6 +2,7 @@ package com.skywatch.cg.data.siros
 
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 
@@ -16,7 +17,10 @@ object SirosNormalizer {
     private val dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")
     private val dateFormatterBr = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 
-    fun normalize(records: List<SirosRecord>, referenceDate: LocalDate = LocalDate.now()): List<NormalizedFlight> {
+    fun normalize(
+        records: List<SirosRecord>,
+        referenceDate: LocalDate = LocalDate.now(ZoneId.of("America/Campo_Grande"))
+    ): List<NormalizedFlight> {
         val result = mutableListOf<NormalizedFlight>()
 
         for (record in records) {
@@ -156,4 +160,3 @@ object SirosNormalizer {
         return null
     }
 }
-

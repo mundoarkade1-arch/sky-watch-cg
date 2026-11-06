@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.skywatch.cg.data.db.AppDatabase
 import com.skywatch.cg.data.siros.NormalizedFlight
 import com.skywatch.cg.data.siros.OperationType
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.dropWhile
@@ -31,6 +32,7 @@ class FlightListViewModelTest {
     private lateinit var db: AppDatabase
     private lateinit var viewModel: FlightListViewModel
     private lateinit var testDispatcher: TestDispatcher
+    private val fixedToday = LocalDate.of(2024, 10, 15)
 
     @Before
     fun setUp() {
@@ -43,7 +45,12 @@ class FlightListViewModelTest {
             .allowMainThreadQueries()
             .build()
         val testRepository = com.skywatch.cg.data.siros.SirosRepository(db, testDispatcher)
-        viewModel = FlightListViewModel(ApplicationProvider.getApplicationContext(), testRepository)
+        // Use fixed date provider for deterministic tests
+        viewModel = FlightListViewModel(
+            ApplicationProvider.getApplicationContext(),
+            testRepository,
+            { fixedToday }
+        )
     }
 
     @After
@@ -65,7 +72,7 @@ class FlightListViewModelTest {
         // Trigger load
         viewModel.loadFlights(testDate)
         testDispatcher.scheduler.advanceUntilIdle()
-        viewModel.uiState.first { it !is FlightUiState.Loading }
+        viewModel.uiState.first { it is FlightUiState.Success }
         
         val finalState = viewModel.uiState.value
         
@@ -81,7 +88,8 @@ class FlightListViewModelTest {
     fun testLoadFlightsWithData() = runTest(testDispatcher) {
         val testDate = LocalDate.of(2024, 10, 15)
         
-        // Insert test data directly via DAO
+        // Arrival: 09:30 UTC at Campo Grande (UTC-4) = 05:30 local on 2024-10-15
+        // arrivalDate is the UTC arrival date; the repository converts it to the airport's local date.
         val arrival = NormalizedFlight(
             flightId = "GLO-1234-2024-10-15",
             sirosRecordId = "GLO-001",
@@ -98,7 +106,7 @@ class FlightListViewModelTest {
             scheduledDepartureUtc = LocalTime.of(8, 0),
             scheduledArrivalUtc = LocalTime.of(9, 30),
             flightDate = testDate,
-            arrivalDate = testDate.plusDays(1),
+            arrivalDate = testDate,
             daysOfWeek = listOf(1, 2, 3, 4, 5, 6, 7),
             validFrom = LocalDate.of(2024, 10, 1),
             validTo = LocalDate.of(2025, 3, 31),
@@ -106,6 +114,7 @@ class FlightListViewModelTest {
             sirosStatus = "Em Operação"
         )
         
+        // Departure: 10:00 UTC from Campo Grande (UTC-4) = 06:00 local on 2024-10-15
         val departure = NormalizedFlight(
             flightId = "GLO-1235-2024-10-15",
             sirosRecordId = "GLO-002",
@@ -130,21 +139,35 @@ class FlightListViewModelTest {
             sirosStatus = "Em Operação"
         )
         
-        val repository = com.skywatch.cg.data.siros.SirosRepository(db, testDispatcher)
-        repository.saveNormalizedFlights(listOf(arrival, departure))
+        // Use the SAME repository as the viewModel to ensure data visibility
+        val testRepository = viewModel.repository
+        testRepository.saveNormalizedFlights(listOf(arrival, departure))
+        testDispatcher.scheduler.advanceUntilIdle()  // Ensure DB write completes
         
         // Trigger load
         viewModel.loadFlights(testDate)
         testDispatcher.scheduler.advanceUntilIdle()
-        viewModel.uiState.first { it !is FlightUiState.Loading }
         
-        val finalState = viewModel.uiState.value
+        // Wait for actual data (not just non-Loading state)
+        val success = viewModel.uiState
+            .dropWhile { it is FlightUiState.Loading }
+            .first { it is FlightUiState.Success && (it as FlightUiState.Success).arrivals.size + (it as FlightUiState.Success).departures.size >= 2 }
+            as FlightUiState.Success
         
-        assertNotNull(finalState)
-        assertTrue(finalState is FlightUiState.Success)
-        val success = finalState as FlightUiState.Success
-        assertEquals(1, success.arrivals.size)
-        assertEquals(1, success.departures.size)
+        // Consulta todos os voos gravados no banco para diagnóstico
+        val allFlightsInDb = testRepository.getAllDepartures() + testRepository.getAllArrivals()
+        val diagInfo = buildString {
+            append("DIAGNOSTICO: ")
+            append("selectedDate=$testDate; ")
+            append("allFlightsDb=[${allFlightsInDb.joinToString { f -> 
+                "id=${f.flightId}, flightDate=${f.flightDate}, arrivalDate=${f.arrivalDate}, depUtc=${f.scheduledDepartureUtc}, arrUtc=${f.scheduledArrivalUtc}, origTz=${f.originTimezone}, destTz=${f.destinationTimezone}"
+            }}]; ")
+            append("returnedArrivals=${success.arrivals.map { it.flightId }}; ")
+            append("returnedDepartures=${success.departures.map { it.flightId }}")
+        }
+        
+        assertEquals(diagInfo, 1, success.arrivals.size)
+        assertEquals(diagInfo, 1, success.departures.size)
         assertEquals("GOL", success.arrivals[0].airline)
         assertEquals("1234", success.arrivals[0].flightNumber)
         assertEquals("GOL", success.departures[0].airline)
@@ -154,7 +177,8 @@ class FlightListViewModelTest {
     @Test
     fun testRefreshStateEmitsRefreshing() = runTest(testDispatcher) {
         val testDate = LocalDate.of(2024, 10, 15)
-        val testRemoteSource = com.skywatch.cg.data.siros.SirosRemoteSource("http://localhost:0/dummy.csv")
+        val refreshResult = CompletableDeferred<com.skywatch.cg.data.siros.SirosRemoteSource.DownloadResult>()
+        val testRemoteSource = FakeSirosRemoteSource { refreshResult.await() }
         val testRepository = com.skywatch.cg.data.siros.SirosRepository(db, testDispatcher, testRemoteSource)
         viewModel = FlightListViewModel(ApplicationProvider.getApplicationContext(), testRepository)
 
@@ -167,24 +191,121 @@ class FlightListViewModelTest {
         testDispatcher.scheduler.runCurrent()
         val refreshingState = viewModel.uiState.value
         assertTrue(refreshingState is FlightUiState.Refreshing)
-        
+
+        refreshResult.complete(
+            com.skywatch.cg.data.siros.SirosRemoteSource.DownloadResult.Failure("Falha simulada")
+        )
         testDispatcher.scheduler.advanceUntilIdle()
-        val finalState = viewModel.uiState.value
-        assertTrue(finalState is FlightUiState.Success || finalState is FlightUiState.Error || finalState is FlightUiState.Refreshing)
+        val finalState = viewModel.uiState.first { it is FlightUiState.Error }
+        assertTrue(finalState is FlightUiState.Error)
     }
 
 
 
     @Test
     fun testRefreshCallsLoadFlights() = runTest(testDispatcher) {
+        val testDate = LocalDate.of(2024, 10, 15)
+        val testRemoteSource = FakeSirosRemoteSource {
+            com.skywatch.cg.data.siros.SirosRemoteSource.DownloadResult.Failure("Falha simulada")
+        }
+        val testRepository = com.skywatch.cg.data.siros.SirosRepository(db, testDispatcher, testRemoteSource)
+        viewModel = FlightListViewModel(ApplicationProvider.getApplicationContext(), testRepository)
+
+        viewModel.loadFlights(testDate)
+        testDispatcher.scheduler.advanceUntilIdle()
+        viewModel.uiState.first { it is FlightUiState.Success }
+
         viewModel.refresh()
         testDispatcher.scheduler.advanceUntilIdle()
-        viewModel.uiState.first { it !is FlightUiState.Loading }
+        viewModel.uiState.first { it is FlightUiState.Error }
         
         val finalState = viewModel.uiState.value
         
         assertNotNull(finalState)
-        assertTrue(finalState is FlightUiState.Success || finalState is FlightUiState.Error)
+        assertTrue(finalState is FlightUiState.Error)
+    }
+
+    @Test
+    fun testRefreshWithCachedFlightsRetainsSuccessAfterSyncFailure() = runTest(testDispatcher) {
+        // Pre-populate with some data so we start in Success state
+        val testDate = LocalDate.of(2024, 10, 15)
+        val arrival = NormalizedFlight(
+            flightId = "GLO-1111-2024-10-15",
+            sirosRecordId = "GLO-111",
+            airline = "GOL",
+            flightNumber = "1111",
+            equipment = "B738",
+            origin = "SBCG",
+            originName = "CAMPO GRANDE",
+            originTimezone = "America/Campo_Grande",
+            destination = "SBGR",
+            destinationName = "GUARULHOS",
+            destinationTimezone = "America/Sao_Paulo",
+            operationType = OperationType.ARRIVAL,
+            scheduledDepartureUtc = LocalTime.of(12, 0),
+            scheduledArrivalUtc = LocalTime.of(13, 30),
+            flightDate = testDate,
+            arrivalDate = testDate,
+            daysOfWeek = listOf(1, 2, 3, 4, 5, 6, 7),
+            validFrom = LocalDate.of(2024, 10, 1),
+            validTo = LocalDate.of(2025, 3, 31),
+            serviceType = "REGULAR DE PASSAGEIROS",
+            sirosStatus = "Em Operação"
+        )
+        val testRemoteSource = FakeSirosRemoteSource {
+            com.skywatch.cg.data.siros.SirosRemoteSource.DownloadResult.Failure("Falha simulada")
+        }
+        val testRepository = com.skywatch.cg.data.siros.SirosRepository(db, testDispatcher, testRemoteSource)
+        viewModel = FlightListViewModel(ApplicationProvider.getApplicationContext(), testRepository)
+        testRepository.saveNormalizedFlights(listOf(arrival))
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Load initial data to get into Success state
+        viewModel.loadFlights(testDate)
+        testDispatcher.scheduler.advanceUntilIdle()
+        
+        viewModel.uiState.first {
+            it is FlightUiState.Success && it.arrivals.any { flight -> flight.flightId == arrival.flightId }
+        }
+
+        // A simulated download failure must keep the cached flights visible.
+        viewModel.refresh()
+        testDispatcher.scheduler.advanceUntilIdle()
+        
+        val finalState = viewModel.uiState.first {
+            it is FlightUiState.Success && it.arrivals.any { flight -> flight.flightId == arrival.flightId }
+        } as FlightUiState.Success
+        assertEquals(listOf(arrival.flightId), finalState.arrivals.map { it.flightId })
+    }
+
+    @Test
+    fun testRefreshWithFailureEndsWithIsRefreshingFalse() = runTest(testDispatcher) {
+        // Start with empty database (no data)
+        val testDate = LocalDate.of(2024, 10, 15)
+
+        val testRemoteSource = FakeSirosRemoteSource {
+            com.skywatch.cg.data.siros.SirosRemoteSource.DownloadResult.Failure("Falha simulada")
+        }
+        val testRepository = com.skywatch.cg.data.siros.SirosRepository(db, testDispatcher, testRemoteSource)
+        viewModel = FlightListViewModel(ApplicationProvider.getApplicationContext(), testRepository)
+
+        // Load initial data (will be empty Success)
+        viewModel.loadFlights(testDate)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Verify we're in Success state (empty)
+        val success = viewModel.uiState.first {
+            it is FlightUiState.Success && it.arrivals.isEmpty() && it.departures.isEmpty()
+        } as FlightUiState.Success
+        assertTrue(success.arrivals.isEmpty() && success.departures.isEmpty())
+
+        // Now call refresh - sync will fail
+        viewModel.refresh()
+        testDispatcher.scheduler.advanceUntilIdle()
+        
+        val finalState = viewModel.uiState.first { it is FlightUiState.Error }
+        assertTrue(finalState is FlightUiState.Error)
+        assertFalse(finalState is FlightUiState.Refreshing)
     }
 
     @Test
@@ -230,13 +351,13 @@ class FlightListViewModelTest {
         viewModel.uiState.first { it !is FlightUiState.Loading }
         
         val today = viewModel.selectedDate.value
-        assertEquals(LocalDate.now(), today)
+        assertEquals(fixedToday, today)
         
         val finalState = viewModel.uiState.value
         assertNotNull(finalState)
         assertTrue(finalState is FlightUiState.Success || finalState is FlightUiState.Error)
         if (finalState is FlightUiState.Success) {
-            assertEquals(LocalDate.now(), finalState.selectedDate)
+            assertEquals(fixedToday, finalState.selectedDate)
         }
     }
 
@@ -290,7 +411,7 @@ class FlightListViewModelTest {
             operationType = OperationType.DEPARTURE,
             scheduledDepartureUtc = LocalTime.of(2, 0), // 02:00 UTC
             scheduledArrivalUtc = LocalTime.of(3, 30),
-            flightDate = utcFlightDate,
+            flightDate = utcFlightDate,  // UTC date of departure
             arrivalDate = utcFlightDate,
             daysOfWeek = listOf(1, 2, 3, 4, 5, 6, 7),
             validFrom = LocalDate.of(2024, 10, 1),
@@ -299,23 +420,92 @@ class FlightListViewModelTest {
             sirosStatus = "Em Operação"
         )
         
-        val repository = com.skywatch.cg.data.siros.SirosRepository(db, testDispatcher)
-        repository.saveNormalizedFlights(listOf(departureAt0200Utc))
+        // Use the SAME repository instance as the viewModel to ensure data visibility
+        val testRepository = viewModel.repository
+        testRepository.saveNormalizedFlights(listOf(departureAt0200Utc))
+        testDispatcher.scheduler.advanceUntilIdle()  // Ensure DB write completes
         
         // Load flights for the LOCAL date (14th) - should include the 02:00 UTC flight
         viewModel.loadFlights(localExpectedDate)
         testDispatcher.scheduler.advanceUntilIdle()
-        viewModel.uiState.first { it !is FlightUiState.Loading }
         
-        val finalState = viewModel.uiState.value
-        assertNotNull(finalState)
-        assertTrue(finalState is FlightUiState.Success)
-        val success = finalState as FlightUiState.Success
+        // Wait for actual data (not just non-Loading state)
+        val success = viewModel.uiState
+            .dropWhile { it is FlightUiState.Loading }
+            .first { it is FlightUiState.Success && (it as FlightUiState.Success).departures.size >= 1 }
+            as FlightUiState.Success
         
+        // Consulta todos os voos gravados no banco para diagnóstico completo
+        val allFlightsInDb = testRepository.getAllDepartures() + testRepository.getAllArrivals()
+        val diagInfo = buildString {
+            append("DIAGNOSTICO: ")
+            append("selectedDate=$localExpectedDate; ")
+            append("allFlightsDb=[${allFlightsInDb.joinToString { f -> 
+                "id=${f.flightId}, flightDate=${f.flightDate}, arrivalDate=${f.arrivalDate}, depUtc=${f.scheduledDepartureUtc}, arrUtc=${f.scheduledArrivalUtc}, origTz=${f.originTimezone}, destTz=${f.destinationTimezone}"
+            }}]; ")
+            append("returnedArrivals=${success.arrivals.map { it.flightId }}; ")
+            append("returnedDepartures=${success.departures.map { it.flightId }}")
+        }
+
         // Flight should appear on 14th (local date), not 15th
-        assertEquals(localExpectedDate, success.selectedDate)
-        assertEquals(1, success.departures.size)
+        assertEquals(diagInfo, localExpectedDate, success.selectedDate)
+        assertEquals(diagInfo, 1, success.departures.size)
         assertEquals("GLO-9999-2024-10-15", success.departures[0].flightId)
         assertEquals(LocalTime.of(2, 0), success.departures[0].scheduledDepartureUtc)
+    }
+
+    @Test
+    fun testLoadFlightDetailsReturnsCachedFlight() = runTest(testDispatcher) {
+        val flight = NormalizedFlight(
+            flightId = "GLO-1234-2024-10-15",
+            sirosRecordId = "GLO-001",
+            airline = "GOL",
+            flightNumber = "1234",
+            equipment = "B738",
+            origin = "SBGR",
+            originName = "GUARULHOS",
+            originTimezone = "America/Sao_Paulo",
+            destination = "SBCG",
+            destinationName = "CAMPO GRANDE",
+            destinationTimezone = "America/Campo_Grande",
+            operationType = OperationType.ARRIVAL,
+            scheduledDepartureUtc = LocalTime.of(8, 0),
+            scheduledArrivalUtc = LocalTime.of(9, 30),
+            flightDate = fixedToday,
+            arrivalDate = fixedToday,
+            daysOfWeek = listOf(1, 2, 3, 4, 5, 6, 7),
+            validFrom = fixedToday.minusDays(1),
+            validTo = fixedToday.plusDays(1),
+            serviceType = "REGULAR DE PASSAGEIROS",
+            sirosStatus = "Em Operação"
+        )
+        viewModel.repository.saveNormalizedFlights(listOf(flight))
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        viewModel.loadFlightDetails(flight.flightId)
+        val state = viewModel.flightDetailUiState.first {
+            it is FlightDetailUiState.Success
+        }
+        assertTrue("Unexpected detail state: $state", state is FlightDetailUiState.Success)
+        val loadedFlight = (state as FlightDetailUiState.Success).flight
+        assertEquals(flight.flightId, loadedFlight.flightId)
+        assertEquals(flight.origin, loadedFlight.origin)
+        assertEquals(flight.destination, loadedFlight.destination)
+    }
+
+    @Test
+    fun testLoadFlightDetailsReportsMissingFlight() = runTest(testDispatcher) {
+        viewModel.loadFlightDetails("missing-flight")
+        val state = viewModel.flightDetailUiState.first {
+            it is FlightDetailUiState.Error
+        }
+        assertTrue("Unexpected detail state: $state", state is FlightDetailUiState.Error)
+        assertEquals("missing-flight", (state as FlightDetailUiState.Error).flightId)
+    }
+
+    private class FakeSirosRemoteSource(
+        private val download: suspend (java.io.File) -> com.skywatch.cg.data.siros.SirosRemoteSource.DownloadResult
+    ) : com.skywatch.cg.data.siros.SirosRemoteSource("http://unused.invalid") {
+        override suspend fun downloadCsvToFileInstance(tempFile: java.io.File) = download(tempFile)
     }
 }

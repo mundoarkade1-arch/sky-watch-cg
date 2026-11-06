@@ -1,5 +1,19 @@
 # Plano de testes
 
+## Agenda local e recomendação de observação — 2026-11-04
+
+A tela inicial combina pousos e decolagens em ordem cronológica e apresenta o horário local de Campo Grande. Os filtros Todos/Pousos/Decolagens alteram a lista, não a base da recomendação: a faixa de 3 horas sempre considera os dois tipos de movimento. A lista representa voos de passageiros ativos encontrados no SIROS para CGR, não todos os movimentos reais; a faixa é calculada a partir do planejamento e não garante operação.
+
+**Regressão final local** (executada a partir de `android-app`):
+```powershell
+.\gradlew.bat :app:testDebugUnitTest :app:testReleaseUnitTest :app:assembleDebug :app:assembleRelease :app:lintVitalRelease :app:processReleaseManifest :app:compileDebugAndroidTestKotlin --console=plain
+```
+**Resultado:** `BUILD SUCCESSFUL`; 75 testes por variante (Debug e Release), 0 falhas, 0 erros e 1 ignorado por depender de CSV real. Builds Debug/Release, lint vital, processamento do manifest Release e compilação dos testes instrumentados aprovados. APK Debug `1.0.18` gerado.
+
+**Telefone físico:** APK Debug `1.0.18` instalado e aberto em aparelho Android 14, sem emulador. A interface apresentou, para 05/11/2026, a janela 09:05–12:05 com 10 movimentos programados (5 pousos e 5 decolagens). Esse resultado reflete os dados SIROS em cache naquela consulta, não uma confirmação de operação.
+
+**Publicação:** CI #58 e workflow de Release #14 concluídos com sucesso para `951ce68`. O APK `SKY-WATCH-CG-v1.0.18-debug.apk` foi enviado para a [prévia v1.0.18 no GitHub Releases](https://github.com/mundoarkade1-arch/sky-watch-cg/releases/tag/v1.0.18).
+
 ## Regras
 - Registrar data/hora UTC e horário local (Campo Grande, UTC-4).
 - Guardar URL/endpoint consultado, código HTTP, latência e quantidade de registros.
@@ -15,7 +29,7 @@
 | T-002 | Endpoints REST SIROS por data/período (/sas/siros_api/api/voos) | Restrito / Bloqueado | Retorna desafio CAPTCHA, inviabilizando chamadas diretas simples de API REST sem sessão navegada. |
 | T-003 | Identificação de voos comerciais de passageiros para SBCG | Confirmado | Localizados voos regulares de passageiros operados por GOL, LATAM e AZUL ligando Campo Grande a hubs como Guarulhos, Congonhas, Campinas e Cuiabá. |
 | T-004 | Fuso horário e conversão UTC para Local | Validado | Horários no CSV fornecidos em UTC. Conversão feita por aeroporto usando America/Sao_Paulo e America/Campo_Grande (sem subtração manual fixa). |
-| T-005 | Comparação com Aena | Complementar | SIROS fornece planejamento (HTA); Aena fornece status em tempo real. |
+| T-005 | Comparação com Aena | Fonte complementar apenas como conceito | SIROS fornece planejamento (HTA). Para CGR, ainda não foi confirmada API nem autorização para reutilizar status operacional Aena; ver pesquisa em `docs/API_SOURCES.md`. |
 | T-006 | Modelo de dados normalizado | Aprovado | Chave composta (ID SIROS original + Data do Voo), delay_minutes = null sem confirmação, distinção entre data_sincronizacao_geral e data_atualizacao_status. |
 
 ## Resultados dos Testes de Persistência Room e Repositório (Etapa 4) - APROVADOS
@@ -36,16 +50,15 @@
 | TV-003 | `testLoadFlightsWithData` | Sucesso (Aprovado) | Insere voos de chegada e partida via repositório injetado e verifica se ambos aparecem corretamente nas listas filtradas. |
 | TV-004 | `testRefreshCallsLoadFlights` | Sucesso (Aprovado) | Verifica que o método `refresh()` dispara novo carregamento e retorna estado válido (`Success` ou `Error`). |
 
-## Resultados dos Testes da Etapa A (ViewModel Refreshing) - 02/11/2026
+## Resultados dos Testes de ViewModel (Fase 1 + Fase 2) - 03/11/2026
 
 | ID | Teste | Resultado | Detalhes |
 |---|---|---|---|
+| TV-001 | `testInitialStateIsLoading` | **Sucesso (Aprovado)** | Verifica que o estado inicial do ViewModel é `Loading`. |
+| TV-002 | `testLoadFlightsEmptyDatabase` | **Sucesso (Aprovado)** | Verifica que ao carregar com banco vazio retorna estado `Success` com listas vazias. |
+| TV-003 | `testLoadFlightsWithData` | **Sucesso (Aprovado)** | Insere voos de chegada e partida via repositório injetado e verifica se ambos aparecem corretamente nas listas filtradas. |
+| TV-004 | `testRefreshCallsLoadFlights` | **Sucesso (Aprovado)** | Verifica que o método `refresh()` dispara novo carregamento e retorna estado válido (`Success` ou `Error`). |
 | TV-005 | `testRefreshStateEmitsRefreshing` | **Sucesso (Aprovado)** | Valida que a chamada a `refresh()` emite o estado `Refreshing` (com spinner/mantendo dados anteriores) e conclui com sucesso simulando uma fonte remota local sem acesso à internet real. |
-
-## Resultados dos Testes de ViewModel Fase 2 - 03/11/2026
-
-| ID | Teste | Resultado | Detalhes |
-|---|---|---|---|
 | TV-006 | `testGoToPreviousDayChangesDateAndLoadsFlights` | **Sucesso (Aprovado)** | Verifica navegação para dia anterior. |
 | TV-007 | `testGoToNextDayChangesDateAndLoadsFlights` | **Sucesso (Aprovado)** | Verifica navegação para próximo dia. |
 | TV-008 | `testGoToTodayChangesDateAndLoadsFlights` | **Sucesso (Aprovado)** | Verifica navegação para hoje. |
@@ -55,7 +68,7 @@
 - Total de testes: **44**
 - Falhas: **0**
 - Erros: **0**
-- Ignorados: **1**
+- Ignorados: **1** (`SirosStreamParserRealFileTest` — precisa do CSV real)
 - `BUILD SUCCESSFUL`
 
 ## Correção de Concorrência e Sincronização nos Testes (Etapa 5) - 2026-11-01
@@ -140,7 +153,7 @@ cd android-app
 
 - **Ressalvas importantes:**
   1. `AppDatabaseMigrationTest.kt` valida a migração v1→v2 sobre uma "v1 provável" (tabela `flights` idêntica ao schema atual gerado pelo Room). Como o schema real da v1 nunca foi exportado e não é recuperável do Git (arquivos só existem a partir do commit 5385fe2), o teste prova o comportamento da migração para o schema simulado, mas não para a v1 antiga real de um aparelho de produção.
-  2. Em instalações novas (schema v2), o Room cria `sync_metadata` SEM a restrição `CHECK (id = 1)`. A restrição existe apenas em bancos que passaram pela `MIGRATION_1_2`. Decisão sobre padronização futura deixada em aberto.
+  2. Naquele estado (schema v2), instalações novas criavam `sync_metadata` sem `CHECK (id = 1)`. A observação é histórica; o schema atual é v6 e aplica a regra `id = 1` por gatilhos tanto em bancos novos como migrados.
 
 ## Resultados dos Testes da Fase 6.3 - Ingestão Remota e Sincronização (01/11/2026)
 
@@ -230,3 +243,181 @@ cmd /c "cd android-app && gradlew.bat cleanTestDebugUnitTest testDebugUnitTest -
 ```
 **Resultado:** `BUILD SUCCESSFUL`, 33 testes, 0 falhas, 0 erros.
 Fase 6.3 concluída com sucesso. APK de debug gerado: `android-app\app\build\outputs\apk\debug\app-debug.apk` (12.6 MB).
+
+## Correção do CI e da tela Sobre — 2026-11-04
+
+**Falha investigada:** a execução CI #38 (commit `64f4c77`) terminou com 53 testes, 2 falhas e 1 teste ignorado. Os testes de atualização dependiam do download remoto SIROS real, que roda fora do relógio controlado por `runTest`; por isso o estado podia continuar em atualização quando o teste fazia a verificação.
+
+**Alterações verificadas:** os testes de atualização usam uma fonte remota falsa controlada pelo teste. O ViewModel preserva o estado de atualização durante emissões do Room, impede duas sincronizações manuais simultâneas e conclui em sucesso ou erro. A tela Sobre usa ícone de retorno acessível, cores do tema e conteúdo rolável.
+
+**Execução local:** `2026-11-04 18:59 UTC / 14:59 Campo Grande`.
+```powershell
+cd android-app
+.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug --console=plain
+```
+**Resultado reproduzível:** `BUILD SUCCESSFUL`; 53 testes contabilizados: 52 executados, 0 falhas, 0 erros e 1 ignorado (`SirosStreamParserRealFileTest`, depende de CSV real local). APK Debug gerado em `android-app\app\build\outputs\apk\debug\app-debug.apk` (11.019.269 bytes).
+
+**CI remoto:** execução #39, commit `bccfd48` na branch `wip-fase3`, concluída com sucesso em 2026-11-04. [Ver execução no GitHub Actions](https://github.com/mundoarkade1-arch/sky-watch-cg/actions/runs/41892849679).
+
+**Escopo ainda não coberto por esta execução:** teste manual ponta a ponta das notificações após reinicialização do dispositivo. A conclusão do CI não representa esse teste físico.
+
+## Revalidação dos testes de atualização — 2026-11-04
+
+**Comando local** (executado a partir de `android-app`):
+```powershell
+.\gradlew.bat :app:testDebugUnitTest --tests "com.skywatch.cg.ui.viewmodel.FlightListViewModelTest" --console=plain
+```
+**Resultado:** `BUILD SUCCESSFUL`; 11 testes, 0 falhas, 0 erros e 0 ignorados. O código de saída foi 0.
+
+**Suíte completa e APK Debug:** executados `.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug --console=plain` a partir de `android-app`. Resultado: `BUILD SUCCESSFUL`; 53 testes contabilizados, 0 falhas, 0 erros e 1 ignorado (`SirosStreamParserRealFileTest`, depende de CSV real local). APK gerado em `android-app\app\build\outputs\apk\debug\app-debug.apk` (11.019.269 bytes).
+
+Durante essa validação foi corrigido `android-app/gradlew.bat`: o script caía sempre no caminho de falha ao terminar, mesmo quando o Gradle era bem-sucedido. Após o ajuste, confirmou-se saída 0 para o teste aprovado e saída 1 para uma tarefa inexistente.
+
+**CI remoto:** execuções #41 e #42 concluídas com sucesso; a #42 validou o build Debug e a suíte unitária no commit `fa2712d`. [Ver execução #42 no GitHub Actions](https://github.com/mundoarkade1-arch/sky-watch-cg/actions/runs/41896892995).
+
+## Testes instrumentados em aparelho físico — 2026-11-04
+
+Em um aparelho físico Android 14, a primeira execução encontrou um fixture incompleto em `FlightDaoTest` (faltava `arrivalDate`), uma cadeia de migração de teste incompleta (registrava v1→v2 apesar do banco atual estar na v5) e uma divergência real: a migração criava um índice para `alert_sent` que não estava declarado na entidade Room.
+
+Correções: preenchido `arrivalDate` no fixture; teste configurado para executar a cadeia completa v1→v5; declarado na entidade `AlertSent` o índice já criado pela migração v3→v4; acrescentada migração v4→v5 idempotente para criar o índice em bancos v4 sem ele. A variante Debug usa `com.skywatch.cg.debug`, mantendo o pacote Release `com.skywatch.cg` separado.
+
+**Comando executado** (a partir de `android-app`):
+```powershell
+.\gradlew.bat :app:connectedDebugAndroidTest --console=plain
+```
+**Resultado no aparelho Android 14 naquela execução:** `BUILD SUCCESSFUL`; 11 testes instrumentados, 0 falhas, 0 erros e 0 ignorados. Incluía migração v1→v5, migração v4→v5 preservando registro de alerta e os testes do DAO de voos.
+
+**Reexecução no aparelho após os ajustes de alertas — 2026-11-04:** executado `.\gradlew.bat :app:connectedDebugAndroidTest --console=plain` com o telefone físico modelo 22101320G (Android 14 / API 34), identificado pelo Android SDK. Resultado: `BUILD SUCCESSFUL`; 11 testes, 0 falhas, 0 erros e 0 ignorados. Relatório XML em `android-app\app\build\outputs\androidTest-results\connected\debug\TEST-22101320G - 14-_app-.xml`.
+
+Essa execução valida migrações Room e operações DAO no aparelho; não valida a entrega de notificações, permissões em uso, voo real na janela ou o `BootReceiver` após reinicialização. O telefone não foi reiniciado.
+
+**Validação local complementar (antes do radar):** `:app:testDebugUnitTest`, `:app:assembleDebug`, `:app:compileDebugAndroidTestKotlin` e `:app:processReleaseManifest` concluíram com sucesso. Suíte unitária: 53 testes contabilizados, 0 falhas, 0 erros e 1 ignorado por depender de CSV real.
+
+**CI remoto:** CI #46 passou no commit `5c7bdf5`, CI #47 para `c8d6761`, #48 para `9e82c84`, #49 para `4b072c4`, #50 para `9206269`, #51 para `ad4db53`, #52 para `fe84e0b` e #53 para `6f0ba0e` também passaram.
+
+**Teste real de notificação após reinicialização:** pendente porque não havia voo SIROS elegível na janela de 15–30 minutos. O reinício está registrado abaixo e o teste de código do `BootReceiver` está na seção final; nenhum dos dois comprova a entrega de uma notificação real.
+
+## Validação local dos alertas — 2026-11-04
+
+O `FlightAlertWorker` considera horários planejados SIROS entre 15 e 30 minutos antes do evento no fuso do aeroporto, deduplica pelo voo/operação/data local e usa `arrivalDate` como data UTC das chegadas. A permissão de notificações é verificada antes de processar os voos. O registro de deduplicação é salvo após a chamada de publicação, para não marcar como enviado antes de tentar notificar.
+
+**Comandos executados** (a partir de `android-app`):
+```powershell
+.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug :app:compileDebugAndroidTestKotlin --console=plain
+```
+**Resultado naquela etapa:** `BUILD SUCCESSFUL`; 56 testes contabilizados, 0 falhas, 0 erros e 1 ignorado por depender de CSV real. APK Debug e compilação dos testes instrumentados concluídos.
+
+O WorkManager pode atrasar execuções, então a janela pode passar sem notificação. Esse comportamento usa apenas o horário programado SIROS e não confirma o estado operacional do voo. A validação de entrega ponta a ponta continua pendente.
+
+## Validação de inicialização e ViewModel — 2026-11-04
+
+Removida a segunda execução de inicialização em `MainActivity.onCreate()`, que repetia a criação do canal, o pedido de permissão de notificações, o agendamento de trabalhos do WorkManager e a verificação de versão.
+
+**Comando executado** (a partir de `android-app`):
+```powershell
+.\gradlew.bat :app:testDebugUnitTest --tests com.skywatch.cg.ui.viewmodel.FlightListViewModelTest :app:assembleDebug :app:compileDebugAndroidTestKotlin --console=plain
+```
+**Resultado:** `BUILD SUCCESSFUL`; 11 testes do `FlightListViewModelTest`, 0 falhas, 0 erros e 0 ignorados; APK Debug e compilação dos testes instrumentados aprovados. CI #47 a #51 também passaram.
+
+Após essa correção, `.\gradlew.bat :app:connectedDebugAndroidTest --console=plain` também passou no telefone físico Android 14: 11 testes, 0 falhas, 0 erros e 0 ignorados. Isso valida banco/DAO/migrações, mas não abre a tela principal nem verifica a notificação real.
+
+## Migração Room v5→v6 — 2026-11-04
+
+A versão 5 tinha uma diferença: migrações antigas criavam `sync_metadata` com `CHECK (id = 1)`, mas instalações novas usavam o schema gerado pelo Room sem esse `CHECK`. A migração v5→v6 reconstrói apenas essa tabela sem a restrição estrutural, preserva todas as colunas/linhas e adiciona gatilhos de inserção e atualização para rejeitar qualquer `id` diferente de 1. O callback idempotente também instala os gatilhos em bancos criados do zero e em aberturas futuras.
+
+**Comandos executados** (a partir de `android-app`):
+```powershell
+.\gradlew.bat :app:testDebugUnitTest :app:compileDebugAndroidTestKotlin --console=plain
+.\gradlew.bat :app:connectedDebugAndroidTest --console=plain
+.\gradlew.bat :app:assembleDebug :app:processReleaseManifest --console=plain
+```
+**Resultados:** suíte unitária: 56 testes, 0 falhas, 0 erros e 1 ignorado por depender de CSV local. No telefone físico Android 14 (22101320G), 13 testes instrumentados, 0 falhas, 0 erros e 0 ignorados. APK Debug e manifest Release compilados com sucesso. Os testes cobrem instalações novas, migração até v6, remoção da antiga `CHECK`, preservação dos dados e rejeição de `id != 1` em inserção/atualização. Nenhum emulador foi aberto.
+
+Schema Room exportado em `android-app/app/schemas/com.skywatch.cg.data.db.AppDatabase/6.json`. CI #50 passou para o commit `9206269`.
+
+## Radar ADS-B experimental — 2026-11-04
+
+O protótipo usa a API ADSB.lol documentada, chamada apenas ao abrir a tela ou por atualização manual. A consulta está centrada nas coordenadas configuradas para CGR e pede observações em um raio de 50 milhas náuticas. O `RadarSnapshotParser` exige timestamp, valida latitude/longitude e ignora registros sem posição; chamadas HTTP malsucedidas geram erro visível, preservando o último resultado em memória. A interface mostra escopo radial e lista, tempo da consulta, idade da posição, atribuição ADSB.lol/ODbL e distinção explícita entre posição observada, planejamento SIROS e status operacional. Não há associação automática a voos.
+
+**Verificação pontual da API (web, sem inserir dados no app):** em 04/11/2026 às 21:22:07 UTC, o endpoint de 50 NM retornou `HTTP 200`, `total=1`, com uma posição reportada a 45.472 NM do centro consultado. Os identificadores foram omitidos. É apenas uma amostra daquele instante, não comprova cobertura contínua, presença de tráfego próximo ao aeroporto nem identidade de voo.
+
+**Testes automatizados:**
+```powershell
+.\gradlew.bat :app:testDebugUnitTest --tests com.skywatch.cg.data.radar.RadarSnapshotParserTest --tests com.skywatch.cg.data.radar.RadarRemoteSourceTest :app:assembleDebug
+.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug :app:processReleaseManifest
+```
+**Resultados:** testes focados do parser/cliente HTTP e build Debug aprovados. Regressão completa `BUILD SUCCESSFUL`: 63 testes contabilizados, 0 falhas, 0 erros e 1 ignorado por depender de CSV real; `assembleDebug` e `processReleaseManifest` aprovados. A consulta de app não é feita pelos testes (HTTP é simulado com MockWebServer). Nenhum emulador foi aberto.
+
+**Condições de uso:** ADSB.lol declara ODbL 1.0 e solicita contato antes de uso em produção. O protótipo exibe atribuição, mas a integração não deve ser distribuída como funcionalidade de produção até confirmar com o mantenedor as exigências aplicáveis. Consulte `docs/API_SOURCES.md`.
+
+**Teste no telefone físico:** instalado por `adb install -r` apenas o pacote `com.skywatch.cg.debug` no aparelho 22101320G (Android 14/API 34); o pacote Release não foi alterado e nenhum emulador foi aberto. A tela Radar abriu, mostrou o escopo, timestamp de consulta da fonte e estado “nenhuma observação ADS-B com posição” às 17:35:14, horário local. Não foi observado crash. A resposta vazia é válida para aquele instante; não prova ausência de aeronaves nem falha/continuidade de cobertura.
+
+**Revalidação do botão Atualizar (04/11/2026):** aberta a tela Radar no mesmo aparelho e acionado o botão “Atualizar observações ADS-B” pela área identificada na hierarquia da interface. A tela permaneceu aberta; o horário da consulta passou de 17:41:43 para 17:42:08 e a API retornou novamente o estado vazio. A captura de logcat após a ação não mostrou exceção fatal nem ANR. Uma tentativa anterior havia terminado no launcher, mas o comportamento não foi reproduzido após reabrir o app e repetir a ação; a causa daquela transição não foi determinada. A consulta vazia não comprova ausência de aeronaves nem cobertura contínua.
+
+**CI:** GitHub Actions CI #54 concluiu com sucesso para o commit `e65bb63` (protótipo experimental do radar).
+
+## Roteiro manual — alertas após reinicialização (execução parcial no Android)
+
+**Objetivo:** verificar permissões e reagendamento pelo `BootReceiver` em um aparelho real. Este roteiro não substitui a informação operacional da companhia aérea nem confirma a operação do voo.
+
+**Comportamento atual a considerar:** o `FlightAlertWorker` só notifica quando o evento planejado está entre 15 e 30 minutos adiante. O trabalho periódico exige conexão de rede e tem intervalo mínimo configurado de 15 minutos; o WorkManager pode atrasar a execução e deixar a janela passar. A fonte SIROS contém planejamento, não confirmação operacional. Use apenas um registro real presente no aplicativo; se não houver voo real na janela de teste, registre “não foi possível testar” em vez de criar dados fictícios.
+
+1. Instale o APK Debug produzido pelo build validado e abra o aplicativo pelo menos uma vez.
+2. Quando solicitado, permita notificações. Confirme também nas configurações do Android que as notificações do SKY WATCH CG e o canal “Alertas de Voo” estão habilitados.
+3. Conecte o aparelho à internet e atualize a lista SIROS. Confira que existe um voo real no cache com evento programado entre 15 e 30 minutos adiante. Registre o identificador/data do registro SIROS e o horário programado local, sem afirmar que o voo está confirmado.
+4. Anote a hora local e UTC; reinicie o aparelho usando o menu normal de energia. Após desbloquear, mantenha a conexão de rede ativa.
+5. Aguarde o WorkManager executar. A periodicidade de 15 minutos é um intervalo mínimo aproximado, não um prazo exato. Verifique se a notificação aparece e se mostra chegada/partida e horário local compatíveis com o registro planejado.
+6. Observe se a mesma notificação reaparece ou é atualizada em execuções subsequentes. Registre repetições; após o primeiro envio registrado, o worker deve ignorar o mesmo evento.
+7. Repita, se possível, com aparelho offline durante parte do período e depois reconectado; anote horários e se o trabalho retomou. Não interprete a ausência de notificação como prova de cancelamento do voo.
+
+### Execução observada — 2026-11-04
+
+O telefone modelo 22101320G (Android 14/API 34) foi reiniciado manualmente depois da instalação e primeira abertura do APK Debug `com.skywatch.cg.debug`. O ADB voltou a conectar; `POST_NOTIFICATIONS` estava concedida, `RECEIVE_BOOT_COMPLETED` estava concedida e dois jobs do `SystemJobService` associados ao pacote foram encontrados no `dumpsys jobscheduler`.
+
+**Evidência direta do receiver:** sem enviar broadcast manual, o logcat após o boot registrou `BOOT_COMPLETED recebido - re-agendando workers periódicos` às 17:06:21, `sincronização periódica re-agendada` às 17:06:21.257 e `verificação de alertas re-agendada` às 17:06:21.258. Na conferência, o aparelho indicava `boot_count=69`, uptime de 864 s e fuso `America/Manaus` (UTC−4), compatíveis com o boot e os horários dos logs.
+
+**Limite restante:** o usuário informou que não havia voo SIROS real programado na janela de 15–30 minutos; assim, não foi possível verificar entrega nem deduplicação de notificação. Nenhum dado de voo foi inventado.
+
+| Verificação | Resultado |
+|---|---|
+| Telefone reiniciou e ADB reconectou | Sim; modelo 22101320G, Android 14 |
+| App Debug instalado antes do boot | Sim |
+| Permissão de notificações | Concedida |
+| Jobs WorkManager visíveis após o boot | 2 jobs associados ao pacote |
+| Log direto de execução do `BootReceiver` | Sim; logcat após boot natural às 17:06:21 |
+| Voo SIROS real na janela de alerta | Não havia |
+| Notificação real recebida | Não avaliada; sem voo elegível |
+
+Os detalhes disponíveis do reinício estão registrados na tabela acima. O voo SIROS elegível, o horário de notificação e a entrega/deduplicação não se aplicam a esta execução e só devem ser registrados em novo teste com voo real. Não publicar matrícula, posição ou status operacional sem fonte verificável.
+
+## Teste automatizado do BootReceiver — 2026-11-04
+
+Adicionado `BootReceiverTest`, que inicializa o WorkManager de teste, envia `ACTION_BOOT_COMPLETED` ao receiver e verifica que os trabalhos únicos `siros_periodic_sync` e `flight_alert_check` são enfileirados como `ENQUEUED`, com os respectivos workers.
+
+**Comando executado** (a partir de `android-app`):
+```powershell
+.\gradlew.bat :app:testDebugUnitTest --tests com.skywatch.cg.BootReceiverTest --console=plain
+```
+**Resultado focado:** `BUILD SUCCESSFUL`; 1 teste, 0 falhas, 0 erros e 0 ignorados.
+
+**Regressão completa:** `.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug --console=plain` concluiu com `BUILD SUCCESSFUL`; 57 testes contabilizados, 0 falhas, 0 erros e 1 ignorado por depender de CSV real. APK Debug atualizado. Não foi aberto emulador.
+
+O teste verifica a lógica do receiver com uma ação enviada pelo teste. Não comprova que o Android entregou `BOOT_COMPLETED` no reinício físico nem substitui o teste de notificação com voo SIROS real.
+
+## Detalhes de voo e prévia Debug 1.0.17 — 2026-11-04
+
+**Regressão reproduzível** (a partir de `android-app`):
+```powershell
+.\gradlew.bat :app:testDebugUnitTest :app:testReleaseUnitTest :app:assembleDebug :app:assembleRelease :app:lintVitalRelease :app:processReleaseManifest --console=plain
+```
+**Resultado:** `BUILD SUCCESSFUL` em 5 min 4 s. Os relatórios XML registram 68 testes em cada variante (Debug e Release), 0 falhas, 0 erros e 1 ignorado por depender de CSV real. `assembleDebug`, `assembleRelease`, `lintVitalRelease` e `processReleaseManifest` passaram. O teste ignorado é `SirosStreamParserRealFileTest`, que requer o CSV local real.
+
+**APK Debug:** `android-app\app\build\outputs\apk\debug\app-debug.apk`, 11.091.182 bytes, SHA-256 `369ED4F04295679273D3576D84696EE4E3276FF75BF3D6BC12DAD0743E93C649`. Assinatura verificada como Android Debug. No Poco 22101320G (Android 14/API 34), a instalação foi concluída; o pacote reportou `com.skywatch.cg.debug`, versão 1.0.17/código 17. O app abriu, um cartão abriu os detalhes e Voltar retornou à lista; a situação SIROS apareceu como cadastral e o logcat não registrou exceção fatal. Nenhum emulador foi aberto.
+
+Durante essa verificação, a tela de detalhes foi ajustada para identificar `sirosStatus` como situação cadastral e esclarecer que ela não confirma a operação do voo. O teste manual do fluxo foi repetido depois do ajuste.
+
+**Limite dos testes instrumentados:** `connectedDebugAndroidTest` não conseguiu instalar o APK instrumentado no aparelho devido a `INSTALL_FAILED_VERIFICATION_FAILURE`. A verificação de segurança do Android não foi desativada nem contornada. O APK Debug normal foi instalado com sucesso, mas isso não substitui os testes instrumentados.
+
+O workflow acionado por tags `v*` publica somente uma prévia Debug, não um APK assinado para distribuição estável/Play Store. Como o runner do CI pode usar uma chave Debug diferente em cada execução, instalar uma prévia atualizada talvez exija desinstalar a anterior, o que apaga os dados locais. O teste de entrega/deduplicação de alerta real continua pendente até haver voo SIROS elegível.
+
+**Publicação remota:** CI #56 passou para o commit `3858738`. O workflow "Build and Release Android APK" #13 para a tag `v1.0.17` concluiu com sucesso, incluindo a etapa `Upload APK to Release`. O APK está no [Release v1.0.17](https://github.com/mundoarkade1-arch/sky-watch-cg/releases/tag/v1.0.17) com o nome `SKY-WATCH-CG-v1.0.17-debug.apk`.
