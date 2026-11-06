@@ -47,6 +47,7 @@ import com.skywatch.cg.ui.viewmodel.FlightListViewModel
 import com.skywatch.cg.ui.viewmodel.FlightUiState
 import com.skywatch.cg.util.getDisplayLastUpdate
 import com.skywatch.cg.util.getAirportEventDateTime
+import com.skywatch.cg.util.getDisplayTime
 import com.skywatch.cg.util.ObservationWindow
 import com.skywatch.cg.util.ObservationWindowCalculator
 import com.skywatch.cg.util.campoGrandeZone

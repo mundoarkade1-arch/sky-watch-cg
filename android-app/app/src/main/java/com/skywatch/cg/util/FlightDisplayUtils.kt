@@ -56,7 +56,7 @@ internal fun Long.getDisplayLastUpdate(): String {
  */
 internal fun formatAirlineName(airline: String): String {
     return airline
-        .replace(Regex("\\s*\\(EX-\\s*VRG\\s*\\)"), "", ignoreCase = true)
+        .replace(Regex("\\s*\\(EX-\\s*VRG\\s*\\)", RegexOption.IGNORE_CASE), "")
         .replace("LINHAS AÉREAS", "", ignoreCase = true)
         .replace("LINHAS AEREAS", "", ignoreCase = true)
         .replace("BRASILEIRAS", "", ignoreCase = true)
