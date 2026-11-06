@@ -1,4 +1,10 @@
 # Changelog
+
+## 2026-11-06 — CI verde e diagnósticos reproduzíveis
+
+- Corrigidos o import de `getDisplayTime` e a construção de `Regex` que deixavam o GitHub Actions vermelho.
+- O Summary do CI passou a publicar totais JUnit: total, pulados e falhas.
+- CI #70 (`4ca880e`): 84 testes, 1 pulado, 0 falhas; APK debug e relatórios publicados.
 ## 2026-11-04 — Agenda cronológica e horário local
 - Unificadas chegadas e partidas numa lista cronológica, inicialmente em Todos, com filtros e contagem por tipo.
 - Cartões, detalhes e notificações usam o horário local do aeroporto do evento; para CGR, o cabeçalho identifica o horário local de Campo Grande.

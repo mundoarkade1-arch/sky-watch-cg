@@ -120,3 +120,24 @@ Daemon will be stopped at the end of the build
 ## Fase 5 - Radar ADS-B experimental (pendente)
 ## Fase 6 - Atualização e publicação (pendente)
 ## Fase 7 - Fechamento (pendente)
+
+## Registro final da correção do CI
+- Commit da correção do código: `bb473af`; CI #68 verde.
+- Commit do diagnóstico de totais: `182dfa8`; CI #69 vermelho por erro de heredoc no resumo.
+- Commit da correção final do diagnóstico: `4ca880e`; CI #70 verde (run `42136555472`, 6m22s).
+- Totais reais publicados no Summary do CI #70: 84 testes, 1 pulado, 0 falhas.
+- O APK debug foi gerado e o relatório JUnit foi publicado como artefato; nenhum Gradle foi executado localmente.
+- Pendente funcional: validação manual no aparelho e conclusão dos itens de alerta visual/sonoro, correspondência SIROS por callsign e rolagem automática descritos nos blocos 3–5.
+- Próximo passo exato: testar o APK `app-debug` no aparelho, verificando refresh em primeiro plano, failover ADS-B, alerta e AlarmManager.
+
+### Bloco 1 — três linhas solicitadas
+1. Fonte padrão atual: `https://api.adsb.lol/v2/point/-20.4686/-54.6724/50`, com reserva em `api.airplanes.live` e `opendata.adsb.fi`.
+2. O radar chama ao abrir e depois a cada 60 s enquanto o app está STARTED; há no máximo uma chamada por segundo por servidor.
+3. HTTP 429 entra em cooldown por fonte, respeitando `Retry-After` ou usando 60 s com backoff até 5 min; a rodada tenta a próxima fonte.
+
+### Bloco 5 — cinco linhas solicitadas
+1. Antes, o alerta periódico era checado pelo WorkManager ao abrir/reativar o app; por isso parecia disparar ao entrar e sair.
+2. Agora há um alarme individual por voo seguido, no horário programado menos os minutos escolhidos.
+3. O AlarmManager usa alarme exato quando permitido e `setAndAllowWhileIdle` como fallback.
+4. O receiver mostra a notificação e grava `alert_sent` para impedir duplicidade; o reagendamento no boot está registrado na implementação.
+5. O app verifica POST_NOTIFICATIONS, canal de alta importância e informa que alguns celulares exigem Bateria > Sem restrições; WorkManager periódico não é usado para isso.
