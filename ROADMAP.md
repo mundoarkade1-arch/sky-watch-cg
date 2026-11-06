@@ -1,5 +1,12 @@
 # Roadmap
 
+## Verificador de atualizações — 06/11/2026
+- [x] Tornar o repositório público para consulta anônima e segura da API de releases.
+- [x] Corrigir o texto do botão `Verificar atualização`.
+- [x] Tratar resposta HTTP 404 e manter fallback para abrir a página da release quando o APK não existir.
+- [x] Validar o checker, a suíte Debug e o build Debug.
+- [ ] Validar manualmente a instalação do APK Release em aparelho Android.
+
 ## Correcao de alertas em segundo plano - 06/11/2026
 - [x] Acionar o agendamento de alertas futuros na abertura, na sincronizacao SIROS e apos reinicializacao do dispositivo.
 - [x] Corrigir conversao de horarios SIROS UTC para o instante real do evento.

@@ -1,5 +1,18 @@
 # Plano de testes
 
+## 2026-11-06 - Verificador de atualizações
+
+Foi confirmado que o repositório privado retornava HTTP 404 para o app, que não possui token por segurança. Após autorização, o repositório foi tornado público; a API pública passou a retornar `v1.0.22` e o asset `app-release.apk`.
+
+Comandos executados:
+
+```powershell
+.\gradlew.bat :app:testDebugUnitTest --tests com.skywatch.cg.data.update.GitHubReleaseUpdateCheckerTest --console=plain --no-daemon
+.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug --console=plain --no-daemon
+```
+
+Resultados: teste específico aprovado; suíte Debug completa e `assembleDebug` concluídos com `BUILD SUCCESSFUL`. Um teste de CSV real foi ignorado por depender de arquivo externo.
+
 ## 2026-11-06 - Alertas em segundo plano
 
 Alteracoes verificadas: o agendamento agora e acionado na abertura, apos sincronizacao SIROS e apos `BOOT_COMPLETED`; o calculo do instante usa UTC; o receiver cria o canal antes de publicar a notificacao.

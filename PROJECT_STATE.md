@@ -1,5 +1,12 @@
 # Estado do projeto
 
+## Correção do verificador de atualizações (06/11/2026)
+- O repositório GitHub foi tornado público com autorização explícita para que o app consulte `releases/latest` sem token embutido.
+- O checker agora trata HTTP 404 com mensagem específica, mantém a comparação numérica de versões e o parser de asset `app-release.apk` coberto por testes.
+- Corrigido o texto da tela Sobre para `Verificar atualização`.
+- Removido um `!!` desnecessário na tela de detalhes; o campo opcional de aeronave agora usa smart cast seguro.
+- Validação local: teste específico do checker, suíte unitária Debug e `assembleDebug` passaram; o teste de CSV real permaneceu ignorado.
+
 ## Correcao de alertas em segundo plano (06/11/2026)
 - O agendamento de alertas SIROS passou a ser chamado na abertura do app, apos sincronizacao periodica e apos `BOOT_COMPLETED`; antes, o `FlightAlertScheduler` existia, mas nao era acionado pelo fluxo de producao.
 - Alarmes sao criados para movimentos planejados futuros no cache local, com janela de 48 horas e antecedencia padrao de 15 minutos. Se o app for aberto dentro dessa antecedencia, o alarme e programado para execucao imediata.

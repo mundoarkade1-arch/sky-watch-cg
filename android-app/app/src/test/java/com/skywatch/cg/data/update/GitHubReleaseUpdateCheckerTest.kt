@@ -51,6 +51,16 @@ class GitHubReleaseUpdateCheckerTest {
         assertTrue(checker(installedVersion = "1.0.9").check() is UpdateCheckResult.Failed)
     }
 
+    @Test
+    fun reportsRepositoryUnavailableWhenGitHubReturnsNotFound() = runTest {
+        server.enqueue(MockResponse().setResponseCode(404))
+
+        val result = checker(installedVersion = "1.0.9").check()
+
+        assertTrue(result is UpdateCheckResult.Failed)
+        assertTrue((result as UpdateCheckResult.Failed).message.contains("repositório"))
+    }
+
     private fun checker(installedVersion: String): GitHubReleaseUpdateChecker {
         val client = OkHttpClient.Builder()
             .connectTimeout(1, TimeUnit.SECONDS)

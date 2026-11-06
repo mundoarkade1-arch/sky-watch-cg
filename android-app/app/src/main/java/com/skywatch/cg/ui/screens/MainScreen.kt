@@ -732,7 +732,7 @@ fun AboutScreen(
                                 strokeWidth = 2.dp
                             )
                         } else {
-                            Text("Verificar atualizaÃ§Ã£o")
+                            Text("Verificar atualização")
                         }
                     }
                 }

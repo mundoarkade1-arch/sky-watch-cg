@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-06 - Verificador de atualizações
+- Tornado o repositório público, com autorização, para permitir consulta anônima das releases sem token no APK.
+- Corrigido o tratamento de erro do checker para HTTP 404 e mantido o fallback para a página da release.
+- Corrigido o texto do botão para `Verificar atualização`.
+- Removido uso desnecessário de `!!` na tela de detalhes do voo.
+- Validação local: checker, suíte unitária Debug e `assembleDebug` aprovados.
+
 ## 2026-11-06 - Alertas em segundo plano
 - Corrigido o fluxo que nao criava alarmes: voos planejados futuros em cache agora sao agendados ao abrir o app, apos sincronizacao SIROS e depois do boot.
 - Restaurados alarmes individuais apos `BOOT_COMPLETED`, com `goAsync()` para concluir a leitura do Room antes de encerrar o receiver.

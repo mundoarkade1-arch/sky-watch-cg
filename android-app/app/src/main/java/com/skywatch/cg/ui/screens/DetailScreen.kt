@@ -157,11 +157,11 @@ val localDateStr = eventDateTime
 
             // Info cards
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                if (!flight.equipment.isNullOrBlank()) {
+                flight.equipment?.takeIf { it.isNotBlank() }?.let { equipment ->
                     InfoRow(
                         icon = "✈",
                         label = "Aeronave",
-                        value = flight.equipment!!,
+                        value = equipment,
                         accentColor = accentColor
                     )
                 }

@@ -36,20 +36,25 @@ class GitHubReleaseUpdateChecker(
                 .build()
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
+                    val message = if (response.code == 404) {
+                        "O repositório de atualizações não está acessível. Verifique a publicação das releases."
+                    } else {
+                        "Não foi possível consultar as atualizações agora."
+                    }
                     return@withContext UpdateCheckResult.Failed(
-                        "Nao foi possivel consultar as atualizacoes agora."
+                        message
                     )
                 }
                 val body = response.body?.string()
                     ?: return@withContext UpdateCheckResult.Failed(
-                        "A resposta de atualizacao veio vazia."
+                        "A resposta de atualização veio vazia."
                     )
                 evaluateRelease(body)
             }
         } catch (_: IOException) {
-            UpdateCheckResult.Failed("Sem conexao para verificar atualizacoes.")
+            UpdateCheckResult.Failed("Sem conexão para verificar atualizações.")
         } catch (_: Exception) {
-            UpdateCheckResult.Failed("Nao foi possivel ler a atualizacao disponivel.")
+            UpdateCheckResult.Failed("Não foi possível ler a atualização disponível.")
         }
     }
 
@@ -57,7 +62,7 @@ class GitHubReleaseUpdateChecker(
         val tagName = extractJsonString(json, "tag_name")?.trim().orEmpty()
         val releaseVersion = tagName.removePrefix("v").removePrefix("V")
         val comparison = AppVersionComparator.compare(releaseVersion, installedVersion)
-            ?: return UpdateCheckResult.Failed("A versao publicada nao e valida.")
+            ?: return UpdateCheckResult.Failed("A versão publicada não é válida.")
         if (comparison <= 0) return UpdateCheckResult.UpToDate
 
         val assetsJson = json.substringAfter("\"assets\"", "")
