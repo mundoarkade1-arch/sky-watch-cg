@@ -6,7 +6,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.json.JSONObject
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
@@ -38,50 +37,59 @@ class GitHubReleaseUpdateChecker(
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
                     return@withContext UpdateCheckResult.Failed(
-                        "Não foi possível consultar as atualizações agora."
+                        "Nao foi possivel consultar as atualizacoes agora."
                     )
                 }
                 val body = response.body?.string()
                     ?: return@withContext UpdateCheckResult.Failed(
-                        "A resposta de atualização veio vazia."
+                        "A resposta de atualizacao veio vazia."
                     )
                 evaluateRelease(body)
             }
         } catch (_: IOException) {
-            UpdateCheckResult.Failed("Sem conexão para verificar atualizações.")
+            UpdateCheckResult.Failed("Sem conexao para verificar atualizacoes.")
         } catch (_: Exception) {
-            UpdateCheckResult.Failed("Não foi possível ler a atualização disponível.")
+            UpdateCheckResult.Failed("Nao foi possivel ler a atualizacao disponivel.")
         }
     }
 
     private fun evaluateRelease(json: String): UpdateCheckResult {
-        val root = JSONObject(json)
-        val tagName = root.optString("tag_name").trim()
+        val tagName = extractJsonString(json, "tag_name")?.trim().orEmpty()
         val releaseVersion = tagName.removePrefix("v").removePrefix("V")
         val comparison = AppVersionComparator.compare(releaseVersion, installedVersion)
-            ?: return UpdateCheckResult.Failed("A versão publicada não é válida.")
+            ?: return UpdateCheckResult.Failed("A versao publicada nao e valida.")
         if (comparison <= 0) return UpdateCheckResult.UpToDate
 
-        val assets = root.optJSONArray("assets")
-        var apkUrl: String? = null
-        if (assets != null) {
-            for (index in 0 until assets.length()) {
-                val asset = assets.optJSONObject(index) ?: continue
-                if (asset.optString("name") == RELEASE_APK_NAME) {
-                    apkUrl = asset.optString("browser_download_url").takeIf { it.isNotBlank() }
-                    break
-                }
-            }
-        }
+        val assetsJson = json.substringAfter("\"assets\"", "")
+        val apkUrl = Regex("\\{[^{}]*}", setOf(RegexOption.DOT_MATCHES_ALL))
+            .findAll(assetsJson)
+            .map { it.value }
+            .firstOrNull { extractJsonString(it, "name") == RELEASE_APK_NAME }
+            ?.let { extractJsonString(it, "browser_download_url") }
+
         return UpdateCheckResult.Available(
             GitHubRelease(
                 version = releaseVersion,
-                notes = root.optString("body").trim(),
-                releaseUrl = root.optString("html_url").trim(),
+                notes = extractJsonString(json, "body").orEmpty().trim(),
+                releaseUrl = extractJsonString(json, "html_url").orEmpty().trim(),
                 apkUrl = apkUrl
             )
         )
     }
+
+    private fun extractJsonString(json: String, key: String): String? {
+        val pattern = Regex(
+            "\"${Regex.escape(key)}\"\\s*:\\s*\"((?:\\\\.|[^\"\\\\])*)\""
+        )
+        return pattern.find(json)?.groupValues?.get(1)?.let(::unescapeJson)
+    }
+
+    private fun unescapeJson(value: String): String = value
+        .replace("\\\\", "\\")
+        .replace("\\\"", "\"")
+        .replace("\\n", "\n")
+        .replace("\\r", "\r")
+        .replace("\\t", "\t")
 
     companion object {
         const val OWNER = "mundoarkade1-arch"
