@@ -76,20 +76,7 @@ jobs:
             if [ "$test_found" -eq 0 ]; then echo "No failed test was identified in the reports."; fi
             echo
             echo "### Test totals"
-            python3 - <<'PY'
-            import glob
-            import xml.etree.ElementTree as ET
-
-            totals = {"tests": 0, "skipped": 0, "failures": 0, "errors": 0}
-            reports = glob.glob("android-app/app/build/test-results/testDebugUnitTest/*.xml")
-            for report in reports:
-                root = ET.parse(report).getroot()
-                for key in totals:
-                    totals[key] += int(root.attrib.get(key, "0"))
-            print(f"Total: {totals['tests']}")
-            print(f"Pulados: {totals['skipped']}")
-            print(f"Falhas: {totals['failures'] + totals['errors']}")
-            PY
+            python3 -c 'import glob, xml.etree.ElementTree as ET; t={k:0 for k in ("tests","skipped","failures","errors")}; [t.__setitem__(k,t[k]+int(r.attrib.get(k,"0"))) for f in glob.glob("android-app/app/build/test-results/testDebugUnitTest/*.xml") for r in [ET.parse(f).getroot()] for k in t]; print("Total: %d" % t["tests"]); print("Pulados: %d" % t["skipped"]); print("Falhas: %d" % (t["failures"]+t["errors"]))'
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Check Build and Test Results
