@@ -1,5 +1,6 @@
 package com.skywatch.cg.ui.screens
 
+import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -36,6 +37,9 @@ import com.skywatch.cg.R
 import com.skywatch.cg.data.db.SyncMetadata
 import com.skywatch.cg.data.siros.NormalizedFlight
 import com.skywatch.cg.data.prefs.AppPreferences
+import com.skywatch.cg.data.update.GitHubRelease
+import com.skywatch.cg.data.update.GitHubReleaseUpdateChecker
+import com.skywatch.cg.data.update.UpdateCheckResult
 import com.skywatch.cg.notification.NotificationHelper
 import com.skywatch.cg.data.siros.OperationType
 import com.skywatch.cg.ui.viewmodel.RadarViewModel
@@ -55,6 +59,7 @@ import com.skywatch.cg.util.formatAirlineName
 import com.skywatch.cg.util.formatTimeUntil
 import com.skywatch.cg.util.nextMovements
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -65,6 +70,26 @@ import java.util.Locale
 fun MainScreen(viewModel: FlightListViewModel, radarViewModel: RadarViewModel) {
     val navController = rememberNavController()
     val radarState by radarViewModel.uiState.collectAsState()
+    val context = LocalContext.current
+    val updateChecker = remember { GitHubReleaseUpdateChecker() }
+    val updateScope = rememberCoroutineScope()
+    var updateResult by remember { mutableStateOf<UpdateCheckResult?>(null) }
+    var isCheckingUpdate by remember { mutableStateOf(false) }
+    var manualUpdateCheck by remember { mutableStateOf(false) }
+
+    fun checkForUpdate(manual: Boolean) {
+        if (isCheckingUpdate) return
+        manualUpdateCheck = manual
+        isCheckingUpdate = true
+        updateScope.launch {
+            updateResult = updateChecker.check()
+            isCheckingUpdate = false
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        checkForUpdate(manual = false)
+    }
     
     Box(modifier = Modifier.fillMaxSize()) {
     NavHost(navController, startDestination = "voos") {
@@ -77,7 +102,9 @@ fun MainScreen(viewModel: FlightListViewModel, radarViewModel: RadarViewModel) {
         composable("sobre") {
             AboutScreen(
                 navController = navController,
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onCheckForUpdate = { checkForUpdate(manual = true) },
+                isCheckingUpdate = isCheckingUpdate
             )
         }
         composable(
@@ -144,6 +171,72 @@ fun MainScreen(viewModel: FlightListViewModel, radarViewModel: RadarViewModel) {
             )
         }
     }
+    val currentUpdateResult = updateResult
+    if (currentUpdateResult is UpdateCheckResult.Available ||
+        (manualUpdateCheck && currentUpdateResult != null)
+    ) {
+        UpdateResultDialog(
+            result = currentUpdateResult,
+            onDismiss = {
+                updateResult = null
+                manualUpdateCheck = false
+            },
+            onOpenRelease = { release ->
+                val url = release.apkUrl ?: release.releaseUrl
+                context.startActivity(
+                    Intent.createChooser(
+                        Intent(Intent.ACTION_VIEW, Uri.parse(url)),
+                        "Baixar atualização"
+                    )
+                )
+                updateResult = null
+                manualUpdateCheck = false
+            }
+        )
+    }
+    }
+}
+
+@Composable
+private fun UpdateResultDialog(
+    result: UpdateCheckResult,
+    onDismiss: () -> Unit,
+    onOpenRelease: (GitHubRelease) -> Unit
+) {
+    when (result) {
+        UpdateCheckResult.UpToDate -> AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text("Atualização") },
+            text = { Text("Você já está na versão mais recente.") },
+            confirmButton = { TextButton(onClick = onDismiss) { Text("OK") } }
+        )
+        is UpdateCheckResult.Failed -> AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text("Atualização indisponível") },
+            text = { Text(result.message) },
+            confirmButton = { TextButton(onClick = onDismiss) { Text("OK") } }
+        )
+        is UpdateCheckResult.Available -> AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text("Nova versão disponível") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text("Versão ${result.release.version}")
+                    if (result.release.notes.isNotBlank()) {
+                        Text(result.release.notes)
+                    }
+                    Text("O navegador será aberto para baixar a atualização.")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { onOpenRelease(result.release) }) {
+                    Text("Atualizar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = onDismiss) { Text("Depois") }
+            }
+        )
     }
 }
 
@@ -526,7 +619,9 @@ fun ErrorState(message: String, onRetry: () -> Unit) {
 @Composable
 fun AboutScreen(
     navController: androidx.navigation.NavController,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onCheckForUpdate: () -> Unit,
+    isCheckingUpdate: Boolean
 ) {
     val context = LocalContext.current
     val preferences = remember { AppPreferences.getInstance(context) }
@@ -627,6 +722,19 @@ fun AboutScreen(
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    Button(
+                        onClick = onCheckForUpdate,
+                        enabled = !isCheckingUpdate
+                    ) {
+                        if (isCheckingUpdate) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Text("Verificar atualizaÃ§Ã£o")
+                        }
+                    }
                 }
             }
         }

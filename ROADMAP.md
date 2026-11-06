@@ -1,5 +1,12 @@
 # Roadmap
 
+## Release e atualizacao - implementacao inicial (06/11/2026)
+- [x] Configurar assinatura Release sem expor secrets e com fallback local.
+- [x] Publicar `app-release.apk` automaticamente a partir da `main` usando GitHub Actions.
+- [x] Consultar a release publica mais recente ao abrir o app e pela tela Sobre.
+- [x] Comparar `tag_name` numericamente e abrir o download quando houver nova versao.
+- [ ] Validar manualmente a instalacao do APK assinado em um aparelho Android.
+
 ## Status atual — 2026-11-04
 - A agenda foi unificada por horário local de CGR, com filtros Todos/Pousos/Decolagens e recomendação da faixa contínua de 3 horas com mais pousos e decolagens programados. A recomendação permanece baseada em todos os movimentos mesmo com um filtro selecionado; teste completo local: 75 por variante, sem falhas, 1 ignorado, builds Debug/Release e lint aprovados. APK Debug `1.0.18` aberto no telefone Android 14, sem emulador.
 - CI #58 e Release #14 passaram para o commit `951ce68`; a prévia Debug `v1.0.18` e o APK foram publicados no [GitHub Releases](https://github.com/mundoarkade1-arch/sky-watch-cg/releases/tag/v1.0.18).

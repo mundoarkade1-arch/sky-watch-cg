@@ -1,5 +1,12 @@
 # Estado do projeto
 
+## Release assinada e atualizacao do app (06/11/2026)
+- O modulo `:app` continua em Kotlin + Jetpack Compose, com `applicationId` `com.skywatch.cg`.
+- `build.gradle.kts` le assinatura Release de `KEYSTORE_PATH`, `KEYSTORE_PASSWORD`, `KEY_ALIAS` e `KEY_PASSWORD`; sem essas variaveis o build local permanece configuravel e nao exige segredo.
+- `VERSION_CODE` e `VERSION_NAME` podem vir do ambiente e mantem fallback para `gradle.properties`.
+- `.github/workflows/release.yml` publica o APK assinado como `app-release.apk` a partir da `main` ou por disparo manual. O numero e monotonicamente ajustado quando `github.run_number` colide com tags antigas.
+- `GitHubReleaseUpdateChecker` consulta a API publica de releases, compara versoes numericamente e a tela Sobre oferece verificacao manual. O botao Atualizar abre o asset no navegador; instalacao e autorizacao do Android continuam sob controle do usuario.
+
 ## Alterações da rodada wip-fase3 (05/11/2026)
 - O radar padrão usa adsb.lol, airplanes.live e adsb.fi em failover; HTTP 429 recebe cooldown e a UI não fixa erro vermelho.
 - O ciclo de atualização de voos é vinculado a `Lifecycle.State.STARTED`; a sincronização SIROS continua separada.

@@ -1,5 +1,13 @@
 # Plano de testes
 
+## Release assinada e atualizacao (06/11/2026)
+
+Implementacao registrada sem executar Gradle localmente. O CI deve validar `assembleRelease` com os secrets ja configurados no repositorio. A API de releases e publica; nao ha token embutido no APK.
+
+Testes unitarios adicionados em `GitHubReleaseUpdateCheckerTest` cobrem release mais nova com asset estavel, versao ja atualizada e resposta HTTP malsucedida. `AppVersionComparatorTest` cobre comparacao numerica como `1.0.10 > 1.0.9`.
+
+Pendente de validacao manual: baixar `app-release.apk` pelo dialogo, confirmar a tela de instalacao do Android e verificar a permissao do navegador para instalar aplicativos desconhecidos, se solicitada.
+
 ## Agenda local e recomendação de observação — 2026-11-04
 
 A tela inicial combina pousos e decolagens em ordem cronológica e apresenta o horário local de Campo Grande. Os filtros Todos/Pousos/Decolagens alteram a lista, não a base da recomendação: a faixa de 3 horas sempre considera os dois tipos de movimento. A lista representa voos de passageiros ativos encontrados no SIROS para CGR, não todos os movimentos reais; a faixa é calculada a partir do planejamento e não garante operação.

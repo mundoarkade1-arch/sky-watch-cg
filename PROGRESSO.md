@@ -1,3 +1,10 @@
+## Rodada de release assinada e atualizacao (06/11/2026)
+- Analise concluida: modulo `:app`, Kotlin + Jetpack Compose, `applicationId` `com.skywatch.cg`, tela Sobre em `MainScreen.kt`, repositorio publico `mundoarkade1-arch/sky-watch-cg`.
+- Implementado Gradle com assinatura Release opcional por ambiente, versao por ambiente com fallback, workflow `release.yml`, consulta publica de releases e dialogo de atualizacao.
+- Escolha de instalacao: o botao abre o asset no navegador; nao foi adicionado token, FileProvider ou permissao de instalacao automatica.
+- O workflow evita colisao com as tags `v1.0.1` a `v1.0.19` existentes usando o proximo numero livre quando o `github.run_number` da nova definicao ainda e menor.
+- Proximo passo exato: publicar a alteracao na `main`, aguardar o CI e conferir a primeira release assinada no GitHub Actions.
+
 ## Falha na Fase 3 - Bloqueio do Gradle/Kapt
 - Último trecho do log:
 ```

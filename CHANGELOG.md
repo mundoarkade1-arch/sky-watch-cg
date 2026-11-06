@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-06 - Release assinada e verificacao de atualizacao
+
+- Configurado o build Release com assinatura opcional por variaveis de ambiente e versao por `VERSION_CODE`/`VERSION_NAME`.
+- Adicionado `.github/workflows/release.yml`, que publica `app-release.apk` em releases da `main` usando os secrets existentes e o `GITHUB_TOKEN` automatico.
+- O app consulta a release publica mais recente ao abrir e tambem pela tela Sobre; a comparacao de versao e numerica.
+- O botao Atualizar abre o download do APK no navegador, sem embutir token e sem pedir `REQUEST_INSTALL_PACKAGES`.
+- O workflow antigo de previa Debug ficou manual para nao disputar as mesmas tags com o release assinado.
+
 ## 2026-11-06 — CI verde e diagnósticos reproduzíveis
 
 - Corrigidos o import de `getDisplayTime` e a construção de `Regex` que deixavam o GitHub Actions vermelho.

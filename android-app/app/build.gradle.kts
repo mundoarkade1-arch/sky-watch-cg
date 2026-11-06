@@ -8,12 +8,32 @@ android {
     namespace = "com.skywatch.cg"
     compileSdk = 34
 
+    val configuredVersionCode = providers.environmentVariable("VERSION_CODE")
+        .orNull?.toIntOrNull()
+        ?: providers.gradleProperty("android.versionCode").orNull?.toIntOrNull()
+        ?: 1
+    val configuredVersionName = providers.environmentVariable("VERSION_NAME")
+        .orNull
+        ?.takeIf { it.isNotBlank() }
+        ?: providers.gradleProperty("android.versionName").orNull
+        ?: "1.0.0"
+    val keyStorePath = providers.environmentVariable("KEYSTORE_PATH").orNull
+    val keyStorePassword = providers.environmentVariable("KEYSTORE_PASSWORD").orNull
+    val keyAlias = providers.environmentVariable("KEY_ALIAS").orNull
+    val keyPassword = providers.environmentVariable("KEY_PASSWORD").orNull
+    val releaseSigningConfigured = listOf(
+        keyStorePath,
+        keyStorePassword,
+        keyAlias,
+        keyPassword
+    ).all { !it.isNullOrBlank() }
+
     defaultConfig {
         applicationId = "com.skywatch.cg"
         minSdk = 24
         targetSdk = 34
-        versionCode = providers.gradleProperty("android.versionCode").get().toInt()
-        versionName = providers.gradleProperty("android.versionName").get()
+        versionCode = configuredVersionCode
+        versionName = configuredVersionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
@@ -25,6 +45,14 @@ android {
         }
         release {
             isMinifyEnabled = false
+            if (releaseSigningConfigured) {
+                signingConfig = signingConfigs.create("release") {
+                    storeFile = file(keyStorePath!!)
+                    this.storePassword = keyStorePassword
+                    this.keyAlias = keyAlias
+                    this.keyPassword = keyPassword
+                }
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
