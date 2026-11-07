@@ -20,7 +20,8 @@ import com.skywatch.cg.util.getDisplayTime
  */
 object NotificationHelper {
 
-    const val CHANNEL_ID = "flight_alerts"
+    const val CHANNEL_ID = "flight_alerts_sound"
+    const val CHANNEL_ID_SILENT = "flight_alerts_silent"
     const val CHANNEL_NAME = "Alertas de Voo"
     const val NOTIFICATION_ID_BASE = 1000
 
@@ -40,8 +41,31 @@ object NotificationHelper {
             }
             val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             manager.createNotificationChannel(channel)
+            manager.createNotificationChannel(
+                NotificationChannel(
+                    CHANNEL_ID_SILENT,
+                    "$CHANNEL_NAME — silenciosos",
+                    NotificationManager.IMPORTANCE_HIGH
+                ).apply {
+                    description = "Alertas sem som ou vibração"
+                    enableVibration(false)
+                    setSound(null, null)
+                    enableLights(false)
+                }
+            )
         }
     }
+
+    internal fun channelIdFor(soundVibration: Boolean): String =
+        if (soundVibration) CHANNEL_ID else CHANNEL_ID_SILENT
+
+    fun notificationSettingsIntent(context: Context): Intent =
+        Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+            putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, context.packageName)
+        }
+
+    internal fun testNotificationMessage(displayed: Boolean): String =
+        if (displayed) "Notificação enviada." else "Permita notificações do app para receber alertas."
 
     /**
      * Verifica se a permissão de notificação foi concedida (Android 13+).
@@ -98,7 +122,10 @@ object NotificationHelper {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+        val notification = NotificationCompat.Builder(
+            context,
+            channelIdFor(AppPreferences.getInstance(context).soundVibration)
+        )
             .setSmallIcon(R.drawable.ic_notification_flight)
             .setContentTitle(title)
             .setContentText("$location\n$timeText")
@@ -137,7 +164,10 @@ object NotificationHelper {
             contentIntent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+        val notification = NotificationCompat.Builder(
+            context,
+            channelIdFor(AppPreferences.getInstance(context).soundVibration)
+        )
             .setSmallIcon(R.drawable.ic_notification_flight)
             .setContentTitle(title)
             .setContentText(text)

@@ -711,14 +711,17 @@ fun AboutScreen(
                             context, "Teste de notificação",
                             "Notificação de teste do SKY WATCH CG", 0x534B59
                         )
-                        notificationFeedback = if (displayed) {
-                            "Notificação enviada."
-                        } else {
-                            "Permita notificações do app para receber alertas."
-                        }
+                        notificationFeedback = NotificationHelper.testNotificationMessage(displayed)
                     }) { Text("Testar notificação") }
                     notificationFeedback?.let {
                         Text(it, style = MaterialTheme.typography.bodySmall)
+                    }
+                    if (!NotificationHelper.hasNotificationPermission(context)) {
+                        OutlinedButton(onClick = {
+                            context.startActivity(NotificationHelper.notificationSettingsIntent(context))
+                        }) {
+                            Text("Abrir configurações de notificações")
+                        }
                     }
                     Text(
                         "Em alguns celulares (ex.: Xiaomi), libere o app em Bateria > Sem restrições.",

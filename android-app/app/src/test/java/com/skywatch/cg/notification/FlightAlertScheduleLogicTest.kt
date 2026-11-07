@@ -22,6 +22,16 @@ class FlightAlertScheduleLogicTest {
         )
     }
 
+    @Test fun soundPreferenceSelectsSeparateNotificationChannels() {
+        assertEquals(NotificationHelper.CHANNEL_ID, NotificationHelper.channelIdFor(true))
+        assertEquals(NotificationHelper.CHANNEL_ID_SILENT, NotificationHelper.channelIdFor(false))
+    }
+
+    @Test fun notificationTestExplainsWhenPermissionIsMissing() {
+        assertEquals("Permita notificações do app para receber alertas.", NotificationHelper.testNotificationMessage(false))
+        assertEquals("Notificação enviada.", NotificationHelper.testNotificationMessage(true))
+    }
+
     @Test fun exactAlarmPolicyUsesExactBeforeAndroid12OrWhenAllowed() {
         assertEquals(true, FlightAlertScheduler.shouldUseExactAlarm(30, false))
         assertEquals(true, FlightAlertScheduler.shouldUseExactAlarm(31, true))
