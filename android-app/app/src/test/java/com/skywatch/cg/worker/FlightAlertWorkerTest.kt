@@ -77,6 +77,12 @@ class FlightAlertWorkerTest {
     }
 
     @Test
+    fun disabledAlertsAreNotProcessedByLegacyWorker() {
+        assertFalse(FlightAlertWorker.shouldProcessAlerts(false))
+        assertTrue(FlightAlertWorker.shouldProcessAlerts(true))
+    }
+
+    @Test
     fun eventDateUsesArrivalDateForArrivalsAndFlightDateForDepartures() {
         val flightDate = LocalDate.of(2024, 10, 15)
         val arrivalDate = flightDate.plusDays(1)

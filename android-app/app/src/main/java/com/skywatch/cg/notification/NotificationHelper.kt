@@ -10,6 +10,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.skywatch.cg.MainActivity
 import com.skywatch.cg.R
+import com.skywatch.cg.data.prefs.AppPreferences
 import com.skywatch.cg.data.siros.NormalizedFlight
 import com.skywatch.cg.util.getDisplayDate
 import com.skywatch.cg.util.getDisplayTime
@@ -76,7 +77,8 @@ object NotificationHelper {
         flight: NormalizedFlight,
         minutesUntilEvent: Int,
         isArrival: Boolean
-    ) {
+    ): Boolean {
+        if (!hasNotificationPermission(context)) return false
         val eventType = if (isArrival) "Pouso" else "Decolagem"
         val title = "${flight.airline} ${flight.flightNumber} · $eventType programado em CGR em $minutesUntilEvent min"
         val location = if (isArrival) {
@@ -104,6 +106,7 @@ object NotificationHelper {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setContentIntent(pendingIntent)
+            .setSilent(!AppPreferences.getInstance(context).soundVibration)
             .setAutoCancel(true)
             .build()
 
@@ -111,6 +114,7 @@ object NotificationHelper {
         val notificationId = flight.flightId.hashCode()
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(notificationId, notification)
+        return true
     }
 
     /**
@@ -141,6 +145,7 @@ object NotificationHelper {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setContentIntent(pendingIntent)
+            .setSilent(!AppPreferences.getInstance(context).soundVibration)
             .setAutoCancel(true)
             .build()
         (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)

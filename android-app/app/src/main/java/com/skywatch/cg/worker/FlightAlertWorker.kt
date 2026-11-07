@@ -6,6 +6,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.skywatch.cg.data.db.AppDatabase
 import com.skywatch.cg.data.db.AlertSent
+import com.skywatch.cg.data.prefs.AppPreferences
 import com.skywatch.cg.data.siros.NormalizedFlight
 import com.skywatch.cg.data.siros.OperationType
 import com.skywatch.cg.notification.NotificationHelper
@@ -33,6 +34,9 @@ class FlightAlertWorker(
 
         try {
             val database = AppDatabase.getDatabase(applicationContext)
+            if (!shouldProcessAlerts(AppPreferences.getInstance(applicationContext).alertsEnabled)) {
+                return@withContext Result.success()
+            }
             val now = LocalDateTime.now(campoGrandeZone)
             val today = now.toLocalDate()
             database.alertSentDao().deleteOldAlerts(
@@ -69,23 +73,25 @@ class FlightAlertWorker(
                     )
                     if (database.alertSentDao().isAlertSent(alertId)) continue
 
-                    NotificationHelper.showFlightAlert(
+                    val displayed = NotificationHelper.showFlightAlert(
                         applicationContext,
                         flight,
                         minutesUntil.toInt(),
                         isArrival
                     )
-                    database.alertSentDao().insertIfAbsent(
-                        AlertSent(
-                            id = alertId,
-                            flightId = flight.flightId,
-                            operationType = flight.operationType.name,
-                            eventDate = eventLocalDateTime.toLocalDate().toString(),
-                            minutesBefore = minutesUntil,
-                            sentAt = Instant.now().toEpochMilli()
+                    if (displayed) {
+                        database.alertSentDao().insertIfAbsent(
+                            AlertSent(
+                                id = alertId,
+                                flightId = flight.flightId,
+                                operationType = flight.operationType.name,
+                                eventDate = eventLocalDateTime.toLocalDate().toString(),
+                                minutesBefore = minutesUntil,
+                                sentAt = Instant.now().toEpochMilli()
+                            )
                         )
-                    )
-                    alertsSent++
+                        alertsSent++
+                    }
                     Log.d("FlightAlertWorker", "Alerta enviado: ${flight.airline} ${flight.flightNumber} em ${minutesUntil} min (${if (isArrival) "chegada" else "partida"})")
                 }
             }
@@ -105,6 +111,8 @@ class FlightAlertWorker(
 
         internal fun isWithinAlertWindow(minutesUntil: Long): Boolean =
             minutesUntil in EARLIEST_ALERT_MINUTES..LATEST_ALERT_MINUTES
+
+        internal fun shouldProcessAlerts(alertsEnabled: Boolean): Boolean = alertsEnabled
 
         internal fun eventUtcDate(
             flightDate: LocalDate,
