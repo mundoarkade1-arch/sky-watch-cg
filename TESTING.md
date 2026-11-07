@@ -1,5 +1,21 @@
 # Plano de testes
 
+## Seção 7 — radar, etapa 1: lógica (2026-11-07)
+
+| Item | Situação | Commit | Teste por item |
+|---|---|---|---|
+| Elevação e cabeceiras de SBCG | Feito | `f7087b7`, `f1946f9` | `sbcgUsesPublishedElevationAndRunwayHeadings` em [RadarAirportConfigTest.kt](android-app/app/src/test/java/com/skywatch/cg/data/radar/RadarAirportConfigTest.kt) |
+| Histórico curto por hex e tendência de distância/altitude | Feito | `f7087b7`, `bdd4028` | `historyIsShortAndKeyedByHex`, `missingRatesUseAltitudeSamplesToDeriveDescent` em [RadarTrajectoryRulesTest.kt](android-app/app/src/test/java/com/skywatch/cg/data/radar/RadarTrajectoryRulesTest.kt) |
+| `baro_rate`/`geom_rate` somente quando presentes | Feito | `f7087b7`, `bdd4028` | `missingBarometricRateUsesGeometricRateWhenPresent`, `missingRatesUseAltitudeSamplesToDeriveDescent` |
+| Regras de pouso/decolagem em AGL | Feito | `f7087b7`, `bdd4028` | `typicalLandingUsesAltitudeAboveAirport`, `typicalTakeoffUsesAltitudeAboveAirport` |
+| Ignorar sobrevoo, solo, dado velho e posição inválida | Feito | `f7087b7`, `f1946f9` | `highOverflightIsIgnoredUsingAgl`, `stationaryAircraftIsIgnored`, `stalePositionIsIgnored`, `invalidPositionIsIgnored` |
+| Helicóptero | Feito — decisão conservadora | `f7087b7`, `bdd4028` | `helicopterIsIgnoredConservativelyWhenCategoryIsA7`; categoria `A7` é ignorada, categoria ausente não é inventada |
+| Deduplicação por hex/tipo com cooldown | Feito | existente, revisado na etapa | `deduplicatesByAircraftAndTypeForTwentyMinutes` em [RadarAlertRulesTest.kt](android-app/app/src/test/java/com/skywatch/cg/data/radar/RadarAlertRulesTest.kt) |
+
+Fonte aeronáutica: [AISWEB/DECEA — SBCG AD 2](https://aisweb.decea.mil.br/eaip/A%2020-2026_2026_10_29/eAIP/AD%202%20SBCG-pt-BR.html), que publica 559 m/1834 ft e as cabeceiras 06/24 com rumos verdadeiros 042,26°/222,26°. A categoria `A7` como rotorcraft foi conferida na [referência do ADS-B emitter category](https://mode-s.org/1090mhz/content/ads-b/2-identification.html).
+
+Suíte completa: `testDebugUnitTest assembleDebug` — `BUILD SUCCESSFUL`; 123 testes, 0 falhas, 0 erros e 1 ignorado. `assembleDebug` passou; nenhuma alteração de UI foi feita.
+
 ## Seção 5 — exibição e fusos (2026-11-07)
 
 | Item | Situação | Commit | Teste por item |

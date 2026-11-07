@@ -1,5 +1,13 @@
 # Estado do projeto
 
+## Seção 7 — radar, etapa 1: lógica (07/11/2026)
+- Constantes documentadas de SBCG: elevação 1.834 ft/559 m e cabeceiras 06/24 nos rumos verdadeiros 042,26°/222,26°, conforme AISWEB/DECEA.
+- Histórico curto por hex deriva tendência de distância e altitude; taxa explícita usa `baro_rate`, depois `geom_rate`, e somente na ausência de ambos usa amostras.
+- Regras usam altitude AGL, ignoram sobrevoo alto, aeronave parada, posição inválida e posição velha.
+- Categoria ADS-B `A7` é tratada conservadoramente como helicóptero e não gera alerta; categoria ausente não é inferida.
+- Etapa restrita a `data/radar`; nenhuma UI foi alterada.
+- Suíte completa: 123 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+
 ## Seção 5 — exibição e fusos concluída (07/11/2026)
 - Formatação de aeroportos e companhias foi normalizada com testes para Dallas/Fort Worth, Rio de Janeiro e casos desconhecidos.
 - `nextMovements` tem testes explícitos para voo de hoje já passado, data anterior e dia futuro; a `DetailScreen` usa rolagem vertical e nomes formatados.

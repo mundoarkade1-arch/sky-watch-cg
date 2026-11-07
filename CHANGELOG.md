@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-07 - Seção 7, etapa 1: lógica do radar
+- Adicionadas constantes oficiais de SBCG: elevação, cabeceiras 06/24 e rumos verdadeiros.
+- Implementado histórico curto por hex com tendência de distância/altitude.
+- Regras de alerta agora usam AGL e filtram sobrevoo alto, solo, dados velhos e posições inválidas.
+- Taxas verticais usam `baro_rate`, `geom_rate` ou derivação pelas amostras; helicópteros `A7` são ignorados conservadoramente.
+- Nenhuma alteração de UI nesta etapa.
+- Validação local: 123 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+
 ## 2026-11-07 - Seção 6: parser SIROS
 - Unificado o parser em `SirosStreamParser`; `SirosCsvParser` e seus testes foram removidos.
 - Cabeçalho SIROS ausente agora gera erro claro de formato alterado.

@@ -1,5 +1,14 @@
 # Roadmap
 
+## Revisão completa — seção 7, etapa 1 em progresso (07/11/2026)
+- [x] Registrar elevação e cabeceiras oficiais de SBCG como constantes documentadas.
+- [x] Adicionar histórico curto por hex e tendências de distância/altitude.
+- [x] Aplicar taxas `baro_rate`/`geom_rate` apenas quando presentes e usar AGL nas regras.
+- [x] Cobrir pouso, decolagem, sobrevoo, solo, dado velho, posição inválida, ausência de taxa e helicóptero.
+- [x] Revisar cooldown do deduplicador com teste de hex/tipo.
+- [ ] Integrar a lógica à UI; fora do escopo desta etapa.
+- [x] Suíte completa: 123 testes, 0 falhas, 0 erros, 1 ignorado; `assembleDebug` aprovado.
+
 ## Revisão completa — seção 6 em progresso (07/11/2026)
 - [x] Unificar produção e testes em `SirosStreamParser` e remover `SirosCsvParser`.
 - [x] Cobrir cabeçalhos, erro de formato, BOM UTF-8, ISO-8859-1, campos vazios, delimitador `;`, aspas escapadas e callback de erro.
