@@ -1,0 +1,15 @@
+{
+  "tag_name": "v1.0.24",
+  "name": "v1.0.24",
+  "body": "## What's Changed\n* Revisão completa: sync, flightId, alertas, radar e atualização",
+  "html_url": "https://github.com/mundoarkade1-arch/sky-watch-cg/releases/tag/v1.0.24",
+  "assets": [
+    {
+      "name": "app-release.apk",
+      "browser_download_url": "https://github.com/mundoarkade1-arch/sky-watch-cg/releases/download/v1.0.24/app-release.apk",
+      "content_type": "application/vnd.android.package-archive",
+      "size": 7784778,
+      "digest": "sha256:2753817813f3a5c0f8cabab52aa899b2821819b9e4c6bd56ec5a0fe89550f3a1"
+    }
+  ]
+}
