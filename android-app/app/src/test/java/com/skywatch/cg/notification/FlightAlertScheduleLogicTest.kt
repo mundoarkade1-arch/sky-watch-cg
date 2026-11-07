@@ -8,6 +8,11 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 class FlightAlertScheduleLogicTest {
+    @Test fun doesNotScheduleWhenAlertsAreDisabled() {
+        assertEquals(false, FlightAlertScheduler.shouldScheduleAlerts(false))
+        assertEquals(true, FlightAlertScheduler.shouldScheduleAlerts(true))
+    }
+
     @Test fun exactAlarmPolicyUsesExactBeforeAndroid12OrWhenAllowed() {
         assertEquals(true, FlightAlertScheduler.shouldUseExactAlarm(30, false))
         assertEquals(true, FlightAlertScheduler.shouldUseExactAlarm(31, true))

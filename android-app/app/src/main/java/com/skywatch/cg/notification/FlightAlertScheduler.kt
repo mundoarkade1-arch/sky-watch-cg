@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import com.skywatch.cg.data.db.FollowedFlight
+import com.skywatch.cg.data.prefs.AppPreferences
 import com.skywatch.cg.data.siros.NormalizedFlight
 import com.skywatch.cg.data.siros.OperationType
 import com.skywatch.cg.util.getDisplayDateTime
@@ -30,6 +31,8 @@ object FlightAlertScheduleLogic {
 object FlightAlertScheduler {
     const val DEFAULT_MINUTES_BEFORE = 15
     private const val SCHEDULE_HORIZON_MILLIS = 48 * 60 * 60 * 1_000L
+
+    internal fun shouldScheduleAlerts(alertsEnabled: Boolean): Boolean = alertsEnabled
 
     fun schedule(
         context: Context,
@@ -92,6 +95,7 @@ object FlightAlertScheduler {
         flights: Iterable<NormalizedFlight>,
         nowMillis: Long = System.currentTimeMillis()
     ): Int {
+        if (!shouldScheduleAlerts(AppPreferences.getInstance(context).alertsEnabled)) return 0
         var scheduled = 0
         flights.forEach { flight ->
             val eventAt = eventAtMillis(flight)
