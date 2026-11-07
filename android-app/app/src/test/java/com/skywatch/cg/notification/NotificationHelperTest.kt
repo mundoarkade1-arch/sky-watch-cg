@@ -1,6 +1,8 @@
 package com.skywatch.cg.notification
 
 import android.app.NotificationManager
+import android.Manifest
+import com.skywatch.cg.MainActivity
 import android.provider.Settings
 import androidx.test.core.app.ApplicationProvider
 import org.junit.Assert.assertEquals
@@ -36,5 +38,22 @@ class NotificationHelperTest {
 
         assertEquals(Settings.ACTION_APP_NOTIFICATION_SETTINGS, intent.action)
         assertEquals(context.packageName, intent.getStringExtra(Settings.EXTRA_APP_PACKAGE))
+    }
+
+    @Test
+    fun showTextAlertNotificationContentIntentOpensMainActivity() {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        shadowOf(context.applicationContext as android.app.Application)
+            .grantPermissions(Manifest.permission.POST_NOTIFICATIONS)
+        NotificationHelper.createNotificationChannel(context)
+
+        assertTrue(NotificationHelper.showTextAlert(context, "Teste", "Mensagem", 77))
+
+        val notification = shadowOf(context.getSystemService(NotificationManager::class.java))
+            .getNotification(77)
+        assertEquals(
+            MainActivity::class.java.name,
+            shadowOf(notification.contentIntent).savedIntent.component?.className
+        )
     }
 }
