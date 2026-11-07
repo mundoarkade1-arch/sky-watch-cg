@@ -37,6 +37,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewModel.startAutoRefresh(lifecycle)
+        radarViewModel.startSurveillance(lifecycle)
         NotificationHelper.createNotificationChannel(this)
         if (!NotificationHelper.hasNotificationPermission(this)) {
             requestNotificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)

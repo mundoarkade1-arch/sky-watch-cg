@@ -96,4 +96,23 @@ class RadarRemoteSourceTest {
         source.fetchSnapshot()
         assertEquals(2, server.requestCount)
     }
+
+    @Test
+    fun enforcesOneSecondMinimumBetweenRequestsToSameEndpoint() = runBlocking {
+        var now = 1_000L
+        val waits = mutableListOf<Long>()
+        repeat(2) { server.enqueue(MockResponse().setBody("""{"now":1793827327001,"ac":[]}""")) }
+        val source = RadarRemoteSource(
+            endpoints = listOf(RadarEndpoint("fonte", server.url("/radar").toString())),
+            client = OkHttpClient(),
+            clockMillis = { now },
+            wait = { millis -> waits += millis; now += millis }
+        )
+
+        source.fetchSnapshot()
+        source.fetchSnapshot()
+
+        assertEquals(listOf(1_000L), waits)
+        assertEquals(2, server.requestCount)
+    }
 }

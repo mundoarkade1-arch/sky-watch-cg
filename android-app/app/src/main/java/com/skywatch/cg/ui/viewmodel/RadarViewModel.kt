@@ -9,6 +9,12 @@ import com.skywatch.cg.data.radar.RadarUnavailableException
 import com.skywatch.cg.data.radar.RadarAlert
 import com.skywatch.cg.data.radar.RadarAlertDeduplicator
 import com.skywatch.cg.data.radar.RadarAlertRules
+import com.skywatch.cg.data.radar.RadarAircraftHistory
+import com.skywatch.cg.data.radar.RadarSurveillance
+import com.skywatch.cg.data.prefs.AppPreferences
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -32,6 +38,8 @@ class RadarViewModel(
 
     private val mutableUiState = MutableStateFlow(RadarUiState())
     private val alertDeduplicator = RadarAlertDeduplicator()
+    private val aircraftHistory = RadarAircraftHistory()
+    private var surveillanceJob: Job? = null
     val uiState: StateFlow<RadarUiState> = mutableUiState.asStateFlow()
 
     fun refresh() {
@@ -44,12 +52,7 @@ class RadarViewModel(
         viewModelScope.launch {
             try {
                 val snapshot = repository.refresh()
-                val detectedAlert = snapshot.aircraft.asSequence().mapNotNull { aircraft ->
-                    RadarAlertRules.evaluate(aircraft)?.takeIf {
-                        alertDeduplicator.shouldAlert(aircraft.icaoHex, it.type)
-                    }
-                }.firstOrNull()
-                mutableUiState.value = RadarUiState(snapshot = snapshot, radarAlert = detectedAlert)
+                applySnapshot(snapshot)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: RadarUnavailableException) {
@@ -65,5 +68,38 @@ class RadarViewModel(
                 )
             }
         }
+    }
+
+    fun startSurveillance(lifecycle: Lifecycle) {
+        if (surveillanceJob?.isActive == true) return
+        surveillanceJob = viewModelScope.launch {
+            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                RadarSurveillance(repository).run(
+                    isStarted = { true },
+                    isEnabled = { AppPreferences.getInstance(getApplication()).radarWatchEnabled },
+                    onSnapshot = { snapshot, _ ->
+                        applySnapshot(snapshot)
+                    },
+                    onError = { error ->
+                        if (error is RadarUnavailableException || error is IOException) {
+                            mutableUiState.value = mutableUiState.value.copy(
+                                isLoading = false,
+                                errorMessage = error.message
+                            )
+                        }
+                    }
+                )
+            }
+        }
+    }
+
+    private suspend fun applySnapshot(snapshot: RadarSnapshot) {
+        val detectedAlert = snapshot.aircraft.asSequence().mapNotNull { aircraft ->
+            val trend = aircraftHistory.observe(aircraft, snapshot.observedAtMillis)
+            RadarAlertRules.evaluate(aircraft, trend)?.takeIf {
+                alertDeduplicator.shouldAlert(aircraft.icaoHex, it.type)
+            }
+        }.firstOrNull()
+        mutableUiState.value = RadarUiState(snapshot = snapshot, radarAlert = detectedAlert)
     }
 }

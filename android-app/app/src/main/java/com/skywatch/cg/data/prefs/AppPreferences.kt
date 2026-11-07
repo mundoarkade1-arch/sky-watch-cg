@@ -12,6 +12,7 @@ class AppPreferences(private val prefs: SharedPreferences) {
         private const val KEY_ALERT_ALL_FLIGHTS = "alert_all_flights"
         private const val KEY_KEEP_SCREEN_ON = "keep_screen_on"
         private const val KEY_SOUND_VIBRATION = "sound_vibration"
+        private const val KEY_RADAR_WATCH_ENABLED = "radar_watch_enabled"
 
         fun getInstance(context: Context): AppPreferences {
             return AppPreferences(context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE))
@@ -37,4 +38,8 @@ class AppPreferences(private val prefs: SharedPreferences) {
     var soundVibration: Boolean
         get() = prefs.getBoolean(KEY_SOUND_VIBRATION, true)
         set(value) = prefs.edit().putBoolean(KEY_SOUND_VIBRATION, value).apply()
+
+    var radarWatchEnabled: Boolean
+        get() = prefs.getBoolean(KEY_RADAR_WATCH_ENABLED, true)
+        set(value) = prefs.edit().putBoolean(KEY_RADAR_WATCH_ENABLED, value).apply()
 }

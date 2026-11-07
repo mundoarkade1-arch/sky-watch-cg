@@ -69,4 +69,5 @@
     <string name="radar_source_status">Fonte: %1$s · %2$d aeronaves · atualizado %3$s</string>
     <string name="radar_sources_unavailable">Fontes indisponíveis, tentando de novo em %1$d s</string>
     <string name="radar_load">Carregar radar</string>
+    <string name="radar_watch_label">Vigília automática (a cada 10 s)</string>
 </resources>

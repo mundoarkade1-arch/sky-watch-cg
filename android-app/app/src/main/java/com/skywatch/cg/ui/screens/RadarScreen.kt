@@ -71,6 +71,7 @@ fun RadarScreen(
     val context = LocalContext.current
     val preferences = remember { AppPreferences.getInstance(context) }
     var keepScreenOn by remember { mutableStateOf(preferences.keepScreenOn) }
+    var radarWatchEnabled by remember { mutableStateOf(preferences.radarWatchEnabled) }
     DisposableEffect(keepScreenOn) {
         val window = (context as? Activity)?.window
         if (keepScreenOn) window?.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -128,6 +129,11 @@ fun RadarScreen(
     ) { innerPadding ->
         RadarContent(
             uiState = uiState,
+            radarWatchEnabled = radarWatchEnabled,
+            onRadarWatchChanged = {
+                radarWatchEnabled = it
+                preferences.radarWatchEnabled = it
+            },
             onRefresh = viewModel::refresh,
             modifier = Modifier
                 .fillMaxSize()
@@ -139,6 +145,8 @@ fun RadarScreen(
 @Composable
 private fun RadarContent(
     uiState: RadarUiState,
+    radarWatchEnabled: Boolean,
+    onRadarWatchChanged: (Boolean) -> Unit,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -153,6 +161,23 @@ private fun RadarContent(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+        }
+
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.radar_watch_label),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                androidx.compose.material3.Switch(
+                    checked = radarWatchEnabled,
+                    onCheckedChange = onRadarWatchChanged
+                )
+            }
         }
 
         uiState.errorMessage?.let { message ->
