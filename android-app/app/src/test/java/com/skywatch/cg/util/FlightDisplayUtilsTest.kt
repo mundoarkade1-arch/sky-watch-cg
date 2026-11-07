@@ -30,7 +30,23 @@ class FlightDisplayUtilsTest {
         val name = "JOHN F KENNEDY INTERNATIONAL AIRPORT (KJFK)"
         val code = "KJFK"
         val result = formatAirportDisplay(name, code)
-        assertEquals("John F Kennedy International Airport (KJFK)", result)
+        assertEquals("John F Kennedy (KJFK)", result)
+    }
+
+    @Test
+    fun formatAirportDisplayInternationalUsesCityInsteadOfCountry() {
+        assertEquals(
+            "Dallas/Fort Worth (KDFW)",
+            formatAirportDisplay("DALLAS/FORT WORTH INTERNATIONAL AIRPORT (KDFW)", "KDFW")
+        )
+    }
+
+    @Test
+    fun formatAirportDisplayKeepsPortuguesePrepositionLowercase() {
+        assertEquals(
+            "Rio de Janeiro (SBGL)",
+            formatAirportDisplay("RIO DE JANEIRO - RIO DE JANEIRO - RJ - BRASIL (SBGL)", "SBGL")
+        )
     }
 
     @Test
@@ -107,6 +123,13 @@ class FlightDisplayUtilsTest {
         assertEquals("05:30", flight.getDisplayTime())
         assertEquals("America/Campo_Grande", airportTimezoneForIcao("sbcg", "UTC"))
         assertEquals("UTC", airportTimezoneForIcao("XXXX", "UTC"))
+    }
+
+    @Test
+    fun brazilianCapitalTimezoneMapCoversCuiabaManausAndRioBranco() {
+        assertEquals("America/Cuiaba", airportTimezoneForIcao("SBCY", "UTC"))
+        assertEquals("America/Manaus", airportTimezoneForIcao("SBEG", "UTC"))
+        assertEquals("America/Rio_Branco", airportTimezoneForIcao("SBRB", "UTC"))
     }
 
     @Test

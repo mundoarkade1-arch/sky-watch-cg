@@ -18,6 +18,9 @@ internal val localDateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH
 
 private val airportTimezonesByIcao = mapOf(
     "SBCG" to "America/Campo_Grande",
+    "SBCY" to "America/Cuiaba",
+    "SBEG" to "America/Manaus",
+    "SBRB" to "America/Rio_Branco",
     "SBGR" to "America/Sao_Paulo",
     "SBSP" to "America/Sao_Paulo",
     "SBKP" to "America/Sao_Paulo",
@@ -105,7 +108,10 @@ internal fun formatAirportDisplay(name: String?, code: String): String {
     val effectiveCode = icaoInParens ?: code
     
     // Remove o código ICAO do final se estiver lá
-    val nameWithoutIcao = rawName.replace(Regex("\\s*\\([A-Z]{4}\\)\\s*$"), "").trim()
+    val nameWithoutIcao = rawName
+        .replace(Regex("\\s*\\([A-Z]{4}\\)\\s*$"), "")
+        .replace(Regex("\\s+INTERNATIONAL\\s+AIRPORT$", RegexOption.IGNORE_CASE), "")
+        .trim()
     
     // Separa por " - "
     val parts = nameWithoutIcao.split(" - ").map { it.trim() }.filter { it.isNotEmpty() }
@@ -146,8 +152,16 @@ internal fun formatAirportDisplay(name: String?, code: String): String {
  * Capitaliza a primeira letra de cada palavra, resto minúsculo.
  */
 private fun capitalizeWords(text: String): String {
-    return text.split(" ").map { word ->
-        if (word.isEmpty()) word else word.lowercase().replaceFirstChar { it.uppercase() }
+    val lowercaseConnectors = setOf("de", "da", "do", "das", "dos", "e")
+    return text.split(" ").mapIndexed { index, word ->
+        val lower = word.lowercase(Locale.ROOT)
+        if (index > 0 && lower in lowercaseConnectors) {
+            lower
+        } else {
+            lower.split("/").joinToString("/") { part ->
+                part.replaceFirstChar { it.uppercase(Locale.ROOT) }
+            }
+        }
     }.joinToString(" ")
 }
 
