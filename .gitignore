@@ -42,3 +42,8 @@ build-logs/
 build-logs-test.log
 
 
+
+gradle-output*.log
+gradle-assemble*.log
+.gradle-user/
+.android-user/
