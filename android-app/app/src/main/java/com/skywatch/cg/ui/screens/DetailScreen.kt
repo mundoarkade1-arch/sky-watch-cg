@@ -26,6 +26,9 @@ import com.skywatch.cg.util.getAirportEventDateTime
 import com.skywatch.cg.util.formatAirportDisplay
 import java.time.format.DateTimeFormatter
 
+internal fun detailAirportDisplay(name: String?, code: String): String =
+    formatAirportDisplay(name, code)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(
@@ -43,8 +46,8 @@ val localDateStr = eventDateTime
     val toCity = flight.destinationName ?: flight.destination
     val fromCode = flight.origin
     val toCode = flight.destination
-    val fromDisplay = formatAirportDisplay(fromCity, fromCode)
-    val toDisplay = formatAirportDisplay(toCity, toCode)
+    val fromDisplay = detailAirportDisplay(fromCity, fromCode)
+    val toDisplay = detailAirportDisplay(toCity, toCode)
 
     val accentColor = if (isArrival) SkyWatchColors.ArrivalAccent else SkyWatchColors.DepartureAccent
 
