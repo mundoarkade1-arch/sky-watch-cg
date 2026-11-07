@@ -336,4 +336,25 @@ class SirosRepositoryTest {
 
         testDb.close()
     }
+
+    @Test
+    fun testSyncWithoutRecognizableHeaderReportsFormatChange() = runBlocking {
+        val testDb = Room.inMemoryDatabaseBuilder(
+            ApplicationProvider.getApplicationContext<Context>(),
+            AppDatabase::class.java
+        ).allowMainThreadQueries().build()
+        val testRepository = SirosRepository(
+            testDb,
+            Dispatchers.IO,
+            FakeSirosRemoteSource("linha desconhecida\nGLO;LINHA")
+        )
+
+        val result = testRepository.syncFromRemote(LocalDate.of(2026, 11, 3))
+
+        assertTrue(result is SirosRepository.SyncResult.Failure)
+        val failure = result as SirosRepository.SyncResult.Failure
+        assertTrue(failure.errorMessage.contains("Formato do CSV mudou"))
+        assertFalse(failure.errorMessage.contains("Nenhum voo SBCG"))
+        testDb.close()
+    }
 }

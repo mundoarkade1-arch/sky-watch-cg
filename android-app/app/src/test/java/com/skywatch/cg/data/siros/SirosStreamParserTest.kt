@@ -128,4 +128,16 @@ GLO;GOL LINHAS AÉREAS;1234;B738;1;2;3;4;5;6;7;186;GLO-001;Em Operação;01/01/2
         assertEquals(1, errors.size)
         assertEquals(3, errors.single().first)
     }
+
+    @Test
+    fun testParseWithoutRecognizableHeaderReportsFormatChange() {
+        val error = assertThrows(IllegalArgumentException::class.java) {
+            SirosStreamParser.parse(
+                ByteArrayInputStream("linha desconhecida\nGLO;LINHA".toByteArray(Charset.forName("ISO-8859-1")))
+            )
+        }
+
+        assertTrue(error.message!!.contains("Formato do CSV mudou"))
+        assertFalse(error.message!!.contains("Nenhum voo SBCG"))
+    }
 }
