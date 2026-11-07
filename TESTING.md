@@ -1,5 +1,14 @@
 # Plano de testes
 
+## Auditoria final das secoes 8 e 9
+
+- O checker usa `org.json.JSONObject`/`JSONArray` e tem teste com o snapshot real da API `releases/latest` em `src/test/resources/github_release_latest_v1.0.23.json`; o teste usa MockWebServer, sem rede externa.
+- A verificacao automatica de release ocorre no maximo uma vez a cada 6 horas; o cooldown de alerta ADS-B de 20 minutos e uma limitacao conhecida.
+- O build Debug nao consulta nem oferece download de APK Release. A versao-base local e `1.0.23`, alinhada a release publica `v1.0.23`.
+- `release.yml` executa `testDebugUnitTest` antes de `assembleRelease` e `apksigner verify` depois do APK ser montado.
+- `NextFlightCard` foi removido por nao ter chamadas no codigo; `FollowedFlight` permanece porque e entidade Room usada pelo `FlightAlertScheduler`.
+- Testes JVM usam MockWebServer, fixtures versionadas e diretorios temporarios do sistema; nenhum teste acessa rede externa ou grava na pasta do projeto.
+
 ## Fechamento das seções 8 e 9 — 2026-11-07
 
 Seção 8 auditada: o checker de releases usa API pública, trata 404 e compara versões numericamente; o workflow lê assinatura apenas de secrets/variáveis do ambiente. A instalação manual do APK Release assinado permanece pendente por depender de aparelho e credenciais do CI.

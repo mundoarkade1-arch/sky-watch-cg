@@ -1,5 +1,12 @@
 # Estado do projeto
 
+## Auditoria final das secoes 8 e 9
+
+- Checker de release migrado para parser `org.json`, validado contra snapshot real de `releases/latest` (`v1.0.23`).
+- Debug nao oferece APK Release; verificacao automatica tem intervalo de 6 horas e a versao-base local e `1.0.23`.
+- Workflow Release testa antes de montar e executa `apksigner verify`; cooldown ADS-B de 20 minutos permanece limitacao conhecida.
+- A tela Sobre informa que o radar depende de receptores comunitarios. `NextFlightCard` foi removido; `FollowedFlight` esta documentado como parte do fluxo de alertas.
+
 ## Seções 8 e 9 — fechamento local (2026-11-07)
 
 - [x] Seção 8 auditada: checker de releases, fallback HTTP 404, comparação numérica, assinatura opcional por variáveis de ambiente e workflow de release sem segredos no app.

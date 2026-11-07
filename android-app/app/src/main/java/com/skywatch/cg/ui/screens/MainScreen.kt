@@ -44,6 +44,7 @@ import com.skywatch.cg.data.prefs.AppPreferences
 import com.skywatch.cg.data.update.GitHubRelease
 import com.skywatch.cg.data.update.GitHubReleaseUpdateChecker
 import com.skywatch.cg.data.update.UpdateCheckResult
+import com.skywatch.cg.data.update.UpdateCheckSchedule
 import com.skywatch.cg.notification.NotificationHelper
 import com.skywatch.cg.notification.FlightAlertScheduler
 import com.skywatch.cg.data.siros.OperationType
@@ -83,8 +84,12 @@ fun MainScreen(viewModel: FlightListViewModel, radarViewModel: RadarViewModel) {
     var updateResult by remember { mutableStateOf<UpdateCheckResult?>(null) }
     var isCheckingUpdate by remember { mutableStateOf(false) }
     var manualUpdateCheck by remember { mutableStateOf(false) }
+    val updatePreferences = remember {
+        context.getSharedPreferences("sky_watch_update", android.content.Context.MODE_PRIVATE)
+    }
 
     fun checkForUpdate(manual: Boolean) {
+        if (BuildConfig.DEBUG) return
         if (isCheckingUpdate) return
         manualUpdateCheck = manual
         isCheckingUpdate = true
@@ -95,7 +100,12 @@ fun MainScreen(viewModel: FlightListViewModel, radarViewModel: RadarViewModel) {
     }
 
     LaunchedEffect(Unit) {
-        checkForUpdate(manual = false)
+        val now = System.currentTimeMillis()
+        val lastCheck = updatePreferences.getLong("last_check_millis", 0L)
+        if (UpdateCheckSchedule.shouldCheck(now, lastCheck)) {
+            updatePreferences.edit().putLong("last_check_millis", now).apply()
+            checkForUpdate(manual = false)
+        }
     }
 
     LaunchedEffect(radarState.radarAnnouncement) {
@@ -122,7 +132,8 @@ fun MainScreen(viewModel: FlightListViewModel, radarViewModel: RadarViewModel) {
                 navController = navController,
                 onNavigateBack = { navController.popBackStack() },
                 onCheckForUpdate = { checkForUpdate(manual = true) },
-                isCheckingUpdate = isCheckingUpdate
+                isCheckingUpdate = isCheckingUpdate,
+                showUpdateButton = !BuildConfig.DEBUG
             )
         }
         composable(
@@ -652,7 +663,8 @@ fun AboutScreen(
     navController: androidx.navigation.NavController,
     onNavigateBack: () -> Unit,
     onCheckForUpdate: () -> Unit,
-    isCheckingUpdate: Boolean
+    isCheckingUpdate: Boolean,
+    showUpdateButton: Boolean
 ) {
     val context = LocalContext.current
     val preferences = remember { AppPreferences.getInstance(context) }
@@ -794,7 +806,12 @@ fun AboutScreen(
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Button(
+                    Text(
+                        text = "O radar mostra observacoes recebidas de receptores comunitarios; cobertura, atraso e identificacao podem variar.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    if (showUpdateButton) Button(
                         onClick = onCheckForUpdate,
                         enabled = !isCheckingUpdate
                     ) {

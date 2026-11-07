@@ -1,0 +1,15 @@
+{
+  "tag_name": "v1.0.23",
+  "name": "v1.0.23",
+  "body": "**Full Changelog**: https://github.com/mundoarkade1-arch/sky-watch-cg/compare/v1.0.22...v1.0.23",
+  "html_url": "https://github.com/mundoarkade1-arch/sky-watch-cg/releases/tag/v1.0.23",
+  "assets": [
+    {
+      "name": "app-release.apk",
+      "browser_download_url": "https://github.com/mundoarkade1-arch/sky-watch-cg/releases/download/v1.0.23/app-release.apk",
+      "content_type": "application/vnd.android.package-archive",
+      "size": 7770790,
+      "digest": "sha256:98fde2ddea2a60ee26ac0bbe43bce46844de4dc9bd323f6a8807be498f2422d"
+    }
+  ]
+}

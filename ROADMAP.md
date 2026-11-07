@@ -1,5 +1,13 @@
 # Roadmap
 
+## Auditoria final das secoes 8 e 9
+
+- [x] Parser de release em `org.json` com fixture real de `releases/latest`.
+- [x] Debug sem oferta de APK Release; intervalo de verificacao e versao-base `1.0.23` coerentes.
+- [x] Workflow testa antes do Release e verifica assinatura com `apksigner`.
+- [x] Limpeza de artefatos concluida; `NextFlightCard` removido e `FollowedFlight` documentado como entidade usada pelo scheduler.
+- [ ] Instalacao manual do APK Release assinado em aparelho continua pendente.
+
 ## Seções 8 e 9 — fechamento local (2026-11-07)
 
 - [x] Auditar o fluxo de release/atualização sem token ou segredo no APK.
