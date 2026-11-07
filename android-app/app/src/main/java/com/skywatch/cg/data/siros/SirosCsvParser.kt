@@ -68,8 +68,14 @@ object SirosCsvParser {
         val result = mutableListOf<String>()
         val current = StringBuilder()
         var inQuotes = false
-        for (c in line) {
+        var index = 0
+        while (index < line.length) {
+            val c = line[index]
             when {
+                c == '"' && inQuotes && index + 1 < line.length && line[index + 1] == '"' -> {
+                    current.append('"')
+                    index++
+                }
                 c == '"' -> inQuotes = !inQuotes
                 c == ';' && !inQuotes -> {
                     result.add(current.toString().trim())
@@ -77,6 +83,7 @@ object SirosCsvParser {
                 }
                 else -> current.append(c)
             }
+            index++
         }
         result.add(current.toString().trim())
         return result
