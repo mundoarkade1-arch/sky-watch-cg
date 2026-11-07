@@ -63,6 +63,13 @@ class FlightDisplayUtilsTest {
     }
 
     @Test
+    fun formatAirlineNameRemovesPortugueseAndCorporateSuffixes() {
+        assertEquals("AZUL", formatAirlineName("AZUL LINHAS AÉREAS BRASILEIRAS S/A"))
+        assertEquals("LATAM", formatAirlineName("LATAM AIRLINES"))
+        assertEquals("GOL", formatAirlineName("GOL (EX-VRG) LINHAS AEREAS"))
+    }
+
+    @Test
     fun arrivalAndDepartureDisplayTheAirportLocalTime() {
         val date = LocalDate.of(2026, 11, 4)
         val arrival = flight(

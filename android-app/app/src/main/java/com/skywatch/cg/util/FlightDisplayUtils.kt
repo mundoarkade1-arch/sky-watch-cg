@@ -6,6 +6,8 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.text.Normalizer
+import java.util.Locale
 
 /**
  * Funções de utilidade para formatação de voos.
@@ -55,16 +57,19 @@ internal fun Long.getDisplayLastUpdate(): String {
  * Exemplo: "LATAM AIRLINES" -> "LATAM"
  */
 internal fun formatAirlineName(airline: String): String {
-    return airline
-        .replace(Regex("\\s*\\(EX-\\s*VRG\\s*\\)", RegexOption.IGNORE_CASE), "")
-        .replace("LINHAS AÉREAS", "", ignoreCase = true)
-        .replace("LINHAS AEREAS", "", ignoreCase = true)
-        .replace("BRASILEIRAS", "", ignoreCase = true)
-        .replace("S.A.", "", ignoreCase = true)
-        .replace("S/A", "", ignoreCase = true)
-        .replace("AIRLINES", "", ignoreCase = true)
+    val normalized = Normalizer.normalize(airline, Normalizer.Form.NFD)
+        .replace("\\p{M}+".toRegex(), "")
+        .uppercase(Locale.ROOT)
+    val cleaned = normalized
+        .replace(Regex("\\s*\\(EX-\\s*VRG\\s*\\)"), "")
+        .replace("LINHAS AEREAS", "")
+        .replace("BRASILEIRAS", "")
+        .replace("S.A.", "")
+        .replace("S/A", "")
+        .replace("AIRLINES", "")
+        .replace(Regex("\\s+"), " ")
         .trim()
-        .let { if (it.isEmpty()) airline else it }
+    return if (cleaned.isEmpty()) airline else cleaned
 }
 
 /**
