@@ -1,9 +1,10 @@
 # Estado do projeto
 
 ## Seção 5 — exibição e fusos concluída (07/11/2026)
-- Formatação de aeroportos e companhias foi normalizada com testes de casos reais e desconhecidos.
-- `nextMovements` ignora movimentos anteriores; a `DetailScreen` usa rolagem vertical e nomes formatados.
-- Fusos conhecidos são resolvidos por ICAO antes do fallback declarado no registro.
+- Formatação de aeroportos e companhias foi normalizada com testes para Dallas/Fort Worth, Rio de Janeiro e casos desconhecidos.
+- `nextMovements` tem testes explícitos para voo de hoje já passado, data anterior e dia futuro; a `DetailScreen` usa rolagem vertical e nomes formatados.
+- O mapa cobre Cuiabá (`SBCY`), Manaus (`SBEG`) e Rio Branco (`SBRB`); ICAO desconhecido usa o fallback declarado no registro.
+- A rolagem foi validada por teste JVM/Compose, mas ainda não foi verificada em aparelho físico.
 - Suíte completa: 106 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
 
 ## Seção 4 — alertas locais concluída (07/11/2026)

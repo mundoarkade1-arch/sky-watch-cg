@@ -1,10 +1,10 @@
 # Roadmap
 
 ## Revisão completa — seção 5 concluída (07/11/2026)
-- [x] Cobrir `formatAirportDisplay` e `formatAirlineName`.
-- [x] Corrigir e testar `nextMovements` para excluir eventos anteriores.
-- [x] Tornar `DetailScreen` rolável e usar `formatAirportDisplay` nos dois aeroportos.
-- [x] Resolver fusos por ICAO com fallback para o timezone declarado.
+- [x] Cobrir `formatAirportDisplay` com Dallas/Fort Worth, Rio de Janeiro e padrão desconhecido, além de `formatAirlineName`.
+- [x] Corrigir e testar `nextMovements` para excluir eventos anteriores e incluir dia futuro.
+- [x] Tornar `DetailScreen` rolável e usar `formatAirportDisplay` nos dois aeroportos; rolagem física ainda não verificada.
+- [x] Resolver fusos por ICAO para Cuiabá, Manaus e Rio Branco, com fallback para o timezone declarado.
 - [x] Suíte completa: 106 testes, 0 falhas, 0 erros, 1 ignorado; `assembleDebug` aprovado.
 
 ## Revisão completa — seção 4 concluída (07/11/2026)
