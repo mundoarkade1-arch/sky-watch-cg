@@ -61,7 +61,6 @@ import java.util.Locale
 import kotlin.math.cos
 import kotlin.math.sin
 
-@androidx.compose.material3.ExperimentalMaterial3Api
 @Composable
 fun RadarScreen(
     viewModel: RadarViewModel,

@@ -431,7 +431,7 @@ A versão 5 tinha uma diferença: migrações antigas criavam `sync_metadata` co
 
 Schema Room exportado em `android-app/app/schemas/com.skywatch.cg.data.db.AppDatabase/6.json`. CI #50 passou para o commit `9206269`.
 
-## Radar ADS-B experimental — 2026-11-04
+## Radar ADS-B — 2026-11-04
 
 O protótipo usa a API ADSB.lol documentada, chamada apenas ao abrir a tela ou por atualização manual. A consulta está centrada nas coordenadas configuradas para CGR e pede observações em um raio de 50 milhas náuticas. O `RadarSnapshotParser` exige timestamp, valida latitude/longitude e ignora registros sem posição; chamadas HTTP malsucedidas geram erro visível, preservando o último resultado em memória. A interface mostra escopo radial e lista, tempo da consulta, idade da posição, atribuição ADSB.lol/ODbL e distinção explícita entre posição observada, planejamento SIROS e status operacional. Não há associação automática a voos.
 
@@ -450,7 +450,7 @@ O protótipo usa a API ADSB.lol documentada, chamada apenas ao abrir a tela ou p
 
 **Revalidação do botão Atualizar (04/11/2026):** aberta a tela Radar no mesmo aparelho e acionado o botão “Atualizar observações ADS-B” pela área identificada na hierarquia da interface. A tela permaneceu aberta; o horário da consulta passou de 17:41:43 para 17:42:08 e a API retornou novamente o estado vazio. A captura de logcat após a ação não mostrou exceção fatal nem ANR. Uma tentativa anterior havia terminado no launcher, mas o comportamento não foi reproduzido após reabrir o app e repetir a ação; a causa daquela transição não foi determinada. A consulta vazia não comprova ausência de aeronaves nem cobertura contínua.
 
-**CI:** GitHub Actions CI #54 concluiu com sucesso para o commit `e65bb63` (protótipo experimental do radar).
+**CI:** GitHub Actions CI #54 concluiu com sucesso para o commit `e65bb63` (primeira versão do radar).
 
 ## Roteiro manual — alertas após reinicialização (execução parcial no Android)
 
@@ -569,5 +569,5 @@ Suíte completa será revalidada após este ajuste de ciclo de vida. O teste foc
 | Alerta visível `VOO DETECTADO` | `pendente neste commit` | Banner em `MainScreen` usa `radar_alert_detected` e mantém a distinção de observação ADS-B |
 | Toque no alerta abre Radar | `pendente neste commit` | Banner navega para a rota `radar` com `launchSingleTop` |
 | Tela Radar com área segura superior | `pendente neste commit` | Banner usa `statusBarsPadding`; tela Radar continua acessível pela navegação inferior |
-| Remoção de “experimental” da UI | `pendente neste commit` | Rótulo passou a ser `Radar`; atribuição não usa o termo removido |
+| Remoção do qualificador de protótipo da UI | `1901075` | Rótulo passou a ser `Radar`; atribuição não usa o termo removido |
 

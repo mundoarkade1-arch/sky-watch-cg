@@ -72,7 +72,6 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(viewModel: FlightListViewModel, radarViewModel: RadarViewModel) {
     val navController = rememberNavController()
@@ -274,7 +273,6 @@ private fun UpdateResultDialog(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FlightsScreen(
     viewModel: FlightListViewModel,
@@ -649,7 +647,6 @@ fun ErrorState(message: String, onRetry: () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutScreen(
     navController: androidx.navigation.NavController,

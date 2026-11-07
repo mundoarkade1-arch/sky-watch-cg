@@ -34,7 +34,7 @@ Conclusão e decisão:
 
 A página [Info vuelos](https://www.aena.es/es/infovuelos.html) diz que os horários são locais e baseados em dados operacionais confirmados e estimativas fornecidas pelas companhias aéreas, mas trata da operação espanhola. Ela não é uma fonte para voos do Aeroporto de Campo Grande e não autoriza reutilização dos dados da Aena Brasil.
 
-## 4. ADSB.lol — observações ADS-B (protótipo experimental; pesquisa em 04/11/2026)
+## 4. ADSB.lol — observações ADS-B (pesquisa em 04/11/2026)
 
 Documentação oficial consultada:
 - [Documentação da API aberta](https://www.adsb.lol/docs/open-data/api)
@@ -49,7 +49,7 @@ Constatações:
 - Uma única consulta `GET /v2/lat/-20.4686/lon/-54.6724/dist/50` respondeu `HTTP 200` em 04/11/2026 por volta de 21:22:07 UTC: `total=1`, posição reportada a 45.472 NM do centro consultado. Identificadores da aeronave não foram reproduzidos. Esse ponto observado não prova cobertura contínua, cobertura do aeroporto em todos os horários nem identificação de voo/companhia.
 
 Decisão e implementação:
-- O app possui um protótipo experimental que consulta manualmente um raio de 50 NM ao abrir a tela Radar ou quando o usuário toca em atualizar. Não há polling em background.
+- O app consulta um raio de 50 NM ao abrir a tela Radar, quando o usuário toca em atualizar e durante a vigília configurada. Não há associação automática a voos SIROS.
 - A tela atribui ADSB.lol e ODbL 1.0, exibe timestamp e distingue observação ADS-B de planejamento/status operacional; resposta vazia é apresentada como “nenhuma observação retornada”, não como ausência de tráfego.
 - Antes de distribuir/usar em produção, contactar o mantenedor, confirmar requisitos ODbL/atribuição e limites operacionais. A amostragem de cobertura precisa ser repetida em períodos distintos.
 - O protótipo não associa callsign/posição a voos SIROS nem afirma que uma aeronave é voo comercial.

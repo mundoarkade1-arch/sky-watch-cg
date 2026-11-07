@@ -85,7 +85,7 @@
 - Alertas padrão com 15 minutos de antecedência.
 - Tema escuro.
 - Prioridade para fontes gratuitas e públicas institucionais (SIROS/ANAC CSV e Aena).
-- **Arquitetura conceitual aprovada:** Modelo normalizado separado por camadas (Planejamento SIROS com ID SIROS original e data específica do voo, Status em tempo real Aena, e Radar experimental AvioADSB). Fusos horários tratados por aeroporto (ex: America/Sao_Paulo, America/Campo_Grande).
+- **Arquitetura conceitual aprovada:** Modelo normalizado separado por camadas (Planejamento SIROS com ID SIROS original e data específica do voo, Status em tempo real Aena, e Radar ADS-B AvioADSB). Fusos horários tratados por aeroporto (ex: America/Sao_Paulo, America/Campo_Grande).
 
 ## Estado técnico
 - [x] PoC realizada no endpoint CSV de registros vigentes do SIROS (/registros/registros/registros.csv): HTTP 200, acesso público gratuito e sem autenticação.
@@ -123,7 +123,7 @@
 - [x] **CI #52 e #53 (04/11/2026):** concluídos com sucesso para os commits `fe84e0b` e `6f0ba0e`.
 - [x] **CI #54 (04/11/2026):** concluído com sucesso para o protótipo de radar no commit `e65bb63`.
 - [x] **Pesquisa inicial de fonte ADS-B (04/11/2026):** documentação oficial OpenSky descreve state vectors em tempo real e consultas por área; uso informado para pesquisa/não comercial. Termos completos não puderam ser consultados (HTTP 403) e a cobertura de CGR não foi verificada. Nenhuma integração foi feita.
-- [x] **Radar ADS-B experimental (04/11/2026):** primeira versão usa a API ADSB.lol com raio de 50 NM, botão de consulta manual, apresentação de observações em escopo radial e lista com timestamp/idade, sem associação a voos SIROS. Atribuição ODbL exibida na tela. A fonte solicita contato antes de uso em produção; não foi feito esse contato.
+- [x] **Radar ADS-B (04/11/2026):** primeira versão usa a API ADSB.lol com raio de 50 NM, botão de consulta manual, apresentação de observações em escopo radial e lista com timestamp/idade, sem associação a voos SIROS. Atribuição ODbL exibida na tela. A fonte solicita contato antes de uso em produção; não foi feito esse contato.
 - [x] **Testes do radar:** parser de payload, posições inválidas/ausentes, resposta vazia, timestamp obrigatório, integração HTTP bem-sucedida e erro HTTP cobertos por 6 testes unitários.
 - [x] **Teste físico inicial do radar (04/11/2026):** instalada e aberta apenas a variante Debug no aparelho 22101320G, sem emulador; a tela carregou resposta sem posições e exibiu estado vazio e horário da fonte, sem crash. Isso não prova ausência de tráfego nem cobertura contínua.
 - [x] **Atualização manual do radar revalidada (04/11/2026):** no aparelho 22101320G, o botão “Atualizar observações ADS-B” manteve a tela aberta e atualizou o horário da consulta de 17:41:43 para 17:42:08; a resposta continuou vazia. A captura posterior não mostrou exceção fatal nem ANR no logcat; a primeira tentativa, que retornou ao launcher, não foi reproduzida.
@@ -148,7 +148,7 @@
 - SIROS CSV: Requer download periódico e tratamento correto da codificação UTF-8 com BOM (detectado automaticamente) e delimitador ;.
 - Aena: Sem API pública documentada confirmada; investigar integração autorizada antes de iniciar implementação.
 - AvioADSB: não foi possível confirmar uma documentação/API oficial ou os termos a partir dos materiais disponíveis; cobertura de CGR não deve ser presumida.
-- ADSB.lol: API ODbL 1.0 usada em protótipo experimental. A documentação pede contato antes de uso em produção; a cobertura foi apenas amostrada uma vez e não garante disponibilidade. Atribuição e separação SIROS/ADS-B estão implementadas.
+- ADSB.lol: API ODbL 1.0 usada em protótipo ADS-B. A documentação pede contato antes de uso em produção; a cobertura foi apenas amostrada uma vez e não garante disponibilidade. Atribuição e separação SIROS/ADS-B estão implementadas.
 - OpenSky: candidato alternativo; termos completos não foram acessados e não está integrado.
 - **Notificação ponta a ponta pendente:** o `BootReceiver` foi confirmado pelo logcat após reinício natural e o teste automatizado cobre seu agendamento; sem voo SIROS entre 15 e 30 minutos, entrega e deduplicação do alerta não foram observadas.
 - **Validação manual de alertas pendente:** o worker busca eventos dentro da janela de 15–30 minutos e usa rede/periodicidade gerenciadas pelo WorkManager. Atrasos podem fazer a janela passar; o WorkManager não garante execução exatamente a cada 15 minutos. Verificar em aparelho real permissões, recebimento, deduplicação e reagendamento após reinicialização.
@@ -190,5 +190,5 @@ Validação local: `testDebugUnitTest assembleDebug` — 127 testes, 0 falhas, 0
 - [x] Banner `VOO DETECTADO` na tela principal.
 - [x] Toque no banner abre a tela Radar.
 - [x] Área segura superior aplicada ao banner com `statusBarsPadding`.
-- [x] Removido “experimental” da interface do Radar.
+- [x] Removido o qualificador de protótipo da interface do Radar.
 

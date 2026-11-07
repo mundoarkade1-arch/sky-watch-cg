@@ -29,7 +29,6 @@ import java.time.format.DateTimeFormatter
 internal fun detailAirportDisplay(name: String?, code: String): String =
     formatAirportDisplay(name, code)
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DetailScreen(
     flight: NormalizedFlight,

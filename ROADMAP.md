@@ -105,7 +105,7 @@
 - [x] Testar o contrato do `BootReceiver` em Robolectric: `BOOT_COMPLETED` agenda os trabalhos únicos de sync e alertas; teste de código, não prova de entrega do broadcast pelo Android.
 - [ ] Verificar a entrega/deduplicação de alerta com um voo SIROS real na janela de 15–30 minutos; não havia voo elegível nesta execução.
 
-## Etapa 7 — Radar ADS-B (protótipo experimental implementado)
+## Etapa 7 — Radar ADS-B implementado
 - [x] Avaliar documentação e licença da ADSB.lol: API pública, dados ODbL 1.0; contactar a fonte antes de uso em produção.
 - [x] Fazer uma consulta pontual centrada em SBCG/CGR (50 NM): a resposta continha uma posição reportada a 45.472 NM às 21:22:07 UTC de 04/11/2026. A observação é apenas um recorte daquele instante e não prova cobertura contínua nem identifica voo comercial.
 - [x] Implementar cliente HTTP no OkHttp existente, parser com validação de coordenadas e estado de erro explícito, sem adicionar dependências.
@@ -161,5 +161,5 @@
 
 - [x] Exibir `VOO DETECTADO` na tela principal.
 - [x] Abrir a tela Radar ao tocar no alerta.
-- [x] Aplicar `statusBarsPadding` e remover “experimental” da UI.
+- [x] Aplicar `statusBarsPadding` e remover o qualificador de protótipo da UI.
 
