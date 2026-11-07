@@ -1,5 +1,12 @@
 # Estado do projeto
 
+## Revisão da sincronização excessiva (06/11/2026)
+- O ciclo de 60 segundos do `FlightListViewModel` não chama mais `syncFromRemote()`; ele atualiza apenas o relógio local e acompanha a virada do dia em `America/Campo_Grande`.
+- A abertura do app sincroniza somente com cache vazio ou quando a última sincronização bem-sucedida tem seis horas ou mais.
+- A combinação dos fluxos de chegadas e decolagens passou a ser feita por data dentro de `flatMapLatest`, evitando emitir a lista antiga com a nova data.
+- Adicionado `FlightDao.hasAnyFlights()` e teste determinístico da política de sincronização.
+- Validação local: checker de releases e política da seção 2 passaram; 5 testes, 0 falhas.
+
 ## Correção do verificador de atualizações (06/11/2026)
 - O repositório GitHub foi tornado público com autorização explícita para que o app consulte `releases/latest` sem token embutido.
 - O checker agora trata HTTP 404 com mensagem específica, mantém a comparação numérica de versões e o parser de asset `app-release.apk` coberto por testes.

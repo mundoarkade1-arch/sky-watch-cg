@@ -65,15 +65,6 @@ class FlightListViewModel(
     private val _selectedDate = MutableStateFlow(todayProvider())
     val selectedDate: StateFlow<LocalDate> = _selectedDate.asStateFlow()
 
-    // Flows from repository for reactive updates
-    private val arrivalsFlow = _selectedDate.flatMapLatest { date ->
-        repository.getArrivalsForUiFlow(date)
-    }.distinctUntilChanged()
-
-    private val departuresFlow = _selectedDate.flatMapLatest { date ->
-        repository.getDeparturesForUiFlow(date)
-    }.distinctUntilChanged()
-
     private val syncMetadataFlow = repository.getSyncMetadataFlow().distinctUntilChanged()
 
     private val _uiState = MutableStateFlow<FlightUiState>(FlightUiState.Loading)
@@ -89,6 +80,7 @@ class FlightListViewModel(
     private var refreshJob: Job? = null
     private var flightDetailJob: Job? = null
     private var autoRefreshJob: Job? = null
+    private var initialSyncChecked = false
     private val _currentLocalDateTime = MutableStateFlow(LocalDateTime.now(ZoneId.of("America/Campo_Grande")))
     val currentLocalDateTime: StateFlow<LocalDateTime> = _currentLocalDateTime.asStateFlow()
 
@@ -100,8 +92,13 @@ class FlightListViewModel(
 
     private fun observeFlights() {
         viewModelScope.launch {
-            combine(arrivalsFlow, departuresFlow, _selectedDate) { arrivals, departures, date ->
-                FlightUiState.Success(arrivals, departures, date)
+            _selectedDate.flatMapLatest { date ->
+                combine(
+                    repository.getArrivalsForUiFlow(date),
+                    repository.getDeparturesForUiFlow(date)
+                ) { arrivals, departures ->
+                    FlightUiState.Success(arrivals, departures, date)
+                }
             }.collect { state ->
                 _uiState.value = when (val currentState = _uiState.value) {
                     is FlightUiState.Refreshing -> currentState.copy(
@@ -230,16 +227,50 @@ class FlightListViewModel(
         if (autoRefreshJob?.isActive == true) return autoRefreshJob!!
         autoRefreshJob = viewModelScope.launch {
             lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                refresh()
+                syncIfStaleOrEmpty()
+                var lastKnownDate = todayProvider()
                 while (isActive) {
                     _currentLocalDateTime.value = LocalDateTime.now(ZoneId.of("America/Campo_Grande"))
                     delay(60_000L)
                     _currentLocalDateTime.value = LocalDateTime.now(ZoneId.of("America/Campo_Grande"))
-                    refresh()
+                    val today = todayProvider()
+                    if (today != lastKnownDate) {
+                        lastKnownDate = today
+                        if (_selectedDate.value == lastKnownDate.minusDays(1)) {
+                            _selectedDate.value = today
+                        }
+                    }
                 }
             }
         }
         return autoRefreshJob!!
+    }
+
+    private suspend fun syncIfStaleOrEmpty() {
+        if (initialSyncChecked) return
+        initialSyncChecked = true
+
+        val metadata = repository.getSyncMetadata()
+        val hasFlights = repository.hasAnyFlights()
+        if (shouldSyncOnOpen(
+                lastSuccessfulSyncAt = metadata?.lastSuccessfulSyncAt ?: 0L,
+                hasFlights = hasFlights,
+                nowMillis = System.currentTimeMillis()
+            )) {
+            refresh()
+        }
+    }
+
+    internal fun shouldSyncOnOpen(
+        lastSuccessfulSyncAt: Long,
+        hasFlights: Boolean,
+        nowMillis: Long
+    ): Boolean = !hasFlights ||
+        lastSuccessfulSyncAt <= 0L ||
+        nowMillis - lastSuccessfulSyncAt >= INITIAL_SYNC_MAX_AGE_MS
+
+    private companion object {
+        const val INITIAL_SYNC_MAX_AGE_MS = 6 * 60 * 60 * 1000L
     }
 
     fun goToPreviousDay() {

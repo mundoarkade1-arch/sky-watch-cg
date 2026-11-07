@@ -89,6 +89,14 @@
 - Quando houver voo SIROS real na janela de 15–30 minutos, concluir o teste de entrega/deduplicação de alerta descrito em `TESTING.md`.
 # Próxima rodada — wip-fase3
 
+## Revisão completa — etapa 2 iniciada (06/11/2026)
+- [x] Remover a sincronização SIROS do ciclo de atualização de 60 segundos.
+- [x] Sincronizar na abertura somente com cache vazio ou dados com seis horas ou mais.
+- [x] Atualizar a data selecionada na virada do dia de Campo Grande.
+- [x] Evitar combinação transitória de listas ao trocar a data.
+- [x] Adicionar teste determinístico da política de sincronização e revalidar `GitHubReleaseUpdateCheckerTest`.
+- [ ] Completar os testes de ciclo de vida com um harness Android/Robolectric apropriado; o `LifecycleRegistry` simples não ativou `repeatOnLifecycle` neste ambiente local.
+
 - Validar no CI a compilação e a suíte unitária após os blocos 0–5.
 - Completar a UI de preferências de som/vibração, teste de notificação e reagendamento dos alarmes quando configurações mudarem.
 - Completar rolagem automática até o próximo voo e botão para voltar ao próximo movimento.

@@ -456,3 +456,14 @@ Durante essa verificação, a tela de detalhes foi ajustada para identificar `si
 O workflow acionado por tags `v*` publica somente uma prévia Debug, não um APK assinado para distribuição estável/Play Store. Como o runner do CI pode usar uma chave Debug diferente em cada execução, instalar uma prévia atualizada talvez exija desinstalar a anterior, o que apaga os dados locais. O teste de entrega/deduplicação de alerta real continua pendente até haver voo SIROS elegível.
 
 **Publicação remota:** CI #56 passou para o commit `3858738`. O workflow "Build and Release Android APK" #13 para a tag `v1.0.17` concluiu com sucesso, incluindo a etapa `Upload APK to Release`. O APK está no [Release v1.0.17](https://github.com/mundoarkade1-arch/sky-watch-cg/releases/tag/v1.0.17) com o nome `SKY-WATCH-CG-v1.0.17-debug.apk`.
+## Revisão da sincronização excessiva — 2026-11-06
+
+Alterado o `FlightListViewModel`: o ciclo de 60 segundos agora atualiza somente o relógio local; a sincronização SIROS na abertura ocorre apenas quando o cache está vazio ou a última sincronização bem-sucedida tem pelo menos seis horas. A troca automática para a data atual usa `America/Campo_Grande`, e os fluxos de chegadas/decolagens são combinados dentro da troca de data para evitar estado transitório.
+
+Comando executado em `android-app`:
+
+```powershell
+.\gradlew.bat testDebugUnitTest --tests com.skywatch.cg.data.update.GitHubReleaseUpdateCheckerTest --tests com.skywatch.cg.ui.viewmodel.FlightListViewModelTest.syncPolicyRefreshesOnlyWhenCacheIsEmptyOrOlderThanSixHours --offline
+```
+
+Resultado real: `BUILD SUCCESSFUL`; 5 testes executados, 0 falhas. O teste do checker de releases permaneceu verde. O build usou o SDK Android local e não acessou a rede durante a execução (`--offline`).

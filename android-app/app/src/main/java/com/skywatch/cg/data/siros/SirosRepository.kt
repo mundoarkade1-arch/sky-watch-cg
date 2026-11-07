@@ -59,6 +59,10 @@ class SirosRepository(
         dao.getByFlightId(flightId)
     }
 
+    suspend fun hasAnyFlights(): Boolean = withContext(ioDispatcher) {
+        dao.hasAnyFlights()
+    }
+
     suspend fun getFlightsBySirosRecordId(sirosRecordId: String): List<FlightEntity> = withContext(ioDispatcher) {
         dao.getBySirosRecordId(sirosRecordId)
     }

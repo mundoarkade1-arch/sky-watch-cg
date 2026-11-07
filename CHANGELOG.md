@@ -218,6 +218,12 @@
 - Registradas limitações iniciais e necessidade de validação de cobertura.
 # Próxima versão
 
+## 2026-11-06 — Revisão da sincronização
+- Corrigida a sincronização excessiva: o relógio de 60 segundos não baixa mais o CSV SIROS.
+- A sincronização automática de abertura respeita cache vazio ou idade mínima de seis horas.
+- Corrigida a atualização automática da data em `America/Campo_Grande` e reduzida a emissão transitória ao trocar de data.
+- Adicionado teste da política de sincronização; o checker de atualização continua aprovado.
+
 - Radar ADS-B com failover entre três fontes, cooldown após HTTP 429 e limite de uma chamada por segundo por servidor.
 - Atualização de voos em primeiro plano a cada minuto, cartões de próximos movimentos e regras experimentais de alerta ADS-B.
 - Alertas planejados individuais iniciados por AlarmManager, com fallback durante modo ocioso e deduplicação no receiver.
