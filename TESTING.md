@@ -10,7 +10,21 @@
 | `DetailScreen` rolável e `formatAirportDisplay` | Feito | `6678e38`, `4f2a682` | `detailDisplayUsesFormattedAirportNames` em [DetailScreenDisplayTest.kt](android-app/app/src/test/java/com/skywatch/cg/ui/screens/DetailScreenDisplayTest.kt); rolagem não verificada em aparelho físico |
 | Fusos por ICAO | Feito | `b5afc50`, `ea63f45` | `brazilianCapitalTimezoneMapCoversCuiabaManausAndRioBranco` e `knownIcaoTimezoneOverridesAnIncorrectDeclaredTimezone` em [FlightDisplayUtilsTest.kt](android-app/app/src/test/java/com/skywatch/cg/util/FlightDisplayUtilsTest.kt); ICAO desconhecido usa o fallback declarado |
 
-Suíte completa: `testDebugUnitTest assembleDebug` — `BUILD SUCCESSFUL`; 106 testes, 0 falhas, 0 erros e 1 ignorado. `assembleDebug` também passou.
+Suíte completa: `testDebugUnitTest assembleDebug` — `BUILD SUCCESSFUL`; 113 testes, 0 falhas, 0 erros e 1 ignorado. `assembleDebug` também passou.
+
+## Seção 6 — parser SIROS (2026-11-07)
+
+| Item | Situação | Commit | Teste por item |
+|---|---|---|---|
+| Cabeçalho descritivo e cabeçalho de 28 colunas | Feito | `178dce6` | `testParseStreamSkipsDescriptiveLine`, `testParseStreamSkipsHeader` em [SirosStreamParserTest.kt](android-app/app/src/test/java/com/skywatch/cg/data/siros/SirosStreamParserTest.kt) |
+| Codificação UTF-8 com BOM | Feito | `178dce6` | `testParseStreamWithUtf8Bom`, `testParseStreamWithCallbackUtf8Bom` em [SirosStreamParserBomTest.kt](android-app/app/src/test/java/com/skywatch/cg/data/siros/SirosStreamParserBomTest.kt) |
+| Codificação ISO-8859-1 sem BOM e acentos | Feito | `178dce6` | `testParseStreamLatin1Encoding`, `testParseStreamWithoutBomIso88591` |
+| Campos vazios, linha curta e erro por callback | Feito | `79f9cd5` | `testParseStreamEmptyFields`, `testParseStreamMalformedLine`, `testParseStreamWithCallbackReportsShortLine` |
+| Delimitador `;`, campo citado e aspas escapadas | Feito | `79f9cd5` | `testParseStreamPreservesQuotedDelimiterAndEscapedQuote` |
+| Avaliação streaming/lazy e callback | Feito | `178dce6` | `testParseStreamLazyEvaluation`, `testParseStreamWithCallback` |
+| Fixture CSV real e memória | Pendente localmente | `178dce6` | `parseRealCsvStreamingCountsRecordsAndKeepsMemoryFlat`; ignorado porque `Downloads/siros-registros.csv` não está disponível |
+
+Suíte completa: `testDebugUnitTest assembleDebug` — `BUILD SUCCESSFUL`; 113 testes, 0 falhas, 0 erros e 1 ignorado. O APK Debug foi gerado. A fixture real continua pendente até o arquivo ser disponibilizado.
 
 ## Seção 4 — checklist de alertas locais (2026-11-07)
 

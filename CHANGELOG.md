@@ -1,11 +1,17 @@
 # Changelog
 
+## 2026-11-07 - Seção 6: parser SIROS
+- Corrigido o parsing de campos SIROS entre aspas com delimitadores e aspas escapadas.
+- Adicionado teste de callback para linha curta, sem inventar dados do CSV real.
+- A fixture real segue pendente porque o arquivo local não está disponível; o teste foi ignorado.
+- Suíte completa aprovada: 113 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+
 ## 2026-11-07 - Seção 5: exibição e fusos
 - Normalizados nomes de aeroportos e companhias aéreas, incluindo Dallas/Fort Worth e Rio de Janeiro.
 - Corrigido `nextMovements` para não escolher eventos anteriores, com cobertura de hoje passado e dia futuro.
 - `DetailScreen` agora permite rolagem e exibe aeroportos formatados; rolagem em aparelho ainda não foi verificada.
 - Adicionado mapa de fusos por ICAO para Cuiabá, Manaus e Rio Branco, com fallback seguro.
-- Suíte completa aprovada: 106 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+- Suíte completa mais recente aprovada: 113 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
 
 ## 2026-11-07 - Seção 4: alertas locais
 - Adicionado feedback e atalho para configurações quando a permissão de notificações está ausente.

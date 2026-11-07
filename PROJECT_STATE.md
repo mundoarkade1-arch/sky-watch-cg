@@ -5,7 +5,13 @@
 - `nextMovements` tem testes explícitos para voo de hoje já passado, data anterior e dia futuro; a `DetailScreen` usa rolagem vertical e nomes formatados.
 - O mapa cobre Cuiabá (`SBCY`), Manaus (`SBEG`) e Rio Branco (`SBRB`); ICAO desconhecido usa o fallback declarado no registro.
 - A rolagem foi validada por teste JVM/Compose, mas ainda não foi verificada em aparelho físico.
-- Suíte completa: 106 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+- Suíte completa mais recente: 113 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+
+## Seção 6 — parser SIROS (07/11/2026)
+- O parser streaming ativo preserva cabeçalhos, BOM UTF-8, ISO-8859-1, campos vazios, delimitador `;`, campos citados e aspas escapadas.
+- `testParseStreamWithCallbackReportsShortLine` comprova o reporte de linha curta sem interromper a API de callback.
+- A fixture CSV real permanece pendente: `SirosStreamParserRealFileTest` foi ignorado por ausência de `Downloads/siros-registros.csv`; não foi inventado resultado de CSV real.
+- Suíte completa: 113 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
 
 ## Seção 4 — alertas locais concluída (07/11/2026)
 - A tela Sobre informa a ausência de permissão por Toast/feedback e oferece `ACTION_APP_NOTIFICATION_SETTINGS`.
