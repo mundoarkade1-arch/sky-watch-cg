@@ -6,6 +6,8 @@
 - `MIGRATION_6_7` recria somente o cache `flights`, preservando `sync_metadata` e `alert_sent`; o schema foi exportado em `android-app/app/schemas/com.skywatch.cg.data.db.AppDatabase/7.json`.
 - Fixture real reduzida e teste de identidade adicionados. Suíte final: 91 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` passou.
 - Teste instrumentado de migração compilado, mas não executado por ausência de `adb` nesta sessão.
+- Validação JVM complementar aprovada em Robolectric: `AppDatabaseMigrationJvmTest` executou a migração real e preservou cache, metadados e alertas.
+- `FlightIdKeyTest` aprovou URI e chaves de `PendingIntent`; `SirosStageIdentityTest` é o teste que comprova a persistência conjunta de pouso e decolagem.
 
 ## Revisão da sincronização excessiva (06/11/2026)
 - O ciclo de 60 segundos do `FlightListViewModel` não chama mais `syncFromRemote()`; ele atualiza apenas o relógio local e acompanha a virada do dia em `America/Campo_Grande`.

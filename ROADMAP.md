@@ -96,6 +96,7 @@
 - [x] Exportar schema Room 7 e adicionar teste de migração.
 - [x] Adicionar fixture reduzida baseada em CSV real e teste de chegada/decolagem sem colisão.
 - [ ] Executar os testes instrumentados em aparelho; `adb` não estava disponível localmente.
+- [x] Executar a migração 6→7 em JVM/Robolectric e validar URI, alertas e `PendingIntent`.
 
 ## Revisão completa — etapa 2 iniciada (06/11/2026)
 - [x] Remover a sincronização SIROS do ciclo de atualização de 60 segundos.

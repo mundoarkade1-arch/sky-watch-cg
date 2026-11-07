@@ -223,6 +223,7 @@
 - Adicionada migração Room 6→7 com schema exportado.
 - Adicionado teste de preservação de metadados/alertas e fixture baseada em CSV real.
 - Suíte Debug final: 91 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+- Migração 6→7 e chaves do novo `flightId` também validadas em 3 testes JVM Robolectric.
 
 ## 2026-11-06 — Revisão da sincronização
 - Corrigida a sincronização excessiva: o relógio de 60 segundos não baixa mais o CSV SIROS.

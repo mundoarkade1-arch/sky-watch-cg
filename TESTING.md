@@ -479,3 +479,10 @@ Validações realizadas:
 - `SirosStageIdentityTest`: fixture derivada de linhas reais do CSV SIROS; chegada e decolagem com mesma identidade de registro e etapas distintas permanecem como dois voos.
 - `compileDebugAndroidTestKotlin`: aprovado, incluindo `AppDatabaseMigrationTest` para 6→7.
 - O teste instrumentado não foi executado porque `adb` não está disponível nesta sessão.
+
+### Validação complementar antes da seção 4
+
+- `AppDatabaseMigrationJvmTest`: executou em Robolectric a criação de um banco v6, a abertura com `MIGRATION_6_7` e a verificação de `sirosStage`, `sync_metadata` e `alert_sent` preservados.
+- `FlightIdKeyTest`: validou `Uri.encode`/`Uri.decode`, IDs de alerta distintos e `PendingIntent` distintos usando o hash completo do `flightId`.
+- Resultado do comando focado: `BUILD SUCCESSFUL`; 3 testes, 0 falhas.
+- O teste que prova que pouso e decolagem persistem juntos é `SirosStageIdentityTest.sameSirosRecordWithDifferentStagesKeepsArrivalAndDeparture`: ele normaliza dois registros com a mesma identidade SIROS e etapas diferentes, persiste ambos e verifica uma chegada e uma decolagem no banco.
