@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-07 - Seção 5: exibição e fusos
+- Normalizados nomes de aeroportos e companhias aéreas.
+- Corrigido `nextMovements` para não escolher eventos anteriores.
+- `DetailScreen` agora permite rolagem e exibe aeroportos formatados.
+- Adicionado mapa de fusos por ICAO com fallback seguro.
+- Suíte completa aprovada: 106 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+
 ## 2026-11-07 - Seção 4: alertas locais
 - Adicionado feedback e atalho para configurações quando a permissão de notificações está ausente.
 - `showTextAlert` agora é validado com `contentIntent` para `MainActivity`.

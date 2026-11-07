@@ -1,5 +1,17 @@
 # Plano de testes
 
+## Seção 5 — exibição e fusos (2026-11-07)
+
+| Item | Situação | Commit | Teste por item |
+|---|---|---|---|
+| `formatAirportDisplay` | Feito | `2144770` | `formatAirportDisplayKeepsUnknownPatternWithoutInventingCity` em [FlightDisplayUtilsTest.kt](android-app/app/src/test/java/com/skywatch/cg/util/FlightDisplayUtilsTest.kt) |
+| `formatAirlineName` | Feito | `4045032` | `formatAirlineNameRemovesPortugueseAndCorporateSuffixes` em [FlightDisplayUtilsTest.kt](android-app/app/src/test/java/com/skywatch/cg/util/FlightDisplayUtilsTest.kt) |
+| `nextMovements` | Feito | `0a99b21` | `ignoresMovementsFromEarlierDates` em [NextMovementsTest.kt](android-app/app/src/test/java/com/skywatch/cg/util/NextMovementsTest.kt) |
+| `DetailScreen` rolável e `formatAirportDisplay` | Feito | `6678e38`, `4f2a682` | `detailDisplayUsesFormattedAirportNames` em [DetailScreenDisplayTest.kt](android-app/app/src/test/java/com/skywatch/cg/ui/screens/DetailScreenDisplayTest.kt); compilação confirma `verticalScroll` |
+| Fusos por ICAO | Feito | `b5afc50` | `knownIcaoTimezoneOverridesAnIncorrectDeclaredTimezone` em [FlightDisplayUtilsTest.kt](android-app/app/src/test/java/com/skywatch/cg/util/FlightDisplayUtilsTest.kt) |
+
+Suíte completa: `testDebugUnitTest assembleDebug` — `BUILD SUCCESSFUL`; 106 testes, 0 falhas, 0 erros e 1 ignorado. `assembleDebug` também passou.
+
 ## Seção 4 — checklist de alertas locais (2026-11-07)
 
 | Item | Situação | Commit | Teste que prova o comportamento |

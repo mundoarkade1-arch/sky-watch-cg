@@ -1,5 +1,12 @@
 # Roadmap
 
+## Revisão completa — seção 5 concluída (07/11/2026)
+- [x] Cobrir `formatAirportDisplay` e `formatAirlineName`.
+- [x] Corrigir e testar `nextMovements` para excluir eventos anteriores.
+- [x] Tornar `DetailScreen` rolável e usar `formatAirportDisplay` nos dois aeroportos.
+- [x] Resolver fusos por ICAO com fallback para o timezone declarado.
+- [x] Suíte completa: 106 testes, 0 falhas, 0 erros, 1 ignorado; `assembleDebug` aprovado.
+
 ## Revisão completa — seção 4 concluída (07/11/2026)
 - [x] (a) Feedback e botão para configurações de notificações sem permissão.
 - [x] (b) `contentIntent` da notificação abre `MainActivity`.

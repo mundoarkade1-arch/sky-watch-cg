@@ -1,5 +1,11 @@
 # Estado do projeto
 
+## Seção 5 — exibição e fusos concluída (07/11/2026)
+- Formatação de aeroportos e companhias foi normalizada com testes de casos reais e desconhecidos.
+- `nextMovements` ignora movimentos anteriores; a `DetailScreen` usa rolagem vertical e nomes formatados.
+- Fusos conhecidos são resolvidos por ICAO antes do fallback declarado no registro.
+- Suíte completa: 106 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+
 ## Seção 4 — alertas locais concluída (07/11/2026)
 - A tela Sobre informa a ausência de permissão por Toast/feedback e oferece `ACTION_APP_NOTIFICATION_SETTINGS`.
 - `showTextAlert` publica com `contentIntent` para `MainActivity`; som e silêncio usam canais distintos.
