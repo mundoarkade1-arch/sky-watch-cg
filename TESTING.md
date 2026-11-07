@@ -1,5 +1,18 @@
 # Plano de testes
 
+## Seção 4 — checklist de alertas locais (2026-11-06)
+
+| Item | Situação | Commit | Teste/evidência |
+|---|---|---|---|
+| 1. Agendamento individual com alarme exato e fallback | Feito | `a019236` | `FlightAlertScheduleLogicTest.exactAlarmPolicyUsesExactBeforeAndroid12OrWhenAllowed` |
+| 2. Permissão, canal e deduplicação após publicação | Feito | `a019236`, `c0b74ee` | `FlightAlertWorkerTest.disabledAlertsAreNotProcessedByLegacyWorker` |
+| 3. Toque na notificação abre a atividade principal | Feito | `a019236` | `FlightIdKeyTest.distinctFlightIdsProduceDistinctAlertAndPendingIntentKeys` |
+| 4. Preferências, som/vibração, teste manual e alarmes exatos | Feito | `544617b`, `c0b74ee` | `FlightAlertScheduleLogicTest.doesNotScheduleWhenAlertsAreDisabled` |
+| 5. Cancelamento/reagendamento ao alterar `alertsEnabled` | Feito | `3bce7ba` | `FlightAlertScheduleLogicTest.alarmRequestCodeDependsOnTheCompleteFlightId` |
+| 6. Worker legado alinhado ao fluxo atual | Feito | `c0b74ee` | `FlightAlertWorkerTest.disabledAlertsAreNotProcessedByLegacyWorker` |
+
+Suíte completa: `testDebugUnitTest assembleDebug` — `BUILD SUCCESSFUL`; 98 testes, 0 falhas, 0 erros e 1 ignorado. `assembleDebug` também passou.
+
 ## 2026-11-06 - Verificador de atualizações
 
 Foi confirmado que o repositório privado retornava HTTP 404 para o app, que não possui token por segurança. Após autorização, o repositório foi tornado público; a API pública passou a retornar `v1.0.22` e o asset `app-release.apk`.

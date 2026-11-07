@@ -1,5 +1,12 @@
 # Estado do projeto
 
+## Seção 4 — alertas locais concluída (06/11/2026)
+- Alarmes individuais usam modo exato quando permitido e fallback seguro quando necessário.
+- O receiver respeita permissão e só registra deduplicação após publicação confirmada; a notificação abre a atividade principal.
+- A tela Sobre expõe alertas locais, som/vibração, teste de notificação e configuração de alarmes exatos.
+- Alterar `alertsEnabled` cancela ou reagenda os alarmes persistidos; o worker legado segue a mesma preferência.
+- Suíte completa: 98 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+
 ## Identidade SIROS e migração Room 6→7 (06/11/2026)
 - `sirosStage` agora é propagado de `SirosRecord.numeroEtapa` para `NormalizedFlight` e `FlightEntity`.
 - `flightId` usa registro SIROS, etapa, tipo de operação e data: `<siros>-E<etapa>-<ARRIVAL|DEPARTURE>-<yyyy-MM-dd>`.

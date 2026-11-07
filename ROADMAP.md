@@ -1,5 +1,13 @@
 # Roadmap
 
+## Revisão completa — seção 4 concluída (06/11/2026)
+- [x] Alarmes individuais exatos com fallback seguro.
+- [x] Permissão, canal, deduplicação e abertura da atividade pela notificação.
+- [x] Preferências de alertas, som/vibração, teste manual e configuração de alarmes exatos.
+- [x] Cancelamento e reagendamento ao alterar `alertsEnabled`.
+- [x] Worker legado alinhado ao fluxo atual.
+- [x] Suíte completa: 98 testes, 0 falhas, 0 erros, 1 ignorado; `assembleDebug` aprovado.
+
 ## Verificador de atualizações — 06/11/2026
 - [x] Tornar o repositório público para consulta anônima e segura da API de releases.
 - [x] Corrigir o texto do botão `Verificar atualização`.

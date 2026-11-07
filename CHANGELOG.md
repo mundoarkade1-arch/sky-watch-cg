@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-06 - Seção 4: alertas locais
+- Adicionado fallback de alarme quando o sistema não permite alarmes exatos.
+- Alertas respeitam permissão, `alertsEnabled` e a preferência de som/vibração.
+- A tela Sobre permite testar notificações, configurar alarmes exatos e reagendar/cancelar alertas.
+- O caminho legado só registra deduplicação após publicação confirmada.
+- Suíte completa aprovada: 98 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+
 ## 2026-11-06 - Verificador de atualizações
 - Tornado o repositório público, com autorização, para permitir consulta anônima das releases sem token no APK.
 - Corrigido o tratamento de erro do checker para HTTP 404 e mantido o fallback para a página da release.
