@@ -34,6 +34,8 @@ object FlightAlertScheduler {
 
     internal fun shouldScheduleAlerts(alertsEnabled: Boolean): Boolean = alertsEnabled
 
+    internal fun alarmRequestCode(flightId: String): Int = flightId.hashCode()
+
     fun schedule(
         context: Context,
         plan: AlertSchedulePlan,
@@ -49,7 +51,7 @@ object FlightAlertScheduler {
             putExtra(FlightAlertReceiver.EXTRA_TEXT, text)
         }
         val pendingIntent = PendingIntent.getBroadcast(
-            context, plan.flightId.hashCode(), intent,
+            context, alarmRequestCode(plan.flightId), intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val canScheduleExact = Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()
@@ -58,6 +60,19 @@ object FlightAlertScheduler {
         } else {
             alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmAtMillis, pendingIntent)
         }
+    }
+
+    fun cancel(context: Context, flightId: String) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, FlightAlertReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            alarmRequestCode(flightId),
+            intent,
+            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+        ) ?: return
+        alarmManager.cancel(pendingIntent)
+        pendingIntent.cancel()
     }
 
     internal fun shouldUseExactAlarm(apiLevel: Int, canScheduleExactAlarms: Boolean): Boolean =

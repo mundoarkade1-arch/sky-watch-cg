@@ -13,6 +13,15 @@ class FlightAlertScheduleLogicTest {
         assertEquals(true, FlightAlertScheduler.shouldScheduleAlerts(true))
     }
 
+    @Test fun alarmRequestCodeDependsOnTheCompleteFlightId() {
+        assertEquals("flight-arrival".hashCode(), FlightAlertScheduler.alarmRequestCode("flight-arrival"))
+        assertEquals(
+            false,
+            FlightAlertScheduler.alarmRequestCode("flight-arrival") ==
+                FlightAlertScheduler.alarmRequestCode("flight-departure")
+        )
+    }
+
     @Test fun exactAlarmPolicyUsesExactBeforeAndroid12OrWhenAllowed() {
         assertEquals(true, FlightAlertScheduler.shouldUseExactAlarm(30, false))
         assertEquals(true, FlightAlertScheduler.shouldUseExactAlarm(31, true))

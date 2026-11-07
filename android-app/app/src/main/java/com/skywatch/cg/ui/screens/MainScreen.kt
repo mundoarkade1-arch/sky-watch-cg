@@ -35,6 +35,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.skywatch.cg.BuildConfig
 import com.skywatch.cg.R
+import com.skywatch.cg.data.db.AppDatabase
 import com.skywatch.cg.data.db.SyncMetadata
 import com.skywatch.cg.data.siros.NormalizedFlight
 import com.skywatch.cg.data.prefs.AppPreferences
@@ -61,6 +62,7 @@ import com.skywatch.cg.util.formatAirlineName
 import com.skywatch.cg.util.formatTimeUntil
 import com.skywatch.cg.util.nextMovements
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -627,6 +629,7 @@ fun AboutScreen(
 ) {
     val context = LocalContext.current
     val preferences = remember { AppPreferences.getInstance(context) }
+    val alertScope = rememberCoroutineScope()
     var alertsEnabled by remember { mutableStateOf(preferences.alertsEnabled) }
     var soundVibration by remember { mutableStateOf(preferences.soundVibration) }
     var notificationFeedback by remember { mutableStateOf<String?>(null) }
@@ -671,6 +674,18 @@ fun AboutScreen(
                             onCheckedChange = {
                                 alertsEnabled = it
                                 preferences.alertsEnabled = it
+                                alertScope.launch(Dispatchers.IO) {
+                                    val database = AppDatabase.getDatabase(context.applicationContext)
+                                    val flights = database.flightDao().getAllArrivals().map { it.toNormalizedFlight() } +
+                                        database.flightDao().getAllDepartures().map { it.toNormalizedFlight() }
+                                    if (it) {
+                                        FlightAlertScheduler.scheduleUpcomingFlights(context.applicationContext, flights)
+                                    } else {
+                                        flights.forEach { flight ->
+                                            FlightAlertScheduler.cancel(context.applicationContext, flight.flightId)
+                                        }
+                                    }
+                                }
                             }
                         )
                     }
