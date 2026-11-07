@@ -43,4 +43,27 @@ class NextMovementsTest {
         assertNull(result.nextArrival)
         assertNull(result.nextDeparture)
     }
+
+    @Test fun todayMovementAlreadyPastIsExcluded() {
+        val result = nextMovements(
+            listOf(flight("PAST", OperationType.ARRIVAL, LocalTime.of(10, 0))),
+            LocalDateTime.of(2026, 11, 5, 10, 30)
+        )
+
+        assertNull(result.nextArrival)
+    }
+
+    @Test fun futureDateMovementIsIncluded() {
+        val tomorrow = flight("FUTURE", OperationType.ARRIVAL, LocalTime.of(10, 0)).copy(
+            flightDate = LocalDate.of(2026, 11, 6),
+            arrivalDate = LocalDate.of(2026, 11, 6)
+        )
+
+        val result = nextMovements(
+            listOf(tomorrow),
+            LocalDateTime.of(2026, 11, 5, 23, 59)
+        )
+
+        assertEquals("FUTURE", result.nextArrival?.flightId)
+    }
 }
