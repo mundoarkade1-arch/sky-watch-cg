@@ -89,7 +89,7 @@ fun RadarScreen(
                 title = {
                     Column {
                         Text(
-                            text = stringResource(R.string.radar_experimental),
+                            text = stringResource(R.string.radar_title),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
@@ -254,7 +254,7 @@ private fun RadarContent(
 
         item {
             Text(
-                text = stringResource(R.string.radar_attribution),
+                text = stringResource(R.string.radar_attribution_plain),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

@@ -185,3 +185,10 @@ Validação local: `testDebugUnitTest assembleDebug` — 127 testes, 0 falhas, 0
 - [x] Um snapshot bem-sucedido recria `RadarUiState` sem `errorMessage`.
 - [x] ODbL 1.0, adsb.lol, atribuição e necessidade de contato antes de produção estão documentados em `docs/API_SOURCES.md`.
 
+### Seção 7 — etapa 2, bloco 2
+
+- [x] Banner `VOO DETECTADO` na tela principal.
+- [x] Toque no banner abre a tela Radar.
+- [x] Área segura superior aplicada ao banner com `statusBarsPadding`.
+- [x] Removido “experimental” da interface do Radar.
+

@@ -562,3 +562,12 @@ Commit: `3303aa1` (`feat: adicionar vigilancia radar no ciclo de vida`).
 
 Suíte completa será revalidada após este ajuste de ciclo de vida. O teste focado passou: 3 testes, 0 falhas.
 
+## Seção 7, etapa 2, bloco 2 — alerta e tela Radar (2026-11-07)
+
+| Item | Commit | Evidência |
+|---|---|---|
+| Alerta visível `VOO DETECTADO` | `pendente neste commit` | Banner em `MainScreen` usa `radar_alert_detected` e mantém a distinção de observação ADS-B |
+| Toque no alerta abre Radar | `pendente neste commit` | Banner navega para a rota `radar` com `launchSingleTop` |
+| Tela Radar com área segura superior | `pendente neste commit` | Banner usa `statusBarsPadding`; tela Radar continua acessível pela navegação inferior |
+| Remoção de “experimental” da UI | `pendente neste commit` | Rótulo passou a ser `Radar`; atribuição não usa o termo removido |
+

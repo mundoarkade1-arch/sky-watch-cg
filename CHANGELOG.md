@@ -5,6 +5,10 @@
 - Adicionado teste com `LifecycleRegistry` cobrindo `CREATED → STARTED → CREATED` e a pausa efetiva das consultas.
 - Documentadas as respostas de auditoria sobre cooldown, limiares, inicialização em `MainActivity`, limpeza de erro após sucesso e ODbL/adsb.lol.
 
+## 2026-11-07 - Seção 7, etapa 2, bloco 2: alerta Radar
+- Adicionado banner `VOO DETECTADO` na tela principal, com toque para abrir Radar e proteção de área segura superior.
+- Removida a palavra “experimental” da interface do Radar.
+
 ## 2026-11-07 - Seção 7, etapa 2, bloco 1: vigilância radar
 - Adicionada vigilância ADS-B em qualquer tela, iniciada pela `MainActivity` e suspensa fora de `STARTED`, com intervalo padrão de 10 segundos.
 - Adicionada preferência persistida de vigília, ligada por padrão, e controle na tela Radar.

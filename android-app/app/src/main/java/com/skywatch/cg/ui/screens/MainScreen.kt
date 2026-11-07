@@ -6,6 +6,7 @@ import android.os.Build
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
@@ -163,9 +164,19 @@ fun MainScreen(viewModel: FlightListViewModel, radarViewModel: RadarViewModel) {
     }
     radarState.radarAlert?.let { alert ->
         Surface(
-            modifier = Modifier.fillMaxWidth().align(Alignment.TopCenter),
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.TopCenter)
+                .statusBarsPadding()
+                .clickable { navController.navigate("radar") { launchSingleTop = true } },
             color = MaterialTheme.colorScheme.tertiaryContainer
         ) {
+            Text(
+                text = stringResource(R.string.radar_alert_detected),
+                modifier = Modifier.padding(16.dp),
+                color = MaterialTheme.colorScheme.onTertiaryContainer,
+                fontWeight = FontWeight.Bold
+            )
             Text(
                 text = if (alert.type.name == "ARRIVAL") {
                     "Avião chegando · a ${alert.distanceNauticalMiles.toInt()} NM · pouso estimado em ~${alert.estimatedMinutes ?: 0} min"
@@ -825,7 +836,7 @@ fun BottomNavBar(navController: androidx.navigation.NavController) {
         )
         NavigationBarItem(
             icon = { Icon(painter = painterResource(R.drawable.ic_radar), contentDescription = null) },
-            label = { Text(text = stringResource(R.string.radar_experimental), style = MaterialTheme.typography.labelSmall) },
+            label = { Text(text = stringResource(R.string.radar_title), style = MaterialTheme.typography.labelSmall) },
             selected = currentRoute == "radar",
             onClick = {
                 navController.navigate("radar") {

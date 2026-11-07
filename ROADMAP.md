@@ -157,3 +157,9 @@
 - [x] Separadas as semânticas de cooldown: deduplicação de alerta (20 min) versus rate limit/backoff HTTP.
 - [ ] Executar CI remoto após o push desta revisão.
 
+## Revisão do bloco 2 (2026-11-07)
+
+- [x] Exibir `VOO DETECTADO` na tela principal.
+- [x] Abrir a tela Radar ao tocar no alerta.
+- [x] Aplicar `statusBarsPadding` e remover “experimental” da UI.
+
