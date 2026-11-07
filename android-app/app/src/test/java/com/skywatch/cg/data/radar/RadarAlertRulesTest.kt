@@ -12,7 +12,7 @@ class RadarAlertRulesTest {
         distance: Double,
         track: Double = 180.0,
         bearing: Double = 0.0
-    ) = RadarAircraft("abc", null, -20.4, -54.6, altitude, rate, 456.0, track, null, distance, bearing)
+    ) = RadarAircraft("abc", null, -20.4, -54.6, altitude, rate, 456.0, track, 0.0, distance, bearing)
 
     @Test fun detectsArrivalAndEstimatesTime() {
         val alert = RadarAlertRules.evaluate(aircraft(8_000, -500, 12.0))
