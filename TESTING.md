@@ -1,5 +1,13 @@
 # Plano de testes
 
+## Fechamento das seções 8 e 9 — 2026-11-07
+
+Seção 8 auditada: o checker de releases usa API pública, trata 404 e compara versões numericamente; o workflow lê assinatura apenas de secrets/variáveis do ambiente. A instalação manual do APK Release assinado permanece pendente por depender de aparelho e credenciais do CI.
+
+Seção 9 concluída localmente: resíduos gerados de tentativas anteriores foram removidos, sem apagar fontes ou fixtures. `FlightAlertWorker` e `SirosCsvParser` não foram encontrados no código.
+
+Validação final: `testDebugUnitTest assembleDebug` — **136 testes, 0 falhas, 0 erros e 1 ignorado** (`SirosStreamParserRealFileTest`).
+
 ## Seção 7 — radar, etapa 1: lógica (2026-11-07)
 
 | Item | Situação | Commit | Teste por item |

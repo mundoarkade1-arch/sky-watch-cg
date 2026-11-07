@@ -1,5 +1,13 @@
 # Estado do projeto
 
+## Seções 8 e 9 — fechamento local (2026-11-07)
+
+- [x] Seção 8 auditada: checker de releases, fallback HTTP 404, comparação numérica, assinatura opcional por variáveis de ambiente e workflow de release sem segredos no app.
+- [ ] Seção 8: instalação manual do APK Release assinado continua pendente; requer aparelho e credenciais de assinatura disponíveis no CI.
+- [x] Seção 9: resíduos locais de logs de tentativa removidos.
+- [x] Seção 9: `FlightAlertWorker` e `SirosCsvParser` não existem no código; `rg` não encontrou qualificadores de protótipo em interface/documentação.
+- [x] Validação final: 136 testes, 0 falhas, 0 erros, 1 ignorado; `assembleDebug` aprovado; CI `42350424172` verde.
+
 ## Seção 7 — radar, etapa 1: lógica (07/11/2026)
 - Constantes documentadas de SBCG: elevação 1.834 ft/559 m e cabeceiras 06/24 nos rumos verdadeiros 042,26°/222,26°, conforme AISWEB/DECEA.
 - Histórico curto por hex deriva tendência de distância e altitude; taxa explícita usa `baro_rate`, depois `geom_rate`, e somente na ausência de ambos usa amostras.

@@ -1,5 +1,12 @@
 # Roadmap
 
+## Seções 8 e 9 — fechamento local (2026-11-07)
+
+- [x] Auditar o fluxo de release/atualização sem token ou segredo no APK.
+- [ ] Validar instalação manual do APK Release assinado em aparelho Android.
+- [x] Remover resíduos de logs de tentativas locais e confirmar ausência dos parsers/workers removidos.
+- [x] Suíte final: 136 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+
 ## Revisão completa — seção 7, etapa 1 em progresso (07/11/2026)
 - [x] Registrar elevação e cabeceiras oficiais de SBCG como constantes documentadas.
 - [x] Adicionar histórico curto por hex e tendências de distância/altitude.
