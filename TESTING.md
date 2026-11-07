@@ -547,3 +547,17 @@ Validações realizadas:
 - `FlightIdKeyTest`: validou `Uri.encode`/`Uri.decode`, IDs de alerta distintos e `PendingIntent` distintos usando o hash completo do `flightId`.
 - Resultado do comando focado: `BUILD SUCCESSFUL`; 3 testes, 0 falhas.
 - O teste que prova que pouso e decolagem persistem juntos é `SirosStageIdentityTest.sameSirosRecordWithDifferentStagesKeepsArrivalAndDeparture`: ele normaliza dois registros com a mesma identidade SIROS e etapas diferentes, persiste ambos e verifica uma chegada e uma decolagem no banco.
+## Seção 7, etapa 2, bloco 1 — vigilância radar (2026-11-07)
+
+Commit: `3303aa1` (`feat: adicionar vigilancia radar no ciclo de vida`).
+
+| Item | Evidência | Teste | Resultado |
+|---|---|---|---|
+| Vigilância em qualquer tela, somente em `STARTED`, intervalo de ~10 s e switch persistido ligado por padrão | `MainActivity` inicia a vigilância; `repeatOnLifecycle(STARTED)` controla o ciclo; `AppPreferences.radarWatchEnabled` persiste a opção | `RadarSurveillanceTest.pollsEveryTenSecondsWithFakeClock`, `RadarSurveillanceTest.doesNotPollWhileOutsideStartedOrWhenDisabled`, `AppPreferencesTest.radarWatchIsEnabledByDefaultAndPersistsChanges` | Passou |
+| Limite de 1 requisição/s por endpoint | `RadarRemoteSource.MIN_REQUEST_INTERVAL_MILLIS` | `RadarRemoteSourceTest.enforcesOneSecondMinimumBetweenRequestsToSameEndpoint` | Passou |
+| Failover `adsb.lol → airplanes.live → adsb.fi` | Ordem em `DEFAULT_ENDPOINTS` | `RadarRemoteSourceTest.failsOverAfterRateLimit` | Passou |
+| `429`, `Retry-After` e backoff limitado | Estado de cooldown por endpoint e teto de 5 minutos | `RadarRemoteSourceTest.respectsRetryAfterCooldownUsingFakeClock` | Passou |
+| Histórico por hex integrado ao alerta do ViewModel | `RadarViewModel.applySnapshot` observa `RadarAircraftHistory` antes de avaliar a regra | `RadarTrajectoryRulesTest` cobre histórico/tendência; integração de ciclo de vida ainda não possui harness Android completo | Código integrado; harness de ViewModel pendente |
+
+Suíte completa executada em `android-app` com `testDebugUnitTest assembleDebug`: **127 testes, 0 falhas, 0 erros e 1 ignorado** (`SirosStreamParserRealFileTest`, dependente de CSV externo). `assembleDebug` passou. Nenhum push foi feito.
+

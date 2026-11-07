@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-07 - Seção 7, etapa 2, bloco 1: vigilância radar
+- Adicionada vigilância ADS-B em qualquer tela, iniciada pela `MainActivity` e suspensa fora de `STARTED`, com intervalo padrão de 10 segundos.
+- Adicionada preferência persistida de vigília, ligada por padrão, e controle na tela Radar.
+- Mantidos limite de 1 requisição por segundo por endpoint, failover entre as três fontes e cooldown de `429` com `Retry-After`/backoff limitado.
+- Integrado o histórico curto por hex ao caminho de avaliação do `RadarViewModel`.
+- Validação local: 127 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+
 ## 2026-11-07 - Seção 7, etapa 1: lógica do radar
 - Adicionadas constantes oficiais de SBCG: elevação, cabeceiras 06/24 e rumos verdadeiros.
 - Implementado histórico curto por hex com tendência de distância/altitude.

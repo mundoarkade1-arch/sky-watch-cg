@@ -164,3 +164,14 @@
 - Solicitar confirmação escrita à entidade responsável por CGR sobre acesso autorizado a status operacional Aena.
 - Manter observações ADS-B separadas do planejamento SIROS; não associar a voo comercial sem correspondência verificável.
 - A integração Aena permanece uma frente separada e depende de resposta escrita; a minuta não foi enviada.
+### Seção 7 — etapa 2, bloco 1 (2026-11-07)
+
+- [x] Vigilância radar ligada ao ciclo de vida da `MainActivity`, com `repeatOnLifecycle(STARTED)` e intervalo padrão de 10 segundos.
+- [x] Switch de vigília persistido em `AppPreferences`, padrão ligado.
+- [x] Limite de 1 requisição por segundo por endpoint, failover na ordem `adsb.lol`, `airplanes.live`, `adsb.fi`, cooldown de `429` com `Retry-After` e teto de backoff preservados.
+- [x] Histórico curto por hex conectado ao caminho de avaliação do `RadarViewModel`.
+- [x] Testes JVM com relógio/espera falsos para intervalo, pausa fora de `STARTED`/switch desligado e MockWebServer para limite, failover e cooldown.
+- [ ] Harness Android/Robolectric completo para observar diretamente a entrada e saída de `STARTED` no `repeatOnLifecycle`.
+
+Validação local: `testDebugUnitTest assembleDebug` — 127 testes, 0 falhas, 0 erros e 1 ignorado; build Debug aprovado.
+

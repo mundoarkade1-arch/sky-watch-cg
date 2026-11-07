@@ -143,3 +143,11 @@
 - Completar a UI de preferências de som/vibração, teste de notificação e reagendamento dos alarmes quando configurações mudarem.
 - Completar rolagem automática até o próximo voo e botão para voltar ao próximo movimento.
 
+## Revisão completa — seção 7, etapa 2, bloco 1 (2026-11-07)
+
+- [x] Vigília ADS-B a cada aproximadamente 10 segundos, iniciada pela atividade e suspensa fora de `STARTED`.
+- [x] Preferência persistida de vigília, ligada por padrão.
+- [x] Limite por endpoint, failover e cooldown/backoff cobertos por testes JVM.
+- [x] Histórico por hex integrado ao `RadarViewModel`.
+- [ ] Validar em harness Android/Robolectric a transição real do `LifecycleRegistry` com `repeatOnLifecycle`.
+
