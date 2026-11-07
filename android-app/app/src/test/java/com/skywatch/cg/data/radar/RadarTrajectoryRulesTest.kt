@@ -60,6 +60,11 @@ class RadarTrajectoryRulesTest {
     }
 
     @Test
+    fun invalidPositionIsIgnored() {
+        assertNull(RadarAlertRules.evaluate(aircraft().copy(latitude = 91.0)))
+    }
+
+    @Test
     fun missingBarometricRateUsesGeometricRateWhenPresent() {
         val alert = RadarAlertRules.evaluate(aircraft(baroRate = null, geometricRate = -500))
         assertEquals(RadarAlertType.ARRIVAL, alert?.type)
