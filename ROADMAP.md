@@ -151,3 +151,9 @@
 - [x] Histórico por hex integrado ao `RadarViewModel`.
 - [ ] Validar em harness Android/Robolectric a transição real do `LifecycleRegistry` com `repeatOnLifecycle`.
 
+## Revisão do bloco 1 — ciclo de vida real (2026-11-07)
+
+- [x] Teste real com `LifecycleRegistry`: `CREATED → STARTED → CREATED` pausa a vigilância.
+- [x] Separadas as semânticas de cooldown: deduplicação de alerta (20 min) versus rate limit/backoff HTTP.
+- [ ] Executar CI remoto após o push desta revisão.
+

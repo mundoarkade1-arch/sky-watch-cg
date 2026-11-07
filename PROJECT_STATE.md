@@ -175,3 +175,13 @@
 
 Validação local: `testDebugUnitTest assembleDebug` — 127 testes, 0 falhas, 0 erros e 1 ignorado; build Debug aprovado.
 
+### Revisão da pausa por ciclo de vida (2026-11-07)
+
+- [x] `RadarSurveillance.runForLifecycle` usa `repeatOnLifecycle(STARTED)` diretamente.
+- [x] `RadarSurveillanceTest.pausesPollingWhenLifecycleMovesFromStartedBackToCreated` usa `LifecycleRegistry`, conta consultas e confirma pausa em `CREATED`.
+- [x] Cooldown de 20 minutos é deduplicação de alertas (`RadarAlertDeduplicator`), distinto do cooldown HTTP/backoff das fontes.
+- [x] `RadarAlertRules` mantém constantes nomeadas para idade, velocidade, AGL, distância, rumo e taxa vertical.
+- [x] `MainActivity` inicia a vigilância antes da composição, permitindo execução em qualquer tela.
+- [x] Um snapshot bem-sucedido recria `RadarUiState` sem `errorMessage`.
+- [x] ODbL 1.0, adsb.lol, atribuição e necessidade de contato antes de produção estão documentados em `docs/API_SOURCES.md`.
+

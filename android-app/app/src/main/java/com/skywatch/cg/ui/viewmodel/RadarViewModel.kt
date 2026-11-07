@@ -13,7 +13,6 @@ import com.skywatch.cg.data.radar.RadarAircraftHistory
 import com.skywatch.cg.data.radar.RadarSurveillance
 import com.skywatch.cg.data.prefs.AppPreferences
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -73,23 +72,19 @@ class RadarViewModel(
     fun startSurveillance(lifecycle: Lifecycle) {
         if (surveillanceJob?.isActive == true) return
         surveillanceJob = viewModelScope.launch {
-            lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                RadarSurveillance(repository).run(
-                    isStarted = { true },
-                    isEnabled = { AppPreferences.getInstance(getApplication()).radarWatchEnabled },
-                    onSnapshot = { snapshot, _ ->
-                        applySnapshot(snapshot)
-                    },
-                    onError = { error ->
-                        if (error is RadarUnavailableException || error is IOException) {
-                            mutableUiState.value = mutableUiState.value.copy(
-                                isLoading = false,
-                                errorMessage = error.message
-                            )
-                        }
+            RadarSurveillance(repository).runForLifecycle(
+                lifecycle = lifecycle,
+                isEnabled = { AppPreferences.getInstance(getApplication()).radarWatchEnabled },
+                onSnapshot = { snapshot, _ -> applySnapshot(snapshot) },
+                onError = { error ->
+                    if (error is RadarUnavailableException || error is IOException) {
+                        mutableUiState.value = mutableUiState.value.copy(
+                            isLoading = false,
+                            errorMessage = error.message
+                        )
                     }
-                )
-            }
+                }
+            )
         }
     }
 

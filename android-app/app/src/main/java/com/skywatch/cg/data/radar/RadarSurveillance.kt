@@ -1,5 +1,7 @@
 package com.skywatch.cg.data.radar
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
@@ -13,8 +15,25 @@ class RadarSurveillance(
     private val repository: RadarRepository,
     private val intervalMillis: Long = DEFAULT_INTERVAL_MILLIS,
     private val clockMillis: () -> Long = System::currentTimeMillis,
-    private val wait: suspend (Long) -> Unit = { delay(it) }
+    private val wait: suspend (Long) -> Unit = { delay(it) },
+    private val refreshSnapshot: suspend () -> RadarSnapshot = { repository.refresh() }
 ) {
+    suspend fun runForLifecycle(
+        lifecycle: Lifecycle,
+        isEnabled: () -> Boolean,
+        onSnapshot: suspend (RadarSnapshot, Long) -> Unit,
+        onError: suspend (Throwable) -> Unit = {}
+    ) {
+        lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            run(
+                isStarted = { true },
+                isEnabled = isEnabled,
+                onSnapshot = onSnapshot,
+                onError = onError
+            )
+        }
+    }
+
     suspend fun run(
         isStarted: () -> Boolean,
         isEnabled: () -> Boolean,
@@ -25,7 +44,7 @@ class RadarSurveillance(
         while (currentCoroutineContext().isActive) {
             if (isStarted() && isEnabled()) {
                 try {
-                    onSnapshot(repository.refresh(), clockMillis())
+                onSnapshot(refreshSnapshot(), clockMillis())
                 } catch (error: CancellationException) {
                     throw error
                 } catch (error: Throwable) {

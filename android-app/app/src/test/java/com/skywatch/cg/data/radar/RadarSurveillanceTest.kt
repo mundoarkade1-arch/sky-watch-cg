@@ -1,6 +1,11 @@
 package com.skywatch.cg.data.radar
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
@@ -71,5 +76,47 @@ class RadarSurveillanceTest {
         } catch (_: CancellationException) { }
 
         assertEquals(1, server.requestCount)
+    }
+
+    @Test
+    fun pausesPollingWhenLifecycleMovesFromStartedBackToCreated() = runBlocking {
+        val owner = TestLifecycleOwner()
+        var calls = 0
+        val surveillance = RadarSurveillance(
+            repository = RadarRepository(),
+            intervalMillis = 10_000L,
+            wait = { delay(1) },
+            refreshSnapshot = {
+                calls++
+                RadarSnapshot(1_000L, emptyList(), "teste")
+            }
+        )
+        val job = launch {
+            surveillance.runForLifecycle(
+                lifecycle = owner.lifecycle,
+                isEnabled = { true },
+                onSnapshot = { _, _ -> }
+            )
+        }
+
+        owner.registry.handleLifecycleEvent(Lifecycle.Event.ON_CREATE)
+        delay(10)
+        assertEquals(0, calls)
+
+        owner.registry.handleLifecycleEvent(Lifecycle.Event.ON_START)
+        delay(20)
+        assertTrue(calls > 0)
+        val callsWhenStarted = calls
+
+        owner.registry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
+        delay(20)
+        assertEquals(callsWhenStarted, calls)
+
+        job.cancel()
+    }
+
+    private class TestLifecycleOwner : LifecycleOwner {
+        val registry = LifecycleRegistry(this)
+        override val lifecycle: Lifecycle = registry
     }
 }
