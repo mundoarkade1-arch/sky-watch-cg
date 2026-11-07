@@ -16,6 +16,19 @@ internal val campoGrandeZone = ZoneId.of("America/Campo_Grande")
 internal val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 internal val localDateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm").withZone(ZoneId.of("America/Campo_Grande"))
 
+private val airportTimezonesByIcao = mapOf(
+    "SBCG" to "America/Campo_Grande",
+    "SBGR" to "America/Sao_Paulo",
+    "SBSP" to "America/Sao_Paulo",
+    "SBKP" to "America/Sao_Paulo",
+    "SBBR" to "America/Sao_Paulo",
+    "KJFK" to "America/New_York",
+    "EGLL" to "Europe/London"
+)
+
+internal fun airportTimezoneForIcao(icao: String, fallback: String): String =
+    airportTimezonesByIcao[icao.trim().uppercase(Locale.ROOT)] ?: fallback
+
 /**
  * Retorna o horário local formatado (HH:mm) para chegada ou partida do voo.
  */
@@ -23,7 +36,9 @@ internal fun NormalizedFlight.getAirportEventDateTime(): LocalDateTime {
     val isArrival = operationType == OperationType.ARRIVAL
     val utcTime = if (isArrival) scheduledArrivalUtc else scheduledDepartureUtc
     val utcDate = if (isArrival) arrivalDate else flightDate
-    val airportTimezone = if (isArrival) destinationTimezone else originTimezone
+    val airportIcao = if (isArrival) destination else origin
+    val declaredTimezone = if (isArrival) destinationTimezone else originTimezone
+    val airportTimezone = airportTimezoneForIcao(airportIcao, declaredTimezone)
     return utcDate.atTime(utcTime)
         .atZone(ZoneId.of("UTC"))
         .withZoneSameInstant(ZoneId.of(airportTimezone))

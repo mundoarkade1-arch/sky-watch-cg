@@ -94,6 +94,22 @@ class FlightDisplayUtilsTest {
     }
 
     @Test
+    fun knownIcaoTimezoneOverridesAnIncorrectDeclaredTimezone() {
+        val flight = flight(
+            id = "icao-timezone",
+            operationType = OperationType.ARRIVAL,
+            flightDate = LocalDate.of(2026, 11, 4),
+            arrivalDate = LocalDate.of(2026, 11, 4),
+            scheduledDepartureUtc = LocalTime.of(8, 0),
+            scheduledArrivalUtc = LocalTime.of(9, 30)
+        ).copy(destinationTimezone = "UTC")
+
+        assertEquals("05:30", flight.getDisplayTime())
+        assertEquals("America/Campo_Grande", airportTimezoneForIcao("sbcg", "UTC"))
+        assertEquals("UTC", airportTimezoneForIcao("XXXX", "UTC"))
+    }
+
+    @Test
     fun overnightArrivalUsesTheArrivalUtcDateBeforeConvertingToCampoGrande() {
         val flightDate = LocalDate.of(2026, 11, 4)
         val flight = flight(
