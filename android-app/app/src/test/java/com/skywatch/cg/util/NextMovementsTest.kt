@@ -28,4 +28,19 @@ class NextMovementsTest {
         assertNull(result.nextArrival)
         assertEquals("D", result.nextDeparture?.flightId)
     }
+
+    @Test fun ignoresMovementsFromEarlierDates() {
+        val yesterday = flight("Y", OperationType.ARRIVAL, LocalTime.of(10, 0)).copy(
+            flightDate = LocalDate.of(2026, 11, 4),
+            arrivalDate = LocalDate.of(2026, 11, 4)
+        )
+
+        val result = nextMovements(
+            listOf(yesterday),
+            LocalDateTime.of(2026, 11, 5, 8, 0)
+        )
+
+        assertNull(result.nextArrival)
+        assertNull(result.nextDeparture)
+    }
 }
