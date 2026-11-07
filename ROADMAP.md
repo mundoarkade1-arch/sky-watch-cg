@@ -1,10 +1,12 @@
 # Roadmap
 
 ## Revisão completa — seção 6 em progresso (07/11/2026)
-- [x] Cobrir cabeçalhos, BOM UTF-8, ISO-8859-1, campos vazios, delimitador `;`, aspas escapadas e callback de erro.
+- [x] Unificar produção e testes em `SirosStreamParser` e remover `SirosCsvParser`.
+- [x] Cobrir cabeçalhos, erro de formato, BOM UTF-8, ISO-8859-1, campos vazios, delimitador `;`, aspas escapadas e callback de erro.
 - [x] Manter o caminho ativo em streaming/lazy para o CSV SIROS.
-- [ ] Executar a fixture CSV real nesta máquina; o arquivo não está disponível e o teste permanece ignorado.
-- [x] Suíte completa: 113 testes, 0 falhas, 0 erros, 1 ignorado; `assembleDebug` aprovado.
+- [x] Testar filtro de passageiros com fixture versionada e registrar os valores reais encontrados no CSV oficial.
+- [ ] Executar o teste de memória com o CSV completo versionado; o arquivo completo não entra no repositório.
+- [x] Suíte completa: 112 testes, 0 falhas, 0 erros, 1 ignorado; `assembleDebug` aprovado.
 
 ## Revisão completa — seção 5 concluída (07/11/2026)
 - [x] Cobrir `formatAirportDisplay` com Dallas/Fort Worth, Rio de Janeiro e padrão desconhecido, além de `formatAirlineName`.

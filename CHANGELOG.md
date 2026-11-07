@@ -1,10 +1,11 @@
 # Changelog
 
 ## 2026-11-07 - Seção 6: parser SIROS
-- Corrigido o parsing de campos SIROS entre aspas com delimitadores e aspas escapadas.
-- Adicionado teste de callback para linha curta, sem inventar dados do CSV real.
-- A fixture real segue pendente porque o arquivo local não está disponível; o teste foi ignorado.
-- Suíte completa aprovada: 113 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+- Unificado o parser em `SirosStreamParser`; `SirosCsvParser` e seus testes foram removidos.
+- Cabeçalho SIROS ausente agora gera erro claro de formato alterado.
+- Removidos logs por registro do sync.
+- Adicionado teste da fixture versionada para `PASSAGEIROS`/`REGULAR DE PASSAGEIROS`; o CSV oficial confirmou os mesmos valores em 929 linhas SBCG.
+- Suíte completa aprovada: 112 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
 
 ## 2026-11-07 - Seção 5: exibição e fusos
 - Normalizados nomes de aeroportos e companhias aéreas, incluindo Dallas/Fort Worth e Rio de Janeiro.

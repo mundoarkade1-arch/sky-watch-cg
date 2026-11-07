@@ -12,19 +12,25 @@
 
 Suíte completa: `testDebugUnitTest assembleDebug` — `BUILD SUCCESSFUL`; 113 testes, 0 falhas, 0 erros e 1 ignorado. `assembleDebug` também passou.
 
-## Seção 6 — parser SIROS (2026-11-07)
+## Seção 6 — parser SIROS (2026-11-07, revisada)
 
 | Item | Situação | Commit | Teste por item |
 |---|---|---|---|
+| Parser único em produção e testes | Feito | `007d33b` | `SirosRepository` usa `SirosStreamParser`; `SirosCsvParser` e seus testes foram removidos |
 | Cabeçalho descritivo e cabeçalho de 28 colunas | Feito | `178dce6` | `testParseStreamSkipsDescriptiveLine`, `testParseStreamSkipsHeader` em [SirosStreamParserTest.kt](android-app/app/src/test/java/com/skywatch/cg/data/siros/SirosStreamParserTest.kt) |
+| Cabeçalho ausente gera erro claro | Feito | `007d33b` | `testParseWithoutRecognizableHeaderReportsFormatChange` e `testSyncWithoutRecognizableHeaderReportsFormatChange` |
 | Codificação UTF-8 com BOM | Feito | `178dce6` | `testParseStreamWithUtf8Bom`, `testParseStreamWithCallbackUtf8Bom` em [SirosStreamParserBomTest.kt](android-app/app/src/test/java/com/skywatch/cg/data/siros/SirosStreamParserBomTest.kt) |
 | Codificação ISO-8859-1 sem BOM e acentos | Feito | `178dce6` | `testParseStreamLatin1Encoding`, `testParseStreamWithoutBomIso88591` |
 | Campos vazios, linha curta e erro por callback | Feito | `79f9cd5` | `testParseStreamEmptyFields`, `testParseStreamMalformedLine`, `testParseStreamWithCallbackReportsShortLine` |
 | Delimitador `;`, campo citado e aspas escapadas | Feito | `79f9cd5` | `testParseStreamPreservesQuotedDelimiterAndEscapedQuote` |
 | Avaliação streaming/lazy e callback | Feito | `178dce6` | `testParseStreamLazyEvaluation`, `testParseStreamWithCallback` |
-| Fixture CSV real e memória | Pendente localmente | `178dce6` | `parseRealCsvStreamingCountsRecordsAndKeepsMemoryFlat`; ignorado porque `Downloads/siros-registros.csv` não está disponível |
+| Filtro de passageiros por `objetoTransporte` e `tipoServico` | Feito | `dd4e0ef` | `fixtureUsesPassengerObjectAndServiceAndRejectsCargoVariant` em [SirosFixturePassengerFilterTest.kt](android-app/app/src/test/java/com/skywatch/cg/data/siros/SirosFixturePassengerFilterTest.kt) |
+| Logs por registro | Feito | `007d33b` | Revisão de [SirosRepository.kt](android-app/app/src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt): permanecem apenas logs agregados/erro |
+| Fixture CSV completo e memória | Pendente localmente | `178dce6` | `parseRealCsvStreamingCountsRecordsAndKeepsMemoryFlat`; ignorado porque o arquivo não está no repositório |
 
-Suíte completa: `testDebugUnitTest assembleDebug` — `BUILD SUCCESSFUL`; 113 testes, 0 falhas, 0 erros e 1 ignorado. O APK Debug foi gerado. A fixture real continua pendente até o arquivo ser disponibilizado.
+Fixture versionada: 2 registros de `siros_cgr_real_sample.csv`, ambos `Tipo Serviço = REGULAR DE PASSAGEIROS` e `Objeto Transporte = PASSAGEIROS`. No CSV oficial baixado (26.650.737 bytes), 929 registros envolviam `SBCG`; todos tinham a mesma combinação. O arquivo completo permaneceu apenas em diretório temporário e não foi versionado.
+
+Suíte completa: `testDebugUnitTest assembleDebug` — `BUILD SUCCESSFUL`; 112 testes, 0 falhas, 0 erros e 1 ignorado. O APK Debug foi gerado.
 
 ## Seção 4 — checklist de alertas locais (2026-11-07)
 

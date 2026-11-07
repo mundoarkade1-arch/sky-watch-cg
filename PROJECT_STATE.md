@@ -8,10 +8,11 @@
 - Suíte completa mais recente: 113 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
 
 ## Seção 6 — parser SIROS (07/11/2026)
-- O parser streaming ativo preserva cabeçalhos, BOM UTF-8, ISO-8859-1, campos vazios, delimitador `;`, campos citados e aspas escapadas.
-- `testParseStreamWithCallbackReportsShortLine` comprova o reporte de linha curta sem interromper a API de callback.
-- A fixture CSV real permanece pendente: `SirosStreamParserRealFileTest` foi ignorado por ausência de `Downloads/siros-registros.csv`; não foi inventado resultado de CSV real.
-- Suíte completa: 113 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+- `SirosStreamParser` é agora o único parser, usado pelo `SirosRepository` e pelos testes; `SirosCsvParser` foi removido.
+- Cabeçalho ausente produz `Formato do CSV mudou: cabeçalho SIROS não reconhecido`, antes de qualquer fallback para “Nenhum voo SBCG”.
+- Logs por registro foram removidos; permanecem logs agregados e de erro.
+- A fixture versionada comprova `Objeto Transporte = PASSAGEIROS` e `Tipo Serviço = REGULAR DE PASSAGEIROS`; o CSV oficial baixado mostrou os mesmos valores nas 929 linhas envolvendo SBCG.
+- Suíte completa: 112 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
 
 ## Seção 4 — alertas locais concluída (07/11/2026)
 - A tela Sobre informa a ausência de permissão por Toast/feedback e oferece `ACTION_APP_NOTIFICATION_SETTINGS`.
