@@ -678,13 +678,7 @@ fun AboutScreen(
                                     val database = AppDatabase.getDatabase(context.applicationContext)
                                     val flights = database.flightDao().getAllArrivals().map { it.toNormalizedFlight() } +
                                         database.flightDao().getAllDepartures().map { it.toNormalizedFlight() }
-                                    if (it) {
-                                        FlightAlertScheduler.scheduleUpcomingFlights(context.applicationContext, flights)
-                                    } else {
-                                        flights.forEach { flight ->
-                                            FlightAlertScheduler.cancel(context.applicationContext, flight.flightId)
-                                        }
-                                    }
+                                    FlightAlertScheduler.scheduleUpcomingFlights(context.applicationContext, flights)
                                 }
                             }
                         )

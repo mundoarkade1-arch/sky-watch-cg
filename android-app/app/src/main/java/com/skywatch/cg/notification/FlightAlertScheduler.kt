@@ -31,10 +31,17 @@ object FlightAlertScheduleLogic {
 object FlightAlertScheduler {
     const val DEFAULT_MINUTES_BEFORE = 15
     private const val SCHEDULE_HORIZON_MILLIS = 48 * 60 * 60 * 1_000L
+    private const val SCHEDULED_FLIGHT_IDS_KEY = "scheduled_flight_ids"
 
     internal fun shouldScheduleAlerts(alertsEnabled: Boolean): Boolean = alertsEnabled
 
     internal fun alarmRequestCode(flightId: String): Int = flightId.hashCode()
+
+    internal fun idsToCancel(previous: Set<String>, current: Set<String>): Set<String> = previous - current
+
+    internal fun scheduledFlightIds(context: Context): Set<String> =
+        context.getSharedPreferences("sky_watch_prefs", Context.MODE_PRIVATE)
+            .getStringSet(SCHEDULED_FLIGHT_IDS_KEY, emptySet()).orEmpty()
 
     fun schedule(
         context: Context,
@@ -110,12 +117,25 @@ object FlightAlertScheduler {
         flights: Iterable<NormalizedFlight>,
         nowMillis: Long = System.currentTimeMillis()
     ): Int {
-        if (!shouldScheduleAlerts(AppPreferences.getInstance(context).alertsEnabled)) return 0
+        val flightList = flights.toList()
+        val preferences = AppPreferences.getInstance(context)
+        val storedPreferences = context.getSharedPreferences("sky_watch_prefs", Context.MODE_PRIVATE)
+        val previousIds = storedPreferences.getStringSet(SCHEDULED_FLIGHT_IDS_KEY, emptySet()).orEmpty()
+        if (!shouldScheduleAlerts(preferences.alertsEnabled)) {
+            idsToCancel(previousIds, emptySet()).forEach { cancel(context, it) }
+            storedPreferences.edit().remove(SCHEDULED_FLIGHT_IDS_KEY).apply()
+            return 0
+        }
+        val eligibleIds = flightList.filter { flight ->
+            val eventAt = eventAtMillis(flight)
+            eventAt > nowMillis && eventAt <= nowMillis + SCHEDULE_HORIZON_MILLIS
+        }.map { it.flightId }.toSet()
+        idsToCancel(previousIds, eligibleIds).forEach { cancel(context, it) }
         var scheduled = 0
-        flights.forEach { flight ->
+        flightList.forEach { flight ->
             val eventAt = eventAtMillis(flight)
             val triggerAt = max(nowMillis + 1_000L, eventAt - DEFAULT_MINUTES_BEFORE * 60_000L)
-            if (eventAt > nowMillis && eventAt <= nowMillis + SCHEDULE_HORIZON_MILLIS) {
+            if (flight.flightId in eligibleIds) {
                 val eventType = if (flight.operationType == OperationType.ARRIVAL) "Pouso" else "Decolagem"
                 val route = if (flight.operationType == OperationType.ARRIVAL) {
                     "Rota planejada: ${flight.origin} → CGR"
@@ -132,6 +152,7 @@ object FlightAlertScheduler {
                 scheduled++
             }
         }
+        storedPreferences.edit().putStringSet(SCHEDULED_FLIGHT_IDS_KEY, eligibleIds).apply()
         return scheduled
     }
 }

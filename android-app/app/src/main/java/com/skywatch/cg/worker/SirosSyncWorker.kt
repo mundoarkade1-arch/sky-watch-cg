@@ -7,6 +7,8 @@ import androidx.work.WorkerParameters
 import com.skywatch.cg.data.db.AppDatabase
 import com.skywatch.cg.data.siros.SirosRepository
 import com.skywatch.cg.notification.FlightAlertScheduler
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 /**
  * Worker do WorkManager para atualização periódica em segundo plano dos dados do SIROS.
@@ -26,6 +28,9 @@ class SirosSyncWorker(
             val result = repository.syncFromRemote()
             when (result) {
                 is SirosRepository.SyncResult.Success -> {
+                    database.alertSentDao().deleteOldAlerts(
+                        Instant.now().minus(30, ChronoUnit.DAYS).toEpochMilli()
+                    )
                     val flights = database.flightDao().getAllArrivals().map { it.toNormalizedFlight() } +
                         database.flightDao().getAllDepartures().map { it.toNormalizedFlight() }
                     FlightAlertScheduler.scheduleUpcomingFlights(applicationContext, flights)

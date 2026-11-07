@@ -2,11 +2,17 @@ package com.skywatch.cg.notification
 
 import com.skywatch.cg.data.siros.NormalizedFlight
 import com.skywatch.cg.data.siros.OperationType
+import androidx.test.core.app.ApplicationProvider
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.ZoneOffset
 
+@RunWith(RobolectricTestRunner::class)
 class FlightAlertScheduleLogicTest {
     @Test fun doesNotScheduleWhenAlertsAreDisabled() {
         assertEquals(false, FlightAlertScheduler.shouldScheduleAlerts(false))
@@ -30,6 +36,52 @@ class FlightAlertScheduleLogicTest {
     @Test fun notificationTestExplainsWhenPermissionIsMissing() {
         assertEquals("Permita notificações do app para receber alertas.", NotificationHelper.testNotificationMessage(false))
         assertEquals("Notificação enviada.", NotificationHelper.testNotificationMessage(true))
+    }
+
+    @Test fun removedFlightsAreSelectedForAlarmCancellation() {
+        assertEquals(
+            setOf("removed-flight"),
+            FlightAlertScheduler.idsToCancel(
+                setOf("kept-flight", "removed-flight"),
+                setOf("kept-flight")
+            )
+        )
+    }
+
+    @Test fun syncRemovesMissingFlightFromScheduledAlarmState() {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        context.getSharedPreferences("sky_watch_prefs", android.content.Context.MODE_PRIVATE).edit().clear().apply()
+        val now = System.currentTimeMillis()
+        val event = Instant.ofEpochMilli(now + 60 * 60 * 1_000L).atZone(ZoneOffset.UTC).toLocalDateTime()
+        val flight = NormalizedFlight(
+            flightId = "current-flight",
+            sirosRecordId = "record",
+            airline = "Teste",
+            flightNumber = "1",
+            equipment = null,
+            origin = "SBCG",
+            originName = null,
+            originTimezone = "America/Campo_Grande",
+            destination = "SBGR",
+            destinationName = null,
+            destinationTimezone = "America/Sao_Paulo",
+            operationType = OperationType.DEPARTURE,
+            scheduledDepartureUtc = event.toLocalTime(),
+            scheduledArrivalUtc = event.toLocalTime().plusHours(2),
+            flightDate = event.toLocalDate(),
+            arrivalDate = event.toLocalDate(),
+            daysOfWeek = emptyList(),
+            validFrom = event.toLocalDate(),
+            validTo = event.toLocalDate(),
+            serviceType = "PASSENGER",
+            sirosStatus = "A operar"
+        )
+
+        FlightAlertScheduler.scheduleUpcomingFlights(context, listOf(flight), now)
+        assertEquals(setOf("current-flight"), FlightAlertScheduler.scheduledFlightIds(context))
+
+        FlightAlertScheduler.scheduleUpcomingFlights(context, emptyList(), now)
+        assertEquals(emptySet<String>(), FlightAlertScheduler.scheduledFlightIds(context))
     }
 
     @Test fun exactAlarmPolicyUsesExactBeforeAndroid12OrWhenAllowed() {
