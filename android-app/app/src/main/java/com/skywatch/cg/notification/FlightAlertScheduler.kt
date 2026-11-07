@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import com.skywatch.cg.data.db.FollowedFlight
+import com.skywatch.cg.data.prefs.AppPreferences
 import com.skywatch.cg.data.siros.NormalizedFlight
 import com.skywatch.cg.data.siros.OperationType
 import com.skywatch.cg.util.getDisplayDateTime
@@ -30,6 +31,17 @@ object FlightAlertScheduleLogic {
 object FlightAlertScheduler {
     const val DEFAULT_MINUTES_BEFORE = 15
     private const val SCHEDULE_HORIZON_MILLIS = 48 * 60 * 60 * 1_000L
+    private const val SCHEDULED_FLIGHT_IDS_KEY = "scheduled_flight_ids"
+
+    internal fun shouldScheduleAlerts(alertsEnabled: Boolean): Boolean = alertsEnabled
+
+    internal fun alarmRequestCode(flightId: String): Int = flightId.hashCode()
+
+    internal fun idsToCancel(previous: Set<String>, current: Set<String>): Set<String> = previous - current
+
+    internal fun scheduledFlightIds(context: Context): Set<String> =
+        context.getSharedPreferences("sky_watch_prefs", Context.MODE_PRIVATE)
+            .getStringSet(SCHEDULED_FLIGHT_IDS_KEY, emptySet()).orEmpty()
 
     fun schedule(
         context: Context,
@@ -46,15 +58,43 @@ object FlightAlertScheduler {
             putExtra(FlightAlertReceiver.EXTRA_TEXT, text)
         }
         val pendingIntent = PendingIntent.getBroadcast(
-            context, plan.flightId.hashCode(), intent,
+            context, alarmRequestCode(plan.flightId), intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && alarmManager.canScheduleExactAlarms()) {
+        val canScheduleExact = Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()
+        if (shouldUseExactAlarm(Build.VERSION.SDK_INT, canScheduleExact)) {
             alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmAtMillis, pendingIntent)
         } else {
             alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmAtMillis, pendingIntent)
         }
     }
+
+    fun cancel(context: Context, flightId: String) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, FlightAlertReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            alarmRequestCode(flightId),
+            intent,
+            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+        ) ?: return
+        alarmManager.cancel(pendingIntent)
+        pendingIntent.cancel()
+    }
+
+    internal fun shouldUseExactAlarm(apiLevel: Int, canScheduleExactAlarms: Boolean): Boolean =
+        apiLevel < Build.VERSION_CODES.S || canScheduleExactAlarms
+
+    fun canScheduleExactAlarms(context: Context): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return true
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        return alarmManager.canScheduleExactAlarms()
+    }
+
+    fun exactAlarmSettingsIntent(context: Context): Intent =
+        Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+            data = android.net.Uri.parse("package:${context.packageName}")
+        }
 
     fun eventAtMillis(flight: FollowedFlight): Long {
         val isArrival = flight.operationType == "ARRIVAL"
@@ -77,11 +117,25 @@ object FlightAlertScheduler {
         flights: Iterable<NormalizedFlight>,
         nowMillis: Long = System.currentTimeMillis()
     ): Int {
+        val flightList = flights.toList()
+        val preferences = AppPreferences.getInstance(context)
+        val storedPreferences = context.getSharedPreferences("sky_watch_prefs", Context.MODE_PRIVATE)
+        val previousIds = storedPreferences.getStringSet(SCHEDULED_FLIGHT_IDS_KEY, emptySet()).orEmpty()
+        if (!shouldScheduleAlerts(preferences.alertsEnabled)) {
+            idsToCancel(previousIds, emptySet()).forEach { cancel(context, it) }
+            storedPreferences.edit().remove(SCHEDULED_FLIGHT_IDS_KEY).apply()
+            return 0
+        }
+        val eligibleIds = flightList.filter { flight ->
+            val eventAt = eventAtMillis(flight)
+            eventAt > nowMillis && eventAt <= nowMillis + SCHEDULE_HORIZON_MILLIS
+        }.map { it.flightId }.toSet()
+        idsToCancel(previousIds, eligibleIds).forEach { cancel(context, it) }
         var scheduled = 0
-        flights.forEach { flight ->
+        flightList.forEach { flight ->
             val eventAt = eventAtMillis(flight)
             val triggerAt = max(nowMillis + 1_000L, eventAt - DEFAULT_MINUTES_BEFORE * 60_000L)
-            if (eventAt > nowMillis && eventAt <= nowMillis + SCHEDULE_HORIZON_MILLIS) {
+            if (flight.flightId in eligibleIds) {
                 val eventType = if (flight.operationType == OperationType.ARRIVAL) "Pouso" else "Decolagem"
                 val route = if (flight.operationType == OperationType.ARRIVAL) {
                     "Rota planejada: ${flight.origin} → CGR"
@@ -98,6 +152,7 @@ object FlightAlertScheduler {
                 scheduled++
             }
         }
+        storedPreferences.edit().putStringSet(SCHEDULED_FLIGHT_IDS_KEY, eligibleIds).apply()
         return scheduled
     }
 }

@@ -1,5 +1,50 @@
 # Changelog
 
+## 2026-11-07 - Seção 7, etapa 2: pausa real por ciclo de vida
+- Extraído o vínculo de `RadarSurveillance` com `repeatOnLifecycle(STARTED)`.
+- Adicionado teste com `LifecycleRegistry` cobrindo `CREATED → STARTED → CREATED` e a pausa efetiva das consultas.
+- Documentadas as respostas de auditoria sobre cooldown, limiares, inicialização em `MainActivity`, limpeza de erro após sucesso e ODbL/adsb.lol.
+
+## 2026-11-07 - Seção 7, etapa 2, bloco 2: alerta Radar
+- Adicionado banner `VOO DETECTADO` na tela principal, com toque para abrir Radar e proteção de área segura superior.
+- Removido o qualificador de protótipo da interface do Radar.
+
+## 2026-11-07 - Seção 7, etapa 2, bloco 1: vigilância radar
+- Adicionada vigilância ADS-B em qualquer tela, iniciada pela `MainActivity` e suspensa fora de `STARTED`, com intervalo padrão de 10 segundos.
+- Adicionada preferência persistida de vigília, ligada por padrão, e controle na tela Radar.
+- Mantidos limite de 1 requisição por segundo por endpoint, failover entre as três fontes e cooldown de `429` com `Retry-After`/backoff limitado.
+- Integrado o histórico curto por hex ao caminho de avaliação do `RadarViewModel`.
+- Validação local: 127 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+
+## 2026-11-07 - Seção 7, etapa 1: lógica do radar
+- Adicionadas constantes oficiais de SBCG: elevação, cabeceiras 06/24 e rumos verdadeiros.
+- Implementado histórico curto por hex com tendência de distância/altitude.
+- Regras de alerta agora usam AGL e filtram sobrevoo alto, solo, dados velhos e posições inválidas.
+- Taxas verticais usam `baro_rate`, `geom_rate` ou derivação pelas amostras; helicópteros `A7` são ignorados conservadoramente.
+- Nenhuma alteração de UI nesta etapa.
+- Validação local: 123 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+
+## 2026-11-07 - Seção 6: parser SIROS
+- Unificado o parser em `SirosStreamParser`; `SirosCsvParser` e seus testes foram removidos.
+- Cabeçalho SIROS ausente agora gera erro claro de formato alterado.
+- Removidos logs por registro do sync.
+- Adicionado teste da fixture versionada para `PASSAGEIROS`/`REGULAR DE PASSAGEIROS`; o CSV oficial confirmou os mesmos valores em 929 linhas SBCG.
+- Suíte completa aprovada: 112 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+
+## 2026-11-07 - Seção 5: exibição e fusos
+- Normalizados nomes de aeroportos e companhias aéreas, incluindo Dallas/Fort Worth e Rio de Janeiro.
+- Corrigido `nextMovements` para não escolher eventos anteriores, com cobertura de hoje passado e dia futuro.
+- `DetailScreen` agora permite rolagem e exibe aeroportos formatados; rolagem em aparelho ainda não foi verificada.
+- Adicionado mapa de fusos por ICAO para Cuiabá, Manaus e Rio Branco, com fallback seguro.
+- Suíte completa mais recente aprovada: 113 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+
+## 2026-11-07 - Seção 4: alertas locais
+- Adicionado feedback e atalho para configurações quando a permissão de notificações está ausente.
+- `showTextAlert` agora é validado com `contentIntent` para `MainActivity`.
+- Alarmes de voos removidos são cancelados no sync; canais de som e silêncio são separados.
+- Removido `FlightAlertWorker` e seus testes para manter AlarmManager como única via.
+- Suíte completa aprovada: 101 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+
 ## 2026-11-06 - Verificador de atualizações
 - Tornado o repositório público, com autorização, para permitir consulta anônima das releases sem token no APK.
 - Corrigido o tratamento de erro do checker para HTTP 404 e mantido o fallback para a página da release.
@@ -50,10 +95,10 @@
 - CI #54 passou para o commit `e65bb63`.
 - No telefone Android 14, o botão de atualização manual manteve a tela aberta e atualizou o horário da consulta; não foi observado crash, exceção fatal ou ANR na revalidação.
 - A resposta continuou sem posições ADS-B com coordenadas válidas. Isso descreve apenas as consultas feitas, não a ausência de tráfego nem a cobertura contínua.
-- O radar continua experimental; contato com ADSB.lol e amostragem de cobertura em momentos distintos permanecem pendentes antes de qualquer uso em produção.
+- O radar continua sujeito a contato com ADSB.lol e amostragem de cobertura em momentos distintos antes de qualquer uso em produção.
 
 ## 2026-11-04 — Primeiro protótipo de radar ADS-B
-- Adicionada tela Radar experimental com desenho de escopo radial para 50 NM centrado em CGR e lista de observações com callsign transmitido, endereço ICAO, altitude, velocidade, distância e idade da posição.
+- Adicionada tela Radar com desenho de escopo radial para 50 NM centrado em CGR e lista de observações com callsign transmitido, endereço ICAO, altitude, velocidade, distância e idade da posição.
 - Criado cliente OkHttp usando dependência existente e API documentada ADSB.lol; consulta somente ao abrir a tela ou quando o usuário atualiza, sem polling em background.
 - Adicionadas validação de coordenadas, horário da consulta, estados de carregamento/vazio/erro, preservação do último resultado em falha e atribuição ODbL na tela.
 - Sem associação às linhas SIROS, sem status operacional inferido e sem dependência nova.
@@ -217,6 +262,19 @@
 - Identificadas Aena, AvioADSB e OpenSky como fontes candidatas.
 - Registradas limitações iniciais e necessidade de validação de cobertura.
 # Próxima versão
+
+## 2026-11-06 — Identidade dos voos SIROS
+- Incluída a etapa SIROS e o tipo de operação no `flightId`.
+- Adicionada migração Room 6→7 com schema exportado.
+- Adicionado teste de preservação de metadados/alertas e fixture baseada em CSV real.
+- Suíte Debug final: 91 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+- Migração 6→7 e chaves do novo `flightId` também validadas em 3 testes JVM Robolectric.
+
+## 2026-11-06 — Revisão da sincronização
+- Corrigida a sincronização excessiva: o relógio de 60 segundos não baixa mais o CSV SIROS.
+- A sincronização automática de abertura respeita cache vazio ou idade mínima de seis horas.
+- Corrigida a atualização automática da data em `America/Campo_Grande` e reduzida a emissão transitória ao trocar de data.
+- Adicionado teste da política de sincronização; o checker de atualização continua aprovado.
 
 - Radar ADS-B com failover entre três fontes, cooldown após HTTP 429 e limite de uma chamada por segundo por servidor.
 - Atualização de voos em primeiro plano a cada minuto, cartões de próximos movimentos e regras experimentais de alerta ADS-B.

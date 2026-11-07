@@ -14,6 +14,7 @@ enum class OperationType {
 data class NormalizedFlight(
     val flightId: String,          // Chave única composta: sirosRecordId + data específica do voo
     val sirosRecordId: String,     // Identificador original SIROS para deduplicação
+    val sirosStage: String = "0",  // Número da etapa original do registro SIROS
     val airline: String,
     val flightNumber: String,
     val equipment: String?,

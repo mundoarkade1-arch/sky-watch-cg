@@ -6,6 +6,8 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.text.Normalizer
+import java.util.Locale
 
 /**
  * Funções de utilidade para formatação de voos.
@@ -14,6 +16,22 @@ internal val campoGrandeZone = ZoneId.of("America/Campo_Grande")
 internal val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
 internal val localDateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm").withZone(ZoneId.of("America/Campo_Grande"))
 
+private val airportTimezonesByIcao = mapOf(
+    "SBCG" to "America/Campo_Grande",
+    "SBCY" to "America/Cuiaba",
+    "SBEG" to "America/Manaus",
+    "SBRB" to "America/Rio_Branco",
+    "SBGR" to "America/Sao_Paulo",
+    "SBSP" to "America/Sao_Paulo",
+    "SBKP" to "America/Sao_Paulo",
+    "SBBR" to "America/Sao_Paulo",
+    "KJFK" to "America/New_York",
+    "EGLL" to "Europe/London"
+)
+
+internal fun airportTimezoneForIcao(icao: String, fallback: String): String =
+    airportTimezonesByIcao[icao.trim().uppercase(Locale.ROOT)] ?: fallback
+
 /**
  * Retorna o horário local formatado (HH:mm) para chegada ou partida do voo.
  */
@@ -21,7 +39,9 @@ internal fun NormalizedFlight.getAirportEventDateTime(): LocalDateTime {
     val isArrival = operationType == OperationType.ARRIVAL
     val utcTime = if (isArrival) scheduledArrivalUtc else scheduledDepartureUtc
     val utcDate = if (isArrival) arrivalDate else flightDate
-    val airportTimezone = if (isArrival) destinationTimezone else originTimezone
+    val airportIcao = if (isArrival) destination else origin
+    val declaredTimezone = if (isArrival) destinationTimezone else originTimezone
+    val airportTimezone = airportTimezoneForIcao(airportIcao, declaredTimezone)
     return utcDate.atTime(utcTime)
         .atZone(ZoneId.of("UTC"))
         .withZoneSameInstant(ZoneId.of(airportTimezone))
@@ -55,16 +75,19 @@ internal fun Long.getDisplayLastUpdate(): String {
  * Exemplo: "LATAM AIRLINES" -> "LATAM"
  */
 internal fun formatAirlineName(airline: String): String {
-    return airline
-        .replace(Regex("\\s*\\(EX-\\s*VRG\\s*\\)", RegexOption.IGNORE_CASE), "")
-        .replace("LINHAS AÉREAS", "", ignoreCase = true)
-        .replace("LINHAS AEREAS", "", ignoreCase = true)
-        .replace("BRASILEIRAS", "", ignoreCase = true)
-        .replace("S.A.", "", ignoreCase = true)
-        .replace("S/A", "", ignoreCase = true)
-        .replace("AIRLINES", "", ignoreCase = true)
+    val normalized = Normalizer.normalize(airline, Normalizer.Form.NFD)
+        .replace("\\p{M}+".toRegex(), "")
+        .uppercase(Locale.ROOT)
+    val cleaned = normalized
+        .replace(Regex("\\s*\\(EX-\\s*VRG\\s*\\)"), "")
+        .replace("LINHAS AEREAS", "")
+        .replace("BRASILEIRAS", "")
+        .replace("S.A.", "")
+        .replace("S/A", "")
+        .replace("AIRLINES", "")
+        .replace(Regex("\\s+"), " ")
         .trim()
-        .let { if (it.isEmpty()) airline else it }
+    return if (cleaned.isEmpty()) airline else cleaned
 }
 
 /**
@@ -85,7 +108,10 @@ internal fun formatAirportDisplay(name: String?, code: String): String {
     val effectiveCode = icaoInParens ?: code
     
     // Remove o código ICAO do final se estiver lá
-    val nameWithoutIcao = rawName.replace(Regex("\\s*\\([A-Z]{4}\\)\\s*$"), "").trim()
+    val nameWithoutIcao = rawName
+        .replace(Regex("\\s*\\([A-Z]{4}\\)\\s*$"), "")
+        .replace(Regex("\\s+INTERNATIONAL\\s+AIRPORT$", RegexOption.IGNORE_CASE), "")
+        .trim()
     
     // Separa por " - "
     val parts = nameWithoutIcao.split(" - ").map { it.trim() }.filter { it.isNotEmpty() }
@@ -126,8 +152,16 @@ internal fun formatAirportDisplay(name: String?, code: String): String {
  * Capitaliza a primeira letra de cada palavra, resto minúsculo.
  */
 private fun capitalizeWords(text: String): String {
-    return text.split(" ").map { word ->
-        if (word.isEmpty()) word else word.lowercase().replaceFirstChar { it.uppercase() }
+    val lowercaseConnectors = setOf("de", "da", "do", "das", "dos", "e")
+    return text.split(" ").mapIndexed { index, word ->
+        val lower = word.lowercase(Locale.ROOT)
+        if (index > 0 && lower in lowercaseConnectors) {
+            lower
+        } else {
+            lower.split("/").joinToString("/") { part ->
+                part.replaceFirstChar { it.uppercase(Locale.ROOT) }
+            }
+        }
     }.joinToString(" ")
 }
 

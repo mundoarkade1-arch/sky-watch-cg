@@ -6,6 +6,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.json.JSONObject
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
@@ -59,42 +60,33 @@ class GitHubReleaseUpdateChecker(
     }
 
     private fun evaluateRelease(json: String): UpdateCheckResult {
-        val tagName = extractJsonString(json, "tag_name")?.trim().orEmpty()
+        val release = runCatching { JSONObject(json) }.getOrElse {
+            return UpdateCheckResult.Failed("A resposta de atualizaÃ§Ã£o nÃ£o Ã© um JSON vÃ¡lido.")
+        }
+        val tagName = release.optString("tag_name").trim()
         val releaseVersion = tagName.removePrefix("v").removePrefix("V")
         val comparison = AppVersionComparator.compare(releaseVersion, installedVersion)
             ?: return UpdateCheckResult.Failed("A versão publicada não é válida.")
         if (comparison <= 0) return UpdateCheckResult.UpToDate
 
-        val assetsJson = json.substringAfter("\"assets\"", "")
-        val apkUrl = Regex("\\{[^{}]*}", setOf(RegexOption.DOT_MATCHES_ALL))
-            .findAll(assetsJson)
-            .map { it.value }
-            .firstOrNull { extractJsonString(it, "name") == RELEASE_APK_NAME }
-            ?.let { extractJsonString(it, "browser_download_url") }
+        val apkUrl = release.optJSONArray("assets")
+            ?.let { assets ->
+                (0 until assets.length())
+                    .asSequence()
+                    .map(assets::optJSONObject)
+                    .firstOrNull { it?.optString("name") == RELEASE_APK_NAME }
+                    ?.optString("browser_download_url")
+            }
 
         return UpdateCheckResult.Available(
             GitHubRelease(
                 version = releaseVersion,
-                notes = extractJsonString(json, "body").orEmpty().trim(),
-                releaseUrl = extractJsonString(json, "html_url").orEmpty().trim(),
+                notes = release.optString("body").trim(),
+                releaseUrl = release.optString("html_url").trim(),
                 apkUrl = apkUrl
             )
         )
     }
-
-    private fun extractJsonString(json: String, key: String): String? {
-        val pattern = Regex(
-            "\"${Regex.escape(key)}\"\\s*:\\s*\"((?:\\\\.|[^\"\\\\])*)\""
-        )
-        return pattern.find(json)?.groupValues?.get(1)?.let(::unescapeJson)
-    }
-
-    private fun unescapeJson(value: String): String = value
-        .replace("\\\\", "\\")
-        .replace("\\\"", "\"")
-        .replace("\\n", "\n")
-        .replace("\\r", "\r")
-        .replace("\\t", "\t")
 
     companion object {
         const val OWNER = "mundoarkade1-arch"

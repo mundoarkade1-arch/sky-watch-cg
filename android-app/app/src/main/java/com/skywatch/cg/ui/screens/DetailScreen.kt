@@ -3,6 +3,8 @@ package com.skywatch.cg.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -21,9 +23,12 @@ import com.skywatch.cg.data.siros.NormalizedFlight
 import com.skywatch.cg.data.siros.OperationType
 import com.skywatch.cg.ui.theme.SkyWatchColors
 import com.skywatch.cg.util.getAirportEventDateTime
+import com.skywatch.cg.util.formatAirportDisplay
 import java.time.format.DateTimeFormatter
 
-@OptIn(ExperimentalMaterial3Api::class)
+internal fun detailAirportDisplay(name: String?, code: String): String =
+    formatAirportDisplay(name, code)
+
 @Composable
 fun DetailScreen(
     flight: NormalizedFlight,
@@ -40,6 +45,8 @@ val localDateStr = eventDateTime
     val toCity = flight.destinationName ?: flight.destination
     val fromCode = flight.origin
     val toCode = flight.destination
+    val fromDisplay = detailAirportDisplay(fromCity, fromCode)
+    val toDisplay = detailAirportDisplay(toCity, toCode)
 
     val accentColor = if (isArrival) SkyWatchColors.ArrivalAccent else SkyWatchColors.DepartureAccent
 
@@ -62,7 +69,8 @@ val localDateStr = eventDateTime
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Giant time
@@ -115,7 +123,7 @@ val localDateStr = eventDateTime
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = fromCity.split(" ").firstOrNull() ?: fromCity,
+                        text = fromDisplay,
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground
@@ -138,7 +146,7 @@ val localDateStr = eventDateTime
 
                 Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.End) {
                     Text(
-                        text = toCity.split(" ").firstOrNull() ?: toCity,
+                        text = toDisplay,
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground,

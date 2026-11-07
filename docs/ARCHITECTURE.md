@@ -17,7 +17,7 @@ ull quando não houver informação operacional confirmada
 - last_sync_at: Data/hora da última sincronização geral da grade de voos
 - status_updated_at: Data/hora da última atualização do status operacional
 - 
-adar_data: Posição ADS-B (AvioADSB experimental), altitude, velocidade, timestamp
+adar_data: Posição ADS-B (AvioADSB), altitude, velocidade, timestamp
 
 ## Regras arquiteturais confirmadas
 1. **Fusos horários:** Cada aeroporto é convertido com base em sua respectiva timezone geográfica (sem fusos fixos globais).

@@ -62,7 +62,8 @@ class AppDatabaseMigrationTest {
                 AppDatabase.MIGRATION_2_3,
                 AppDatabase.MIGRATION_3_4,
                 AppDatabase.MIGRATION_4_5,
-                AppDatabase.MIGRATION_5_6
+                AppDatabase.MIGRATION_5_6,
+                AppDatabase.MIGRATION_6_7
             )
             .addCallback(AppDatabase.SYNC_METADATA_ID_CALLBACK)
             .allowMainThreadQueries()
@@ -70,7 +71,7 @@ class AppDatabaseMigrationTest {
     }
 
     @Test
-    fun migration1To6CreatesSyncMetadataAndKeepsFlights() = runBlocking {
+    fun migration1To7CreatesSyncMetadataAndKeepsFlights() = runBlocking {
         createV1Database()
         val database = openMigrated()
         try {
@@ -79,6 +80,13 @@ class AppDatabaseMigrationTest {
                 assertEquals(1, cursor.count)
             }
             assertNotNull(database.flightDao().getByFlightId("OLD-1"))
+            sqlite.query("PRAGMA table_info(`flights`)").use { cursor ->
+                var hasStage = false
+                while (cursor.moveToNext()) {
+                    hasStage = hasStage || cursor.getString(1) == "sirosStage"
+                }
+                assertEquals(true, hasStage)
+            }
         } finally {
             database.close()
         }
@@ -209,6 +217,61 @@ class AppDatabaseMigrationTest {
         } finally {
             database.close()
         }
+    }
+
+    @Test
+    fun migration6To7AddsStageAndPreservesMetadataAndAlerts() = runBlocking {
+        createV6DatabaseWithRecords()
+        val database = openMigrated()
+        try {
+            val sqlite = database.openHelper.writableDatabase
+            sqlite.query("PRAGMA table_info(`flights`)").use { cursor ->
+                var hasStage = false
+                while (cursor.moveToNext()) {
+                    hasStage = hasStage || cursor.getString(1) == "sirosStage"
+                }
+                assertEquals(true, hasStage)
+            }
+            assertNotNull(database.flightDao().getByFlightId("OLD-1"))
+            assertNotNull(database.syncMetadataDao().getSyncMetadata())
+            sqlite.query("SELECT id FROM alert_sent WHERE id = 'alert-v6'").use { cursor ->
+                assertEquals(1, cursor.count)
+            }
+        } finally {
+            database.close()
+        }
+    }
+
+    private fun createV6DatabaseWithRecords() {
+        val callback = object : SupportSQLiteOpenHelper.Callback(1) {
+            override fun onCreate(db: SupportSQLiteDatabase) {
+                db.execSQL(createFlightsV1)
+                db.execSQL(insertFlightV1)
+            }
+
+            override fun onUpgrade(db: SupportSQLiteDatabase, oldVersion: Int, newVersion: Int) {}
+        }
+        val config = SupportSQLiteOpenHelper.Configuration.builder(context)
+            .name(dbName)
+            .callback(callback)
+            .build()
+        val helper = FrameworkSQLiteOpenHelperFactory().create(config)
+        val sqlite = helper.writableDatabase
+        AppDatabase.MIGRATION_1_2.migrate(sqlite)
+        AppDatabase.MIGRATION_2_3.migrate(sqlite)
+        AppDatabase.MIGRATION_3_4.migrate(sqlite)
+        AppDatabase.MIGRATION_4_5.migrate(sqlite)
+        AppDatabase.MIGRATION_5_6.migrate(sqlite)
+        sqlite.execSQL(
+            "INSERT INTO sync_metadata (id, lastSuccessfulSyncAt, lastSyncStatus, recordsInserted) " +
+                "VALUES (1, 456, 'SUCCESS', 1)"
+        )
+        sqlite.execSQL(
+            "INSERT INTO alert_sent (id, flightId, operationType, eventDate, minutesBefore, sentAt) " +
+                "VALUES ('alert-v6', 'OLD-1', 'ARRIVAL', '2024-01-15', 15, 0)"
+        )
+        sqlite.version = 6
+        helper.close()
     }
 
     private fun assertInvalidSyncMetadataId(database: SupportSQLiteDatabase, sql: String) {

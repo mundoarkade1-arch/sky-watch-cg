@@ -46,7 +46,6 @@
     <string name="unfollow_flight">Deixar de seguir</string>
     <string name="settings">Configurações</string>
     <string name="sources_and_warnings">Fontes e avisos</string>
-    <string name="radar_experimental">Radar (experimental)</string>
     <string name="adsb_disclaimer">Posição observada via ADS-B. Pode haver poucas ou nenhuma aeronave nesta região.</string>
     <string name="radar_range_label">Observações em até 50 milhas náuticas de CGR</string>
     <string name="radar_refresh">Atualizar observações ADS-B</string>
@@ -65,8 +64,11 @@
     <string name="radar_speed_unknown">velocidade indisponível</string>
     <string name="radar_aircraft_metrics">%1$s · %2$s · %3$d NM · rumo %4$d°</string>
     <string name="radar_position_age">Posição recebida há %1$d s</string>
-    <string name="radar_attribution">Fontes ADS-B: adsb.lol, airplanes.live e adsb.fi. Observações experimentais; não são horário nem confirmação operacional.</string>
     <string name="radar_source_status">Fonte: %1$s · %2$d aeronaves · atualizado %3$s</string>
     <string name="radar_sources_unavailable">Fontes indisponíveis, tentando de novo em %1$d s</string>
     <string name="radar_load">Carregar radar</string>
+    <string name="radar_watch_label">Vigília automática (a cada 10 s)</string>
+    <string name="radar_title">Radar</string>
+    <string name="radar_attribution_plain">Fontes ADS-B: adsb.lol, airplanes.live e adsb.fi. São observações, não horários nem confirmação operacional.</string>
+    <string name="radar_alert_detected">VOO DETECTADO</string>
 </resources>

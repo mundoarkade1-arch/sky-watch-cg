@@ -309,6 +309,14 @@ class FlightListViewModelTest {
     }
 
     @Test
+    fun syncPolicyRefreshesOnlyWhenCacheIsEmptyOrOlderThanSixHours() {
+        val now = 10_000_000L
+        assertTrue(viewModel.shouldSyncOnOpen(0L, hasFlights = false, nowMillis = now))
+        assertTrue(viewModel.shouldSyncOnOpen(now - 6 * 60 * 60 * 1000L, true, now))
+        assertFalse(viewModel.shouldSyncOnOpen(now - 1_000L, true, now))
+    }
+
+    @Test
     fun testGoToPreviousDayChangesDateAndLoadsFlights() = runTest(testDispatcher) {
         val testDate = LocalDate.of(2024, 10, 15)
         

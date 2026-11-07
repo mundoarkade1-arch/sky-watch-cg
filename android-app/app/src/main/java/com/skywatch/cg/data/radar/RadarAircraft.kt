@@ -11,7 +11,9 @@ data class RadarAircraft(
     val trackDegrees: Double?,
     val secondsSincePosition: Double?,
     val distanceNauticalMiles: Double,
-    val bearingDegrees: Double
+    val bearingDegrees: Double,
+    val geometricRateFeetPerMinute: Int? = null,
+    val emitterCategory: String? = null
 )
 
 data class RadarSnapshot(

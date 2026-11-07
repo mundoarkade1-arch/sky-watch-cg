@@ -72,6 +72,9 @@ interface FlightDao {
     @Query("SELECT * FROM flights WHERE flightId = :flightId")
     suspend fun getByFlightId(flightId: String): FlightEntity?
 
+    @Query("SELECT EXISTS(SELECT 1 FROM flights)")
+    suspend fun hasAnyFlights(): Boolean
+
     @Query("SELECT * FROM flights WHERE flightDate < :beforeDate")
     suspend fun getOldFlights(beforeDate: String): List<FlightEntity>
 

@@ -1,5 +1,83 @@
 # Plano de testes
 
+## Auditoria final das secoes 8 e 9
+
+- O checker usa `org.json.JSONObject`/`JSONArray` e tem teste com o snapshot real da API `releases/latest` em `src/test/resources/github_release_latest_v1.0.23.json`; o teste usa MockWebServer, sem rede externa.
+- A verificacao automatica de release ocorre no maximo uma vez a cada 6 horas; o cooldown de alerta ADS-B de 20 minutos e uma limitacao conhecida.
+- O build Debug nao consulta nem oferece download de APK Release. A versao-base local e `1.0.23`, alinhada a release publica `v1.0.23`.
+- `release.yml` executa `testDebugUnitTest` antes de `assembleRelease` e `apksigner verify` depois do APK ser montado.
+- `NextFlightCard` foi removido por nao ter chamadas no codigo; `FollowedFlight` permanece porque e entidade Room usada pelo `FlightAlertScheduler`.
+- Testes JVM usam MockWebServer, fixtures versionadas e diretorios temporarios do sistema; nenhum teste acessa rede externa ou grava na pasta do projeto.
+
+## Fechamento das seções 8 e 9 — 2026-11-07
+
+Seção 8 auditada: o checker de releases usa API pública, trata 404 e compara versões numericamente; o workflow lê assinatura apenas de secrets/variáveis do ambiente. A instalação manual do APK Release assinado permanece pendente por depender de aparelho e credenciais do CI.
+
+Seção 9 concluída localmente: resíduos gerados de tentativas anteriores foram removidos, sem apagar fontes ou fixtures. `FlightAlertWorker` e `SirosCsvParser` não foram encontrados no código.
+
+Validação final: `testDebugUnitTest assembleDebug` — **136 testes, 0 falhas, 0 erros e 1 ignorado** (`SirosStreamParserRealFileTest`).
+
+## Seção 7 — radar, etapa 1: lógica (2026-11-07)
+
+| Item | Situação | Commit | Teste por item |
+|---|---|---|---|
+| Elevação e cabeceiras de SBCG | Feito | `f7087b7`, `f1946f9` | `sbcgUsesPublishedElevationAndRunwayHeadings` em [RadarAirportConfigTest.kt](android-app/app/src/test/java/com/skywatch/cg/data/radar/RadarAirportConfigTest.kt) |
+| Histórico curto por hex e tendência de distância/altitude | Feito | `f7087b7`, `bdd4028` | `historyIsShortAndKeyedByHex`, `missingRatesUseAltitudeSamplesToDeriveDescent` em [RadarTrajectoryRulesTest.kt](android-app/app/src/test/java/com/skywatch/cg/data/radar/RadarTrajectoryRulesTest.kt) |
+| `baro_rate`/`geom_rate` somente quando presentes | Feito | `f7087b7`, `bdd4028` | `missingBarometricRateUsesGeometricRateWhenPresent`, `missingRatesUseAltitudeSamplesToDeriveDescent` |
+| Regras de pouso/decolagem em AGL | Feito | `f7087b7`, `bdd4028` | `typicalLandingUsesAltitudeAboveAirport`, `typicalTakeoffUsesAltitudeAboveAirport` |
+| Ignorar sobrevoo, solo, dado velho e posição inválida | Feito | `f7087b7`, `f1946f9` | `highOverflightIsIgnoredUsingAgl`, `stationaryAircraftIsIgnored`, `stalePositionIsIgnored`, `invalidPositionIsIgnored` |
+| Helicóptero | Feito — decisão conservadora | `f7087b7`, `bdd4028` | `helicopterIsIgnoredConservativelyWhenCategoryIsA7`; categoria `A7` é ignorada, categoria ausente não é inventada |
+| Deduplicação por hex/tipo com cooldown | Feito | existente, revisado na etapa | `deduplicatesByAircraftAndTypeForTwentyMinutes` em [RadarAlertRulesTest.kt](android-app/app/src/test/java/com/skywatch/cg/data/radar/RadarAlertRulesTest.kt) |
+
+Fonte aeronáutica: [AISWEB/DECEA — SBCG AD 2](https://aisweb.decea.mil.br/eaip/A%2020-2026_2026_10_29/eAIP/AD%202%20SBCG-pt-BR.html), que publica 559 m/1834 ft e as cabeceiras 06/24 com rumos verdadeiros 042,26°/222,26°. A categoria `A7` como rotorcraft foi conferida na [referência do ADS-B emitter category](https://mode-s.org/1090mhz/content/ads-b/2-identification.html).
+
+Suíte completa: `testDebugUnitTest assembleDebug` — `BUILD SUCCESSFUL`; 123 testes, 0 falhas, 0 erros e 1 ignorado. `assembleDebug` passou; nenhuma alteração de UI foi feita.
+
+## Seção 5 — exibição e fusos (2026-11-07)
+
+| Item | Situação | Commit | Teste por item |
+|---|---|---|---|
+| `formatAirportDisplay` | Feito | `2144770`, `ea63f45` | `formatAirportDisplayInternationalUsesCityInsteadOfCountry`, `formatAirportDisplayKeepsPortuguesePrepositionLowercase` e `formatAirportDisplayKeepsUnknownPatternWithoutInventingCity` em [FlightDisplayUtilsTest.kt](android-app/app/src/test/java/com/skywatch/cg/util/FlightDisplayUtilsTest.kt) |
+| `formatAirlineName` | Feito | `4045032` | `formatAirlineNameRemovesPortugueseAndCorporateSuffixes` em [FlightDisplayUtilsTest.kt](android-app/app/src/test/java/com/skywatch/cg/util/FlightDisplayUtilsTest.kt) |
+| `nextMovements` | Feito | `0a99b21`, `369c266` | `todayMovementAlreadyPastIsExcluded`, `futureDateMovementIsIncluded` e `ignoresMovementsFromEarlierDates` em [NextMovementsTest.kt](android-app/app/src/test/java/com/skywatch/cg/util/NextMovementsTest.kt) |
+| `DetailScreen` rolável e `formatAirportDisplay` | Feito | `6678e38`, `4f2a682` | `detailDisplayUsesFormattedAirportNames` em [DetailScreenDisplayTest.kt](android-app/app/src/test/java/com/skywatch/cg/ui/screens/DetailScreenDisplayTest.kt); rolagem não verificada em aparelho físico |
+| Fusos por ICAO | Feito | `b5afc50`, `ea63f45` | `brazilianCapitalTimezoneMapCoversCuiabaManausAndRioBranco` e `knownIcaoTimezoneOverridesAnIncorrectDeclaredTimezone` em [FlightDisplayUtilsTest.kt](android-app/app/src/test/java/com/skywatch/cg/util/FlightDisplayUtilsTest.kt); ICAO desconhecido usa o fallback declarado |
+
+Suíte completa: `testDebugUnitTest assembleDebug` — `BUILD SUCCESSFUL`; 113 testes, 0 falhas, 0 erros e 1 ignorado. `assembleDebug` também passou.
+
+## Seção 6 — parser SIROS (2026-11-07, revisada)
+
+| Item | Situação | Commit | Teste por item |
+|---|---|---|---|
+| Parser único em produção e testes | Feito | `007d33b` | `SirosRepository` usa `SirosStreamParser`; `SirosCsvParser` e seus testes foram removidos |
+| Cabeçalho descritivo e cabeçalho de 28 colunas | Feito | `178dce6` | `testParseStreamSkipsDescriptiveLine`, `testParseStreamSkipsHeader` em [SirosStreamParserTest.kt](android-app/app/src/test/java/com/skywatch/cg/data/siros/SirosStreamParserTest.kt) |
+| Cabeçalho ausente gera erro claro | Feito | `007d33b` | `testParseWithoutRecognizableHeaderReportsFormatChange` e `testSyncWithoutRecognizableHeaderReportsFormatChange` |
+| Codificação UTF-8 com BOM | Feito | `178dce6` | `testParseStreamWithUtf8Bom`, `testParseStreamWithCallbackUtf8Bom` em [SirosStreamParserBomTest.kt](android-app/app/src/test/java/com/skywatch/cg/data/siros/SirosStreamParserBomTest.kt) |
+| Codificação ISO-8859-1 sem BOM e acentos | Feito | `178dce6` | `testParseStreamLatin1Encoding`, `testParseStreamWithoutBomIso88591` |
+| Campos vazios, linha curta e erro por callback | Feito | `79f9cd5` | `testParseStreamEmptyFields`, `testParseStreamMalformedLine`, `testParseStreamWithCallbackReportsShortLine` |
+| Delimitador `;`, campo citado e aspas escapadas | Feito | `79f9cd5` | `testParseStreamPreservesQuotedDelimiterAndEscapedQuote` |
+| Avaliação streaming/lazy e callback | Feito | `178dce6` | `testParseStreamLazyEvaluation`, `testParseStreamWithCallback` |
+| Filtro de passageiros por `objetoTransporte` e `tipoServico` | Feito | `dd4e0ef` | `fixtureUsesPassengerObjectAndServiceAndRejectsCargoVariant` em [SirosFixturePassengerFilterTest.kt](android-app/app/src/test/java/com/skywatch/cg/data/siros/SirosFixturePassengerFilterTest.kt) |
+| Logs por registro | Feito | `007d33b` | Revisão de [SirosRepository.kt](android-app/app/src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt): permanecem apenas logs agregados/erro |
+| Fixture CSV completo e memória | Pendente localmente | `178dce6` | `parseRealCsvStreamingCountsRecordsAndKeepsMemoryFlat`; ignorado porque o arquivo não está no repositório |
+
+Fixture versionada: 2 registros de `siros_cgr_real_sample.csv`, ambos `Tipo Serviço = REGULAR DE PASSAGEIROS` e `Objeto Transporte = PASSAGEIROS`. No CSV oficial baixado (26.650.737 bytes), 929 registros envolviam `SBCG`; todos tinham a mesma combinação. O arquivo completo permaneceu apenas em diretório temporário e não foi versionado.
+
+Suíte completa: `testDebugUnitTest assembleDebug` — `BUILD SUCCESSFUL`; 112 testes, 0 falhas, 0 erros e 1 ignorado. O APK Debug foi gerado.
+
+## Seção 4 — checklist de alertas locais (2026-11-07)
+
+| Item | Situação | Commit | Teste que prova o comportamento |
+|---|---|---|---|
+| (a) Snackbar/Toast sem permissão e botão `ACTION_APP_NOTIFICATION_SETTINGS` | Feito | `dbd324c` | `NotificationHelperTest.notificationSettingsButtonTargetsThisApp` e `FlightAlertScheduleLogicTest.notificationTestExplainsWhenPermissionIsMissing` |
+| (b) `contentIntent` de `showTextAlert` abre `MainActivity` | Feito | `aeaa5d4` | `NotificationHelperTest.showTextAlertNotificationContentIntentOpensMainActivity` |
+| (c) Voo removido no sync cancela alarme e os atuais são reagendados | Feito | `b1005fb` | `FlightAlertScheduleLogicTest.syncRemovesMissingFlightFromScheduledAlarmState` |
+| (d) Switch Som e vibração usa canais separados | Feito | `dbd324c` | `NotificationHelperTest.createsSeparateSoundAndSilentChannels` |
+| (e) `FlightAlertWorker` e testes removidos; AlarmManager é a única via | Feito | `2f6cf5f` | Suíte completa sem referências ao worker; agendamento ativo passa por `FlightAlertScheduler` |
+| (f) Sem permissão, alerta não é consumido em `alert_sent` | Feito | `02b28b8` | `NotificationHelperTest.notificationPermissionDeniedCannotConsumeAlertSent` |
+
+Suíte completa: `testDebugUnitTest assembleDebug` — `BUILD SUCCESSFUL`; 101 testes, 0 falhas, 0 erros e 1 ignorado. `assembleDebug` também passou.
+
 ## 2026-11-06 - Verificador de atualizações
 
 Foi confirmado que o repositório privado retornava HTTP 404 para o app, que não possui token por segurança. Após autorização, o repositório foi tornado público; a API pública passou a retornar `v1.0.22` e o asset `app-release.apk`.
@@ -334,7 +412,7 @@ Essa execução valida migrações Room e operações DAO no aparelho; não vali
 
 ## Validação local dos alertas — 2026-11-04
 
-O `FlightAlertWorker` considera horários planejados SIROS entre 15 e 30 minutos antes do evento no fuso do aeroporto, deduplica pelo voo/operação/data local e usa `arrivalDate` como data UTC das chegadas. A permissão de notificações é verificada antes de processar os voos. O registro de deduplicação é salvo após a chamada de publicação, para não marcar como enviado antes de tentar notificar.
+O fluxo ativo usa alarmes individuais do `FlightAlertScheduler` entre 15 e 30 minutos antes do evento planejado, com deduplicação no receiver e uso de `arrivalDate` como data UTC das chegadas. A permissão de notificações é verificada antes de processar o alerta. O registro de deduplicação é salvo após a chamada de publicação, para não marcar como enviado antes de tentar notificar.
 
 **Comandos executados** (a partir de `android-app`):
 ```powershell
@@ -370,7 +448,7 @@ A versão 5 tinha uma diferença: migrações antigas criavam `sync_metadata` co
 
 Schema Room exportado em `android-app/app/schemas/com.skywatch.cg.data.db.AppDatabase/6.json`. CI #50 passou para o commit `9206269`.
 
-## Radar ADS-B experimental — 2026-11-04
+## Radar ADS-B — 2026-11-04
 
 O protótipo usa a API ADSB.lol documentada, chamada apenas ao abrir a tela ou por atualização manual. A consulta está centrada nas coordenadas configuradas para CGR e pede observações em um raio de 50 milhas náuticas. O `RadarSnapshotParser` exige timestamp, valida latitude/longitude e ignora registros sem posição; chamadas HTTP malsucedidas geram erro visível, preservando o último resultado em memória. A interface mostra escopo radial e lista, tempo da consulta, idade da posição, atribuição ADSB.lol/ODbL e distinção explícita entre posição observada, planejamento SIROS e status operacional. Não há associação automática a voos.
 
@@ -389,13 +467,13 @@ O protótipo usa a API ADSB.lol documentada, chamada apenas ao abrir a tela ou p
 
 **Revalidação do botão Atualizar (04/11/2026):** aberta a tela Radar no mesmo aparelho e acionado o botão “Atualizar observações ADS-B” pela área identificada na hierarquia da interface. A tela permaneceu aberta; o horário da consulta passou de 17:41:43 para 17:42:08 e a API retornou novamente o estado vazio. A captura de logcat após a ação não mostrou exceção fatal nem ANR. Uma tentativa anterior havia terminado no launcher, mas o comportamento não foi reproduzido após reabrir o app e repetir a ação; a causa daquela transição não foi determinada. A consulta vazia não comprova ausência de aeronaves nem cobertura contínua.
 
-**CI:** GitHub Actions CI #54 concluiu com sucesso para o commit `e65bb63` (protótipo experimental do radar).
+**CI:** GitHub Actions CI #54 concluiu com sucesso para o commit `e65bb63` (primeira versão do radar).
 
 ## Roteiro manual — alertas após reinicialização (execução parcial no Android)
 
 **Objetivo:** verificar permissões e reagendamento pelo `BootReceiver` em um aparelho real. Este roteiro não substitui a informação operacional da companhia aérea nem confirma a operação do voo.
 
-**Comportamento atual a considerar:** o `FlightAlertWorker` só notifica quando o evento planejado está entre 15 e 30 minutos adiante. O trabalho periódico exige conexão de rede e tem intervalo mínimo configurado de 15 minutos; o WorkManager pode atrasar a execução e deixar a janela passar. A fonte SIROS contém planejamento, não confirmação operacional. Use apenas um registro real presente no aplicativo; se não houver voo real na janela de teste, registre “não foi possível testar” em vez de criar dados fictícios.
+**Comportamento atual a considerar:** o `FlightAlertScheduler` agenda alarmes individuais para eventos planejados futuros. O WorkManager atualiza o cache e os alarmes após o sync; o sistema pode atrasar a entrega. A fonte SIROS contém planejamento, não confirmação operacional. Use apenas um registro real presente no aplicativo; se não houver voo real na janela de teste, registre “não foi possível testar” em vez de criar dados fictícios.
 
 1. Instale o APK Debug produzido pelo build validado e abra o aplicativo pelo menos uma vez.
 2. Quando solicitado, permita notificações. Confirme também nas configurações do Android que as notificações do SKY WATCH CG e o canal “Alertas de Voo” estão habilitados.
@@ -456,3 +534,57 @@ Durante essa verificação, a tela de detalhes foi ajustada para identificar `si
 O workflow acionado por tags `v*` publica somente uma prévia Debug, não um APK assinado para distribuição estável/Play Store. Como o runner do CI pode usar uma chave Debug diferente em cada execução, instalar uma prévia atualizada talvez exija desinstalar a anterior, o que apaga os dados locais. O teste de entrega/deduplicação de alerta real continua pendente até haver voo SIROS elegível.
 
 **Publicação remota:** CI #56 passou para o commit `3858738`. O workflow "Build and Release Android APK" #13 para a tag `v1.0.17` concluiu com sucesso, incluindo a etapa `Upload APK to Release`. O APK está no [Release v1.0.17](https://github.com/mundoarkade1-arch/sky-watch-cg/releases/tag/v1.0.17) com o nome `SKY-WATCH-CG-v1.0.17-debug.apk`.
+## Revisão da sincronização excessiva — 2026-11-06
+
+Alterado o `FlightListViewModel`: o ciclo de 60 segundos agora atualiza somente o relógio local; a sincronização SIROS na abertura ocorre apenas quando o cache está vazio ou a última sincronização bem-sucedida tem pelo menos seis horas. A troca automática para a data atual usa `America/Campo_Grande`, e os fluxos de chegadas/decolagens são combinados dentro da troca de data para evitar estado transitório.
+
+Comando executado em `android-app`:
+
+```powershell
+.\gradlew.bat testDebugUnitTest --tests com.skywatch.cg.data.update.GitHubReleaseUpdateCheckerTest --tests com.skywatch.cg.ui.viewmodel.FlightListViewModelTest.syncPolicyRefreshesOnlyWhenCacheIsEmptyOrOlderThanSixHours --offline
+```
+
+Resultado real: `BUILD SUCCESSFUL`; 5 testes executados, 0 falhas. O teste do checker de releases permaneceu verde. O build usou o SDK Android local e não acessou a rede durante a execução (`--offline`).
+## Seção 3 — identidade SIROS e migração Room 6→7 (2026-11-06)
+
+`NormalizedFlight` e `FlightEntity` passaram a preservar `sirosStage`. O identificador normalizado agora usa `sirosRecordId-E<etapa>-<ARRIVAL|DEPARTURE>-<yyyy-MM-dd>`, evitando que uma chegada e uma decolagem do mesmo registro SIROS se sobrescrevam.
+
+Foi adicionada `MIGRATION_6_7`, que recria somente a tabela de cache `flights` com a coluna `sirosStage`, preservando `sync_metadata` e `alert_sent`. O schema Room 7 foi exportado em `android-app/app/schemas/com.skywatch.cg.data.db.AppDatabase/7.json`.
+
+Validações realizadas:
+
+- `testDebugUnitTest assembleDebug`: `BUILD SUCCESSFUL`; 91 testes, 0 falhas, 0 erros e 1 ignorado (`SirosStreamParserRealFileTest`).
+- `SirosStageIdentityTest`: fixture derivada de linhas reais do CSV SIROS; chegada e decolagem com mesma identidade de registro e etapas distintas permanecem como dois voos.
+- `compileDebugAndroidTestKotlin`: aprovado, incluindo `AppDatabaseMigrationTest` para 6→7.
+- O teste instrumentado não foi executado porque `adb` não está disponível nesta sessão.
+
+### Validação complementar antes da seção 4
+
+- `AppDatabaseMigrationJvmTest`: executou em Robolectric a criação de um banco v6, a abertura com `MIGRATION_6_7` e a verificação de `sirosStage`, `sync_metadata` e `alert_sent` preservados.
+- `FlightIdKeyTest`: validou `Uri.encode`/`Uri.decode`, IDs de alerta distintos e `PendingIntent` distintos usando o hash completo do `flightId`.
+- Resultado do comando focado: `BUILD SUCCESSFUL`; 3 testes, 0 falhas.
+- O teste que prova que pouso e decolagem persistem juntos é `SirosStageIdentityTest.sameSirosRecordWithDifferentStagesKeepsArrivalAndDeparture`: ele normaliza dois registros com a mesma identidade SIROS e etapas diferentes, persiste ambos e verifica uma chegada e uma decolagem no banco.
+## Seção 7, etapa 2, bloco 1 — vigilância radar (2026-11-07, revisão)
+
+Commit: `3303aa1` (`feat: adicionar vigilancia radar no ciclo de vida`).
+
+| Item | Evidência | Teste | Resultado |
+|---|---|---|---|
+| Vigilância em qualquer tela, somente em `STARTED`, intervalo de ~10 s e switch persistido ligado por padrão | `MainActivity` inicia a vigilância; `repeatOnLifecycle(STARTED)` controla o ciclo; `AppPreferences.radarWatchEnabled` persiste a opção | `RadarSurveillanceTest.pollsEveryTenSecondsWithFakeClock`, `RadarSurveillanceTest.doesNotPollWhileOutsideStartedOrWhenDisabled`, `AppPreferencesTest.radarWatchIsEnabledByDefaultAndPersistsChanges` | Passou |
+| Pausa real fora de `STARTED` | `RadarSurveillance.runForLifecycle` usa `repeatOnLifecycle`; o teste conduz `LifecycleRegistry` de `CREATED → STARTED → CREATED` | `RadarSurveillanceTest.pausesPollingWhenLifecycleMovesFromStartedBackToCreated` | Passou |
+| Limite de 1 requisição/s por endpoint | `RadarRemoteSource.MIN_REQUEST_INTERVAL_MILLIS` | `RadarRemoteSourceTest.enforcesOneSecondMinimumBetweenRequestsToSameEndpoint` | Passou |
+| Failover `adsb.lol → airplanes.live → adsb.fi` | Ordem em `DEFAULT_ENDPOINTS` | `RadarRemoteSourceTest.failsOverAfterRateLimit` | Passou |
+| `429`, `Retry-After` e backoff limitado | Estado de cooldown por endpoint e teto de 5 minutos | `RadarRemoteSourceTest.respectsRetryAfterCooldownUsingFakeClock` | Passou |
+| Histórico por hex integrado ao alerta do ViewModel | `RadarViewModel.applySnapshot` observa `RadarAircraftHistory` antes de avaliar a regra | `RadarTrajectoryRulesTest` cobre histórico/tendência; integração de ciclo de vida ainda não possui harness Android completo | Código integrado; harness de ViewModel pendente |
+
+Suíte completa será revalidada após este ajuste de ciclo de vida. O teste focado passou: 3 testes, 0 falhas.
+
+## Seção 7, etapa 2, bloco 2 — alerta e tela Radar (2026-11-07)
+
+| Item | Commit | Evidência |
+|---|---|---|
+| Alerta visível `VOO DETECTADO` | `pendente neste commit` | Banner em `MainScreen` usa `radar_alert_detected` e mantém a distinção de observação ADS-B |
+| Toque no alerta abre Radar | `pendente neste commit` | Banner navega para a rota `radar` com `launchSingleTop` |
+| Tela Radar com área segura superior | `pendente neste commit` | Banner usa `statusBarsPadding`; tela Radar continua acessível pela navegação inferior |
+| Remoção do qualificador de protótipo da UI | `1901075` | Rótulo passou a ser `Radar`; atribuição não usa o termo removido |
+

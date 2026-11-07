@@ -38,6 +38,22 @@ class GitHubReleaseUpdateCheckerTest {
     }
 
     @Test
+    fun parsesRealLatestReleaseJsonFixture() = runTest {
+        val latestJson = requireNotNull(javaClass.classLoader?.getResourceAsStream("github_release_latest_v1.0.23.json"))
+            .bufferedReader()
+            .use { it.readText() }
+        server.enqueue(MockResponse().setResponseCode(200).setBody(latestJson))
+
+        val result = checker(installedVersion = "1.0.22").check()
+
+        assertTrue(result is UpdateCheckResult.Available)
+        val release = (result as UpdateCheckResult.Available).release
+        assertEquals("1.0.23", release.version)
+        assertEquals("app-release.apk", release.apkUrl?.substringAfterLast('/'))
+        assertTrue(release.releaseUrl.endsWith("/v1.0.23"))
+    }
+
+    @Test
     fun reportsUpToDateWhenPublishedVersionIsNotNewer() = runTest {
         server.enqueue(MockResponse().setResponseCode(200).setBody(releaseJson("1.0.9")))
 

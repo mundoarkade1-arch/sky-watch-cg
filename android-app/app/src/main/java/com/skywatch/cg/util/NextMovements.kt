@@ -11,7 +11,7 @@ data class NextMovements(
 
 fun nextMovements(voos: List<NormalizedFlight>, agoraLocal: LocalDateTime): NextMovements {
     val eligible = voos.map { it to it.getAirportEventDateTime() }
-        .filter { (_, event) -> event.toLocalDate() != agoraLocal.toLocalDate() || !event.isBefore(agoraLocal) }
+        .filter { (_, event) -> !event.isBefore(agoraLocal) }
     return NextMovements(
         nextArrival = eligible.filter { it.first.operationType == OperationType.ARRIVAL }
             .minByOrNull { it.second }?.first,

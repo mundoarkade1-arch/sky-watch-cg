@@ -2,8 +2,11 @@ package com.skywatch.cg.ui.screens
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
@@ -34,15 +37,19 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.skywatch.cg.BuildConfig
 import com.skywatch.cg.R
+import com.skywatch.cg.data.db.AppDatabase
 import com.skywatch.cg.data.db.SyncMetadata
 import com.skywatch.cg.data.siros.NormalizedFlight
 import com.skywatch.cg.data.prefs.AppPreferences
 import com.skywatch.cg.data.update.GitHubRelease
 import com.skywatch.cg.data.update.GitHubReleaseUpdateChecker
 import com.skywatch.cg.data.update.UpdateCheckResult
+import com.skywatch.cg.data.update.UpdateCheckSchedule
 import com.skywatch.cg.notification.NotificationHelper
+import com.skywatch.cg.notification.FlightAlertScheduler
 import com.skywatch.cg.data.siros.OperationType
 import com.skywatch.cg.ui.viewmodel.RadarViewModel
+import com.skywatch.cg.data.radar.radarAlertHeadline
 import com.skywatch.cg.ui.components.DayStrip
 import com.skywatch.cg.ui.components.FlightCard
 import com.skywatch.cg.ui.components.SegmentedTabRow
@@ -59,25 +66,30 @@ import com.skywatch.cg.util.formatAirlineName
 import com.skywatch.cg.util.formatTimeUntil
 import com.skywatch.cg.util.nextMovements
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(viewModel: FlightListViewModel, radarViewModel: RadarViewModel) {
     val navController = rememberNavController()
     val radarState by radarViewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val radarAlertTitle = stringResource(R.string.radar_alert_detected)
     val updateChecker = remember { GitHubReleaseUpdateChecker() }
     val updateScope = rememberCoroutineScope()
     var updateResult by remember { mutableStateOf<UpdateCheckResult?>(null) }
     var isCheckingUpdate by remember { mutableStateOf(false) }
     var manualUpdateCheck by remember { mutableStateOf(false) }
+    val updatePreferences = remember {
+        context.getSharedPreferences("sky_watch_update", android.content.Context.MODE_PRIVATE)
+    }
 
     fun checkForUpdate(manual: Boolean) {
+        if (BuildConfig.DEBUG) return
         if (isCheckingUpdate) return
         manualUpdateCheck = manual
         isCheckingUpdate = true
@@ -88,7 +100,23 @@ fun MainScreen(viewModel: FlightListViewModel, radarViewModel: RadarViewModel) {
     }
 
     LaunchedEffect(Unit) {
-        checkForUpdate(manual = false)
+        val now = System.currentTimeMillis()
+        val lastCheck = updatePreferences.getLong("last_check_millis", 0L)
+        if (UpdateCheckSchedule.shouldCheck(now, lastCheck)) {
+            updatePreferences.edit().putLong("last_check_millis", now).apply()
+            checkForUpdate(manual = false)
+        }
+    }
+
+    LaunchedEffect(radarState.radarAnnouncement) {
+        radarState.radarAnnouncement?.let { alert ->
+            NotificationHelper.showTextAlert(
+                context = context,
+                title = radarAlertTitle,
+                text = "Olhe para ${alert.lookDirection} · ${alert.distanceNauticalMiles.toInt()} NM",
+                notificationId = 9_100 + alert.type.ordinal
+            )
+        }
     }
     
     Box(modifier = Modifier.fillMaxSize()) {
@@ -104,7 +132,8 @@ fun MainScreen(viewModel: FlightListViewModel, radarViewModel: RadarViewModel) {
                 navController = navController,
                 onNavigateBack = { navController.popBackStack() },
                 onCheckForUpdate = { checkForUpdate(manual = true) },
-                isCheckingUpdate = isCheckingUpdate
+                isCheckingUpdate = isCheckingUpdate,
+                showUpdateButton = !BuildConfig.DEBUG
             )
         }
         composable(
@@ -158,9 +187,24 @@ fun MainScreen(viewModel: FlightListViewModel, radarViewModel: RadarViewModel) {
     }
     radarState.radarAlert?.let { alert ->
         Surface(
-            modifier = Modifier.fillMaxWidth().align(Alignment.TopCenter),
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.TopCenter)
+                .statusBarsPadding()
+                .clickable { navController.navigate("radar") { launchSingleTop = true } },
             color = MaterialTheme.colorScheme.tertiaryContainer
         ) {
+            Text(
+                text = radarAlertHeadline(radarState.radarAlerts.size),
+                modifier = Modifier.padding(16.dp),
+                color = MaterialTheme.colorScheme.onTertiaryContainer,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Olhe para ${alert.lookDirection} · ${alert.distanceNauticalMiles.toInt()} NM",
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.onTertiaryContainer
+            )
             Text(
                 text = if (alert.type.name == "ARRIVAL") {
                     "Avião chegando · a ${alert.distanceNauticalMiles.toInt()} NM · pouso estimado em ~${alert.estimatedMinutes ?: 0} min"
@@ -240,7 +284,6 @@ private fun UpdateResultDialog(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FlightsScreen(
     viewModel: FlightListViewModel,
@@ -615,17 +658,20 @@ fun ErrorState(message: String, onRetry: () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutScreen(
     navController: androidx.navigation.NavController,
     onNavigateBack: () -> Unit,
     onCheckForUpdate: () -> Unit,
-    isCheckingUpdate: Boolean
+    isCheckingUpdate: Boolean,
+    showUpdateButton: Boolean
 ) {
     val context = LocalContext.current
     val preferences = remember { AppPreferences.getInstance(context) }
+    val alertScope = rememberCoroutineScope()
+    var alertsEnabled by remember { mutableStateOf(preferences.alertsEnabled) }
     var soundVibration by remember { mutableStateOf(preferences.soundVibration) }
+    var notificationFeedback by remember { mutableStateOf<String?>(null) }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -661,6 +707,22 @@ fun AboutScreen(
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Alertas locais", modifier = Modifier.weight(1f))
+                        Switch(
+                            checked = alertsEnabled,
+                            onCheckedChange = {
+                                alertsEnabled = it
+                                preferences.alertsEnabled = it
+                                alertScope.launch(Dispatchers.IO) {
+                                    val database = AppDatabase.getDatabase(context.applicationContext)
+                                    val flights = database.flightDao().getAllArrivals().map { it.toNormalizedFlight() } +
+                                        database.flightDao().getAllDepartures().map { it.toNormalizedFlight() }
+                                    FlightAlertScheduler.scheduleUpcomingFlights(context.applicationContext, flights)
+                                }
+                            }
+                        )
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("Som e vibração", modifier = Modifier.weight(1f))
                         Switch(
                             checked = soundVibration,
@@ -670,12 +732,34 @@ fun AboutScreen(
                             }
                         )
                     }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        OutlinedButton(onClick = {
+                            context.startActivity(FlightAlertScheduler.exactAlarmSettingsIntent(context))
+                        }) {
+                            Text("Configurar alarmes exatos")
+                        }
+                    }
                     Button(onClick = {
-                        NotificationHelper.showTextAlert(
+                        val displayed = NotificationHelper.showTextAlert(
                             context, "Teste de notificação",
                             "Notificação de teste do SKY WATCH CG", 0x534B59
                         )
+                        val feedback = NotificationHelper.testNotificationMessage(displayed)
+                        notificationFeedback = feedback
+                        if (!displayed) {
+                            Toast.makeText(context, feedback, Toast.LENGTH_LONG).show()
+                        }
                     }) { Text("Testar notificação") }
+                    notificationFeedback?.let {
+                        Text(it, style = MaterialTheme.typography.bodySmall)
+                    }
+                    if (!NotificationHelper.hasNotificationPermission(context)) {
+                        OutlinedButton(onClick = {
+                            context.startActivity(NotificationHelper.notificationSettingsIntent(context))
+                        }) {
+                            Text("Abrir configurações de notificações")
+                        }
+                    }
                     Text(
                         "Em alguns celulares (ex.: Xiaomi), libere o app em Bateria > Sem restrições.",
                         style = MaterialTheme.typography.bodySmall,
@@ -722,7 +806,12 @@ fun AboutScreen(
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Button(
+                    Text(
+                        text = "O radar mostra observacoes recebidas de receptores comunitarios; cobertura, atraso e identificacao podem variar.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    if (showUpdateButton) Button(
                         onClick = onCheckForUpdate,
                         enabled = !isCheckingUpdate
                     ) {
@@ -779,7 +868,7 @@ fun BottomNavBar(navController: androidx.navigation.NavController) {
         )
         NavigationBarItem(
             icon = { Icon(painter = painterResource(R.drawable.ic_radar), contentDescription = null) },
-            label = { Text(text = stringResource(R.string.radar_experimental), style = MaterialTheme.typography.labelSmall) },
+            label = { Text(text = stringResource(R.string.radar_title), style = MaterialTheme.typography.labelSmall) },
             selected = currentRoute == "radar",
             onClick = {
                 navController.navigate("radar") {

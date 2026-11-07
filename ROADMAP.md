@@ -1,5 +1,53 @@
 # Roadmap
 
+## Auditoria final das secoes 8 e 9
+
+- [x] Parser de release em `org.json` com fixture real de `releases/latest`.
+- [x] Debug sem oferta de APK Release; intervalo de verificacao e versao-base `1.0.23` coerentes.
+- [x] Workflow testa antes do Release e verifica assinatura com `apksigner`.
+- [x] Limpeza de artefatos concluida; `NextFlightCard` removido e `FollowedFlight` documentado como entidade usada pelo scheduler.
+- [ ] Instalacao manual do APK Release assinado em aparelho continua pendente.
+
+## Seções 8 e 9 — fechamento local (2026-11-07)
+
+- [x] Auditar o fluxo de release/atualização sem token ou segredo no APK.
+- [ ] Validar instalação manual do APK Release assinado em aparelho Android.
+- [x] Remover resíduos de logs de tentativas locais e confirmar ausência dos parsers/workers removidos.
+- [x] Suíte final: 136 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+
+## Revisão completa — seção 7, etapa 1 em progresso (07/11/2026)
+- [x] Registrar elevação e cabeceiras oficiais de SBCG como constantes documentadas.
+- [x] Adicionar histórico curto por hex e tendências de distância/altitude.
+- [x] Aplicar taxas `baro_rate`/`geom_rate` apenas quando presentes e usar AGL nas regras.
+- [x] Cobrir pouso, decolagem, sobrevoo, solo, dado velho, posição inválida, ausência de taxa e helicóptero.
+- [x] Revisar cooldown do deduplicador com teste de hex/tipo.
+- [ ] Integrar a lógica à UI; fora do escopo desta etapa.
+- [x] Suíte completa: 123 testes, 0 falhas, 0 erros, 1 ignorado; `assembleDebug` aprovado.
+
+## Revisão completa — seção 6 em progresso (07/11/2026)
+- [x] Unificar produção e testes em `SirosStreamParser` e remover `SirosCsvParser`.
+- [x] Cobrir cabeçalhos, erro de formato, BOM UTF-8, ISO-8859-1, campos vazios, delimitador `;`, aspas escapadas e callback de erro.
+- [x] Manter o caminho ativo em streaming/lazy para o CSV SIROS.
+- [x] Testar filtro de passageiros com fixture versionada e registrar os valores reais encontrados no CSV oficial.
+- [ ] Executar o teste de memória com o CSV completo versionado; o arquivo completo não entra no repositório.
+- [x] Suíte completa: 112 testes, 0 falhas, 0 erros, 1 ignorado; `assembleDebug` aprovado.
+
+## Revisão completa — seção 5 concluída (07/11/2026)
+- [x] Cobrir `formatAirportDisplay` com Dallas/Fort Worth, Rio de Janeiro e padrão desconhecido, além de `formatAirlineName`.
+- [x] Corrigir e testar `nextMovements` para excluir eventos anteriores e incluir dia futuro.
+- [x] Tornar `DetailScreen` rolável e usar `formatAirportDisplay` nos dois aeroportos; rolagem física ainda não verificada.
+- [x] Resolver fusos por ICAO para Cuiabá, Manaus e Rio Branco, com fallback para o timezone declarado.
+- [x] Suíte completa mais recente: 113 testes, 0 falhas, 0 erros, 1 ignorado; `assembleDebug` aprovado.
+
+## Revisão completa — seção 4 concluída (07/11/2026)
+- [x] (a) Feedback e botão para configurações de notificações sem permissão.
+- [x] (b) `contentIntent` da notificação abre `MainActivity`.
+- [x] (c) Sync cancela alarmes removidos e reagenda os movimentos atuais.
+- [x] (d) Switch Som e vibração com canais separados e teste Robolectric.
+- [x] (e) `FlightAlertWorker` e testes removidos; AlarmManager é a única via.
+- [x] (f) Permissão negada não consome `alert_sent`.
+- [x] Suíte completa: 101 testes, 0 falhas, 0 erros, 1 ignorado; `assembleDebug` aprovado.
+
 ## Verificador de atualizações — 06/11/2026
 - [x] Tornar o repositório público para consulta anônima e segura da API de releases.
 - [x] Corrigir o texto do botão `Verificar atualização`.
@@ -72,7 +120,7 @@
 - [x] Testar o contrato do `BootReceiver` em Robolectric: `BOOT_COMPLETED` agenda os trabalhos únicos de sync e alertas; teste de código, não prova de entrega do broadcast pelo Android.
 - [ ] Verificar a entrega/deduplicação de alerta com um voo SIROS real na janela de 15–30 minutos; não havia voo elegível nesta execução.
 
-## Etapa 7 — Radar ADS-B (protótipo experimental implementado)
+## Etapa 7 — Radar ADS-B implementado
 - [x] Avaliar documentação e licença da ADSB.lol: API pública, dados ODbL 1.0; contactar a fonte antes de uso em produção.
 - [x] Fazer uma consulta pontual centrada em SBCG/CGR (50 NM): a resposta continha uma posição reportada a 45.472 NM às 21:22:07 UTC de 04/11/2026. A observação é apenas um recorte daquele instante e não prova cobertura contínua nem identifica voo comercial.
 - [x] Implementar cliente HTTP no OkHttp existente, parser com validação de coordenadas e estado de erro explícito, sem adicionar dependências.
@@ -89,7 +137,44 @@
 - Quando houver voo SIROS real na janela de 15–30 minutos, concluir o teste de entrega/deduplicação de alerta descrito em `TESTING.md`.
 # Próxima rodada — wip-fase3
 
+## Revisão completa — seção 3 concluída (06/11/2026)
+- [x] Propagar a etapa original do SIROS até o modelo persistido.
+- [x] Compor `flightId` com registro, etapa, operação e data.
+- [x] Adicionar migração Room 6→7 preservando metadados e alertas.
+- [x] Exportar schema Room 7 e adicionar teste de migração.
+- [x] Adicionar fixture reduzida baseada em CSV real e teste de chegada/decolagem sem colisão.
+- [ ] Executar os testes instrumentados em aparelho; `adb` não estava disponível localmente.
+- [x] Executar a migração 6→7 em JVM/Robolectric e validar URI, alertas e `PendingIntent`.
+
+## Revisão completa — etapa 2 iniciada (06/11/2026)
+- [x] Remover a sincronização SIROS do ciclo de atualização de 60 segundos.
+- [x] Sincronizar na abertura somente com cache vazio ou dados com seis horas ou mais.
+- [x] Atualizar a data selecionada na virada do dia de Campo Grande.
+- [x] Evitar combinação transitória de listas ao trocar a data.
+- [x] Adicionar teste determinístico da política de sincronização e revalidar `GitHubReleaseUpdateCheckerTest`.
+- [ ] Completar os testes de ciclo de vida com um harness Android/Robolectric apropriado; o `LifecycleRegistry` simples não ativou `repeatOnLifecycle` neste ambiente local.
+
 - Validar no CI a compilação e a suíte unitária após os blocos 0–5.
 - Completar a UI de preferências de som/vibração, teste de notificação e reagendamento dos alarmes quando configurações mudarem.
 - Completar rolagem automática até o próximo voo e botão para voltar ao próximo movimento.
+
+## Revisão completa — seção 7, etapa 2, bloco 1 (2026-11-07)
+
+- [x] Vigília ADS-B a cada aproximadamente 10 segundos, iniciada pela atividade e suspensa fora de `STARTED`.
+- [x] Preferência persistida de vigília, ligada por padrão.
+- [x] Limite por endpoint, failover e cooldown/backoff cobertos por testes JVM.
+- [x] Histórico por hex integrado ao `RadarViewModel`.
+- [ ] Validar em harness Android/Robolectric a transição real do `LifecycleRegistry` com `repeatOnLifecycle`.
+
+## Revisão do bloco 1 — ciclo de vida real (2026-11-07)
+
+- [x] Teste real com `LifecycleRegistry`: `CREATED → STARTED → CREATED` pausa a vigilância.
+- [x] Separadas as semânticas de cooldown: deduplicação de alerta (20 min) versus rate limit/backoff HTTP.
+- [ ] Executar CI remoto após o push desta revisão.
+
+## Revisão do bloco 2 (2026-11-07)
+
+- [x] Exibir `VOO DETECTADO` na tela principal.
+- [x] Abrir a tela Radar ao tocar no alerta.
+- [x] Aplicar `statusBarsPadding` e remover o qualificador de protótipo da UI.
 

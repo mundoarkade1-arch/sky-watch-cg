@@ -10,6 +10,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.skywatch.cg.MainActivity
 import com.skywatch.cg.R
+import com.skywatch.cg.data.prefs.AppPreferences
 import com.skywatch.cg.data.siros.NormalizedFlight
 import com.skywatch.cg.util.getDisplayDate
 import com.skywatch.cg.util.getDisplayTime
@@ -19,7 +20,8 @@ import com.skywatch.cg.util.getDisplayTime
  */
 object NotificationHelper {
 
-    const val CHANNEL_ID = "flight_alerts"
+    const val CHANNEL_ID = "flight_alerts_sound"
+    const val CHANNEL_ID_SILENT = "flight_alerts_silent"
     const val CHANNEL_NAME = "Alertas de Voo"
     const val NOTIFICATION_ID_BASE = 1000
 
@@ -39,8 +41,31 @@ object NotificationHelper {
             }
             val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             manager.createNotificationChannel(channel)
+            manager.createNotificationChannel(
+                NotificationChannel(
+                    CHANNEL_ID_SILENT,
+                    "$CHANNEL_NAME — silenciosos",
+                    NotificationManager.IMPORTANCE_HIGH
+                ).apply {
+                    description = "Alertas sem som ou vibração"
+                    enableVibration(false)
+                    setSound(null, null)
+                    enableLights(false)
+                }
+            )
         }
     }
+
+    internal fun channelIdFor(soundVibration: Boolean): String =
+        if (soundVibration) CHANNEL_ID else CHANNEL_ID_SILENT
+
+    fun notificationSettingsIntent(context: Context): Intent =
+        Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+            putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, context.packageName)
+        }
+
+    internal fun testNotificationMessage(displayed: Boolean): String =
+        if (displayed) "Notificação enviada." else "Permita notificações do app para receber alertas."
 
     /**
      * Verifica se a permissão de notificação foi concedida (Android 13+).
@@ -76,7 +101,8 @@ object NotificationHelper {
         flight: NormalizedFlight,
         minutesUntilEvent: Int,
         isArrival: Boolean
-    ) {
+    ): Boolean {
+        if (!hasNotificationPermission(context)) return false
         val eventType = if (isArrival) "Pouso" else "Decolagem"
         val title = "${flight.airline} ${flight.flightNumber} · $eventType programado em CGR em $minutesUntilEvent min"
         val location = if (isArrival) {
@@ -96,7 +122,10 @@ object NotificationHelper {
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
 
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+        val notification = NotificationCompat.Builder(
+            context,
+            channelIdFor(AppPreferences.getInstance(context).soundVibration)
+        )
             .setSmallIcon(R.drawable.ic_notification_flight)
             .setContentTitle(title)
             .setContentText("$location\n$timeText")
@@ -104,6 +133,7 @@ object NotificationHelper {
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
             .setContentIntent(pendingIntent)
+            .setSilent(!AppPreferences.getInstance(context).soundVibration)
             .setAutoCancel(true)
             .build()
 
@@ -111,6 +141,7 @@ object NotificationHelper {
         val notificationId = flight.flightId.hashCode()
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(notificationId, notification)
+        return true
     }
 
     /**
@@ -122,18 +153,33 @@ object NotificationHelper {
         manager.cancel(notificationId)
     }
 
-    fun showTextAlert(context: Context, title: String, text: String, notificationId: Int) {
-        if (!hasNotificationPermission(context)) return
-        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+    fun showTextAlert(context: Context, title: String, text: String, notificationId: Int): Boolean {
+        if (!hasNotificationPermission(context)) return false
+        val contentIntent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            notificationId,
+            contentIntent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+        val notification = NotificationCompat.Builder(
+            context,
+            channelIdFor(AppPreferences.getInstance(context).soundVibration)
+        )
             .setSmallIcon(R.drawable.ic_notification_flight)
             .setContentTitle(title)
             .setContentText(text)
             .setStyle(NotificationCompat.BigTextStyle().bigText(text))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .setContentIntent(pendingIntent)
+            .setSilent(!AppPreferences.getInstance(context).soundVibration)
             .setAutoCancel(true)
             .build()
         (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
             .notify(notificationId, notification)
+        return true
     }
 }

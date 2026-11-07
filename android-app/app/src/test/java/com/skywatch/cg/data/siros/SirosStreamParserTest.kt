@@ -99,4 +99,45 @@ GLO;GOL LINHAS AÉREAS;1234;B738;1;2;3;4;5;6;7;186;GLO-001;Em Operação;01/01/2
         SirosStreamParser.parseStreamWithCallback(inputStream, onRecord = { collected.add(it) })
         assertEquals(5, collected.size)
     }
+
+    @Test
+    fun testParseStreamPreservesQuotedDelimiterAndEscapedQuote() {
+        val quotedCsv = sampleCsv
+            .replace("SBCG;CAMPO GRANDE;SBGR", "SBCG;\"CAMPO; GRANDE\";SBGR")
+            .replace("GOL LINHAS AEREAS", "\"GOL \"\"LINHAS\"\" AEREAS\"")
+
+        val records = SirosStreamParser.parseStream(
+            ByteArrayInputStream(quotedCsv.toByteArray(Charset.forName("ISO-8859-1")))
+        ).toList()
+
+        assertEquals("GOL \"LINHAS\" AEREAS", records[0].empresa)
+        assertEquals("CAMPO; GRANDE", records[0].arptOrigem)
+    }
+
+    @Test
+    fun testParseStreamWithCallbackReportsShortLine() {
+        val csv = "Importante: Horários em UTC\nCód. Empresa;Empresa\nGLO;LINHA"
+        val errors = mutableListOf<Pair<Int, String>>()
+
+        SirosStreamParser.parseStreamWithCallback(
+            ByteArrayInputStream(csv.toByteArray(Charset.forName("ISO-8859-1"))),
+            onRecord = {},
+            onError = { line, message -> errors += line to message }
+        )
+
+        assertEquals(1, errors.size)
+        assertEquals(3, errors.single().first)
+    }
+
+    @Test
+    fun testParseWithoutRecognizableHeaderReportsFormatChange() {
+        val error = assertThrows(IllegalArgumentException::class.java) {
+            SirosStreamParser.parse(
+                ByteArrayInputStream("linha desconhecida\nGLO;LINHA".toByteArray(Charset.forName("ISO-8859-1")))
+            )
+        }
+
+        assertTrue(error.message!!.contains("Formato do CSV mudou"))
+        assertFalse(error.message!!.contains("Nenhum voo SBCG"))
+    }
 }

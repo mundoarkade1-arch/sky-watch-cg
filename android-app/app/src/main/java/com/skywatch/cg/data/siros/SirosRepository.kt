@@ -59,6 +59,10 @@ class SirosRepository(
         dao.getByFlightId(flightId)
     }
 
+    suspend fun hasAnyFlights(): Boolean = withContext(ioDispatcher) {
+        dao.hasAnyFlights()
+    }
+
     suspend fun getFlightsBySirosRecordId(sirosRecordId: String): List<FlightEntity> = withContext(ioDispatcher) {
         dao.getBySirosRecordId(sirosRecordId)
     }
@@ -128,10 +132,6 @@ class SirosRepository(
 
                     // Após o loop do parsing:
                     Log.d("SirosRepository", "Total registros lidos: ${sbcgRecords.size}")
-                    sbcgRecords.forEach { r ->
-                        Log.d("SirosRepository", "Record: origem=${r.codigoOrigem} destino=${r.codigoDestino} inicio=${r.inicioOperacao} fim=${r.fimOperacao}")
-                    }
-
                     if (sbcgRecords.isEmpty()) {
                         val errorMessage = "Nenhum voo SBCG encontrado no CSV"
                         Log.e("SirosRepository", errorMessage)
@@ -141,10 +141,6 @@ class SirosRepository(
 
                     val normalizedFlights = SirosNormalizer.normalize(sbcgRecords, referenceDate)
                     Log.d("SirosRepository", "Normalizados: ${normalizedFlights.size}")
-                    normalizedFlights.forEach { f ->
-                        Log.d("SirosRepository", "Normalized: ${f.flightId} date=${f.flightDate} validFrom=${f.validFrom} validTo=${f.validTo}")
-                    }
-
                     database.withTransaction {
                         dao.deleteAll()
                         val entities = normalizedFlights.map { FlightEntity.fromNormalizedFlight(it) }

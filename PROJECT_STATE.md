@@ -1,5 +1,66 @@
 # Estado do projeto
 
+## Auditoria final das secoes 8 e 9
+
+- Checker de release migrado para parser `org.json`, validado contra snapshot real de `releases/latest` (`v1.0.23`).
+- Debug nao oferece APK Release; verificacao automatica tem intervalo de 6 horas e a versao-base local e `1.0.23`.
+- Workflow Release testa antes de montar e executa `apksigner verify`; cooldown ADS-B de 20 minutos permanece limitacao conhecida.
+- A tela Sobre informa que o radar depende de receptores comunitarios. `NextFlightCard` foi removido; `FollowedFlight` esta documentado como parte do fluxo de alertas.
+
+## Seções 8 e 9 — fechamento local (2026-11-07)
+
+- [x] Seção 8 auditada: checker de releases, fallback HTTP 404, comparação numérica, assinatura opcional por variáveis de ambiente e workflow de release sem segredos no app.
+- [ ] Seção 8: instalação manual do APK Release assinado continua pendente; requer aparelho e credenciais de assinatura disponíveis no CI.
+- [x] Seção 9: resíduos locais de logs de tentativa removidos.
+- [x] Seção 9: `FlightAlertWorker` e `SirosCsvParser` não existem no código; `rg` não encontrou qualificadores de protótipo em interface/documentação.
+- [x] Validação final: 136 testes, 0 falhas, 0 erros, 1 ignorado; `assembleDebug` aprovado; CI `42350424172` verde.
+
+## Seção 7 — radar, etapa 1: lógica (07/11/2026)
+- Constantes documentadas de SBCG: elevação 1.834 ft/559 m e cabeceiras 06/24 nos rumos verdadeiros 042,26°/222,26°, conforme AISWEB/DECEA.
+- Histórico curto por hex deriva tendência de distância e altitude; taxa explícita usa `baro_rate`, depois `geom_rate`, e somente na ausência de ambos usa amostras.
+- Regras usam altitude AGL, ignoram sobrevoo alto, aeronave parada, posição inválida e posição velha.
+- Categoria ADS-B `A7` é tratada conservadoramente como helicóptero e não gera alerta; categoria ausente não é inferida.
+- Etapa restrita a `data/radar`; nenhuma UI foi alterada.
+- Suíte completa: 123 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+
+## Seção 5 — exibição e fusos concluída (07/11/2026)
+- Formatação de aeroportos e companhias foi normalizada com testes para Dallas/Fort Worth, Rio de Janeiro e casos desconhecidos.
+- `nextMovements` tem testes explícitos para voo de hoje já passado, data anterior e dia futuro; a `DetailScreen` usa rolagem vertical e nomes formatados.
+- O mapa cobre Cuiabá (`SBCY`), Manaus (`SBEG`) e Rio Branco (`SBRB`); ICAO desconhecido usa o fallback declarado no registro.
+- A rolagem foi validada por teste JVM/Compose, mas ainda não foi verificada em aparelho físico.
+- Suíte completa mais recente: 113 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+
+## Seção 6 — parser SIROS (07/11/2026)
+- `SirosStreamParser` é agora o único parser, usado pelo `SirosRepository` e pelos testes; `SirosCsvParser` foi removido.
+- Cabeçalho ausente produz `Formato do CSV mudou: cabeçalho SIROS não reconhecido`, antes de qualquer fallback para “Nenhum voo SBCG”.
+- Logs por registro foram removidos; permanecem logs agregados e de erro.
+- A fixture versionada comprova `Objeto Transporte = PASSAGEIROS` e `Tipo Serviço = REGULAR DE PASSAGEIROS`; o CSV oficial baixado mostrou os mesmos valores nas 929 linhas envolvendo SBCG.
+- Suíte completa: 112 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+
+## Seção 4 — alertas locais concluída (07/11/2026)
+- A tela Sobre informa a ausência de permissão por Toast/feedback e oferece `ACTION_APP_NOTIFICATION_SETTINGS`.
+- `showTextAlert` publica com `contentIntent` para `MainActivity`; som e silêncio usam canais distintos.
+- O sync cancela alarmes de voos removidos e mantém apenas os alarmes dos movimentos atuais.
+- `FlightAlertWorker` e seus testes foram removidos; `AlarmManager`/receiver é a única via de alerta.
+- O receiver só grava `alert_sent` após permissão e publicação confirmada; `deleteOldAlerts` roda no sync ativo.
+- Suíte completa: 101 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+
+## Identidade SIROS e migração Room 6→7 (06/11/2026)
+- `sirosStage` agora é propagado de `SirosRecord.numeroEtapa` para `NormalizedFlight` e `FlightEntity`.
+- `flightId` usa registro SIROS, etapa, tipo de operação e data: `<siros>-E<etapa>-<ARRIVAL|DEPARTURE>-<yyyy-MM-dd>`.
+- `MIGRATION_6_7` recria somente o cache `flights`, preservando `sync_metadata` e `alert_sent`; o schema foi exportado em `android-app/app/schemas/com.skywatch.cg.data.db.AppDatabase/7.json`.
+- Fixture real reduzida e teste de identidade adicionados. Suíte final: 91 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` passou.
+- Teste instrumentado de migração compilado, mas não executado por ausência de `adb` nesta sessão.
+- Validação JVM complementar aprovada em Robolectric: `AppDatabaseMigrationJvmTest` executou a migração real e preservou cache, metadados e alertas.
+- `FlightIdKeyTest` aprovou URI e chaves de `PendingIntent`; `SirosStageIdentityTest` é o teste que comprova a persistência conjunta de pouso e decolagem.
+
+## Revisão da sincronização excessiva (06/11/2026)
+- O ciclo de 60 segundos do `FlightListViewModel` não chama mais `syncFromRemote()`; ele atualiza apenas o relógio local e acompanha a virada do dia em `America/Campo_Grande`.
+- A abertura do app sincroniza somente com cache vazio ou quando a última sincronização bem-sucedida tem seis horas ou mais.
+- A combinação dos fluxos de chegadas e decolagens passou a ser feita por data dentro de `flatMapLatest`, evitando emitir a lista antiga com a nova data.
+- Adicionado `FlightDao.hasAnyFlights()` e teste determinístico da política de sincronização.
+- Validação local: checker de releases e política da seção 2 passaram; 5 testes, 0 falhas.
+
 ## Correção do verificador de atualizações (06/11/2026)
 - O repositório GitHub foi tornado público com autorização explícita para que o app consulte `releases/latest` sem token embutido.
 - O checker agora trata HTTP 404 com mensagem específica, mantém a comparação numérica de versões e o parser de asset `app-release.apk` coberto por testes.
@@ -39,7 +100,7 @@
 - Alertas padrão com 15 minutos de antecedência.
 - Tema escuro.
 - Prioridade para fontes gratuitas e públicas institucionais (SIROS/ANAC CSV e Aena).
-- **Arquitetura conceitual aprovada:** Modelo normalizado separado por camadas (Planejamento SIROS com ID SIROS original e data específica do voo, Status em tempo real Aena, e Radar experimental AvioADSB). Fusos horários tratados por aeroporto (ex: America/Sao_Paulo, America/Campo_Grande).
+- **Arquitetura conceitual aprovada:** Modelo normalizado separado por camadas (Planejamento SIROS com ID SIROS original e data específica do voo, Status em tempo real Aena, e Radar ADS-B AvioADSB). Fusos horários tratados por aeroporto (ex: America/Sao_Paulo, America/Campo_Grande).
 
 ## Estado técnico
 - [x] PoC realizada no endpoint CSV de registros vigentes do SIROS (/registros/registros/registros.csv): HTTP 200, acesso público gratuito e sem autenticação.
@@ -77,7 +138,7 @@
 - [x] **CI #52 e #53 (04/11/2026):** concluídos com sucesso para os commits `fe84e0b` e `6f0ba0e`.
 - [x] **CI #54 (04/11/2026):** concluído com sucesso para o protótipo de radar no commit `e65bb63`.
 - [x] **Pesquisa inicial de fonte ADS-B (04/11/2026):** documentação oficial OpenSky descreve state vectors em tempo real e consultas por área; uso informado para pesquisa/não comercial. Termos completos não puderam ser consultados (HTTP 403) e a cobertura de CGR não foi verificada. Nenhuma integração foi feita.
-- [x] **Radar ADS-B experimental (04/11/2026):** primeira versão usa a API ADSB.lol com raio de 50 NM, botão de consulta manual, apresentação de observações em escopo radial e lista com timestamp/idade, sem associação a voos SIROS. Atribuição ODbL exibida na tela. A fonte solicita contato antes de uso em produção; não foi feito esse contato.
+- [x] **Radar ADS-B (04/11/2026):** primeira versão usa a API ADSB.lol com raio de 50 NM, botão de consulta manual, apresentação de observações em escopo radial e lista com timestamp/idade, sem associação a voos SIROS. Atribuição ODbL exibida na tela. A fonte solicita contato antes de uso em produção; não foi feito esse contato.
 - [x] **Testes do radar:** parser de payload, posições inválidas/ausentes, resposta vazia, timestamp obrigatório, integração HTTP bem-sucedida e erro HTTP cobertos por 6 testes unitários.
 - [x] **Teste físico inicial do radar (04/11/2026):** instalada e aberta apenas a variante Debug no aparelho 22101320G, sem emulador; a tela carregou resposta sem posições e exibiu estado vazio e horário da fonte, sem crash. Isso não prova ausência de tráfego nem cobertura contínua.
 - [x] **Atualização manual do radar revalidada (04/11/2026):** no aparelho 22101320G, o botão “Atualizar observações ADS-B” manteve a tela aberta e atualizou o horário da consulta de 17:41:43 para 17:42:08; a resposta continuou vazia. A captura posterior não mostrou exceção fatal nem ANR no logcat; a primeira tentativa, que retornou ao launcher, não foi reproduzida.
@@ -102,7 +163,7 @@
 - SIROS CSV: Requer download periódico e tratamento correto da codificação UTF-8 com BOM (detectado automaticamente) e delimitador ;.
 - Aena: Sem API pública documentada confirmada; investigar integração autorizada antes de iniciar implementação.
 - AvioADSB: não foi possível confirmar uma documentação/API oficial ou os termos a partir dos materiais disponíveis; cobertura de CGR não deve ser presumida.
-- ADSB.lol: API ODbL 1.0 usada em protótipo experimental. A documentação pede contato antes de uso em produção; a cobertura foi apenas amostrada uma vez e não garante disponibilidade. Atribuição e separação SIROS/ADS-B estão implementadas.
+- ADSB.lol: API ODbL 1.0 usada em protótipo ADS-B. A documentação pede contato antes de uso em produção; a cobertura foi apenas amostrada uma vez e não garante disponibilidade. Atribuição e separação SIROS/ADS-B estão implementadas.
 - OpenSky: candidato alternativo; termos completos não foram acessados e não está integrado.
 - **Notificação ponta a ponta pendente:** o `BootReceiver` foi confirmado pelo logcat após reinício natural e o teste automatizado cobre seu agendamento; sem voo SIROS entre 15 e 30 minutos, entrega e deduplicação do alerta não foram observadas.
 - **Validação manual de alertas pendente:** o worker busca eventos dentro da janela de 15–30 minutos e usa rede/periodicidade gerenciadas pelo WorkManager. Atrasos podem fazer a janela passar; o WorkManager não garante execução exatamente a cada 15 minutos. Verificar em aparelho real permissões, recebimento, deduplicação e reagendamento após reinicialização.
@@ -118,3 +179,31 @@
 - Solicitar confirmação escrita à entidade responsável por CGR sobre acesso autorizado a status operacional Aena.
 - Manter observações ADS-B separadas do planejamento SIROS; não associar a voo comercial sem correspondência verificável.
 - A integração Aena permanece uma frente separada e depende de resposta escrita; a minuta não foi enviada.
+### Seção 7 — etapa 2, bloco 1 (2026-11-07)
+
+- [x] Vigilância radar ligada ao ciclo de vida da `MainActivity`, com `repeatOnLifecycle(STARTED)` e intervalo padrão de 10 segundos.
+- [x] Switch de vigília persistido em `AppPreferences`, padrão ligado.
+- [x] Limite de 1 requisição por segundo por endpoint, failover na ordem `adsb.lol`, `airplanes.live`, `adsb.fi`, cooldown de `429` com `Retry-After` e teto de backoff preservados.
+- [x] Histórico curto por hex conectado ao caminho de avaliação do `RadarViewModel`.
+- [x] Testes JVM com relógio/espera falsos para intervalo, pausa fora de `STARTED`/switch desligado e MockWebServer para limite, failover e cooldown.
+- [ ] Harness Android/Robolectric completo para observar diretamente a entrada e saída de `STARTED` no `repeatOnLifecycle`.
+
+Validação local: `testDebugUnitTest assembleDebug` — 127 testes, 0 falhas, 0 erros e 1 ignorado; build Debug aprovado.
+
+### Revisão da pausa por ciclo de vida (2026-11-07)
+
+- [x] `RadarSurveillance.runForLifecycle` usa `repeatOnLifecycle(STARTED)` diretamente.
+- [x] `RadarSurveillanceTest.pausesPollingWhenLifecycleMovesFromStartedBackToCreated` usa `LifecycleRegistry`, conta consultas e confirma pausa em `CREATED`.
+- [x] Cooldown de 20 minutos é deduplicação de alertas (`RadarAlertDeduplicator`), distinto do cooldown HTTP/backoff das fontes.
+- [x] `RadarAlertRules` mantém constantes nomeadas para idade, velocidade, AGL, distância, rumo e taxa vertical.
+- [x] `MainActivity` inicia a vigilância antes da composição, permitindo execução em qualquer tela.
+- [x] Um snapshot bem-sucedido recria `RadarUiState` sem `errorMessage`.
+- [x] ODbL 1.0, adsb.lol, atribuição e necessidade de contato antes de produção estão documentados em `docs/API_SOURCES.md`.
+
+### Seção 7 — etapa 2, bloco 2
+
+- [x] Banner `VOO DETECTADO` na tela principal.
+- [x] Toque no banner abre a tela Radar.
+- [x] Área segura superior aplicada ao banner com `statusBarsPadding`.
+- [x] Removido o qualificador de protótipo da interface do Radar.
+

@@ -36,7 +36,7 @@ object SirosStreamParser {
 
     fun parseStream(inputStream: InputStream): Sequence<SirosRecord> = sequence {
         openReader(inputStream).use { reader ->
-            var headerSkipped = false
+            var headerFound = false
 
             for (line in reader.lineSequence()) {
                 val trimmed = line.trim()
@@ -45,10 +45,10 @@ object SirosStreamParser {
                         continue
                     }
                     if (trimmed.contains(HEADER_MARKER)) {
-                        headerSkipped = true
+                        headerFound = true
                         continue
                     }
-                    if (!headerSkipped) {
+                    if (!headerFound) {
                         continue
                     }
                     val fields = splitLine(trimmed)
@@ -89,14 +89,25 @@ object SirosStreamParser {
                     }
                 }
             }
+            if (!headerFound) {
+                throw IllegalArgumentException("Formato do CSV mudou: cabeçalho SIROS não reconhecido")
+            }
         }
     }
+
+    fun parse(inputStream: InputStream): List<SirosRecord> = parseStream(inputStream).toList()
 private fun splitLine(line: String): List<String> {
         val result = mutableListOf<String>()
         val current = StringBuilder()
         var inQuotes = false
-        for (c in line) {
+        var index = 0
+        while (index < line.length) {
+            val c = line[index]
             when {
+                c == '"' && inQuotes && index + 1 < line.length && line[index + 1] == '"' -> {
+                    current.append('"')
+                    index++
+                }
                 c == '"' -> inQuotes = !inQuotes
                 c == DELIMITER && !inQuotes -> {
                     result.add(current.toString().trim())
@@ -104,6 +115,7 @@ private fun splitLine(line: String): List<String> {
                 }
                 else -> current.append(c)
             }
+            index++
         }
         result.add(current.toString().trim())
         return result
@@ -115,7 +127,7 @@ private fun splitLine(line: String): List<String> {
         onError: ((Int, String) -> Unit)? = null
     ) {
         val reader = openReader(inputStream)
-        var headerSkipped = false
+        var headerFound = false
         var lineNumber = 0
 
         try {
@@ -129,10 +141,10 @@ private fun splitLine(line: String): List<String> {
                     return@forEachLine
                 }
                 if (trimmed.contains(HEADER_MARKER)) {
-                    headerSkipped = true
+                    headerFound = true
                     return@forEachLine
                 }
-                if (!headerSkipped) {
+                if (!headerFound) {
                     return@forEachLine
                 }
                 val fields = splitLine(trimmed)
@@ -173,6 +185,9 @@ private fun splitLine(line: String): List<String> {
                 if (record.isValid()) {
                     onRecord(record)
                 }
+            }
+            if (!headerFound) {
+                onError?.invoke(lineNumber, "Formato do CSV mudou: cabeçalho SIROS não reconhecido")
             }
         } catch (e: Exception) {
             onError?.invoke(lineNumber, e.message ?: "Erro desconhecido")

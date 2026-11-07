@@ -1,6 +1,8 @@
 # Compilação e cache do Gradle
 build/
 .gradle/
+.gradle-user/
+.android-user/
 gradle-8.5-bin.zip
 
 # Configuração local do computador
@@ -25,6 +27,7 @@ captures/
 *.tmp
 *.csv
 android-app/**/*.csv
+!android-app/app/src/test/resources/siros_cgr_real_sample.csv
 siros_temp_*.csv
 android-app/assemble_output.txt
 android-app/build_log.txt
@@ -39,3 +42,8 @@ build-logs/
 build-logs-test.log
 
 
+
+gradle-output*.log
+gradle-assemble*.log
+.gradle-user/
+.android-user/

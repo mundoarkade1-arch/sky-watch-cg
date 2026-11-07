@@ -61,7 +61,6 @@ import java.util.Locale
 import kotlin.math.cos
 import kotlin.math.sin
 
-@androidx.compose.material3.ExperimentalMaterial3Api
 @Composable
 fun RadarScreen(
     viewModel: RadarViewModel,
@@ -71,6 +70,7 @@ fun RadarScreen(
     val context = LocalContext.current
     val preferences = remember { AppPreferences.getInstance(context) }
     var keepScreenOn by remember { mutableStateOf(preferences.keepScreenOn) }
+    var radarWatchEnabled by remember { mutableStateOf(preferences.radarWatchEnabled) }
     DisposableEffect(keepScreenOn) {
         val window = (context as? Activity)?.window
         if (keepScreenOn) window?.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -88,7 +88,7 @@ fun RadarScreen(
                 title = {
                     Column {
                         Text(
-                            text = stringResource(R.string.radar_experimental),
+                            text = stringResource(R.string.radar_title),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold
                         )
@@ -128,6 +128,11 @@ fun RadarScreen(
     ) { innerPadding ->
         RadarContent(
             uiState = uiState,
+            radarWatchEnabled = radarWatchEnabled,
+            onRadarWatchChanged = {
+                radarWatchEnabled = it
+                preferences.radarWatchEnabled = it
+            },
             onRefresh = viewModel::refresh,
             modifier = Modifier
                 .fillMaxSize()
@@ -139,6 +144,8 @@ fun RadarScreen(
 @Composable
 private fun RadarContent(
     uiState: RadarUiState,
+    radarWatchEnabled: Boolean,
+    onRadarWatchChanged: (Boolean) -> Unit,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -153,6 +160,23 @@ private fun RadarContent(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+        }
+
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.radar_watch_label),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                androidx.compose.material3.Switch(
+                    checked = radarWatchEnabled,
+                    onCheckedChange = onRadarWatchChanged
+                )
+            }
         }
 
         uiState.errorMessage?.let { message ->
@@ -229,7 +253,7 @@ private fun RadarContent(
 
         item {
             Text(
-                text = stringResource(R.string.radar_attribution),
+                text = stringResource(R.string.radar_attribution_plain),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
