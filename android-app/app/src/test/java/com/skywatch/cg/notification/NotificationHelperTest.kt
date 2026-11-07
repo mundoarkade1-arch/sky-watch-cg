@@ -58,6 +58,24 @@ class NotificationHelperTest {
     }
 
     @Test
+    fun showTextAlertUsesChannelSelectedBySoundPreference() {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        shadowOf(context.applicationContext as android.app.Application)
+            .grantPermissions(Manifest.permission.POST_NOTIFICATIONS)
+        NotificationHelper.createNotificationChannel(context)
+        val preferences = com.skywatch.cg.data.prefs.AppPreferences.getInstance(context)
+
+        preferences.soundVibration = true
+        assertTrue(NotificationHelper.showTextAlert(context, "Som", "Mensagem", 78))
+        val manager = shadowOf(context.getSystemService(NotificationManager::class.java))
+        assertEquals(NotificationHelper.CHANNEL_ID, manager.getNotification(78).channelId)
+
+        preferences.soundVibration = false
+        assertTrue(NotificationHelper.showTextAlert(context, "Silencioso", "Mensagem", 79))
+        assertEquals(NotificationHelper.CHANNEL_ID_SILENT, manager.getNotification(79).channelId)
+    }
+
+    @Test
     fun notificationPermissionDeniedCannotConsumeAlertSent() {
         assertFalse(FlightAlertReceiver.shouldRecordAlert(false, false))
         assertFalse(FlightAlertReceiver.shouldRecordAlert(false, true))

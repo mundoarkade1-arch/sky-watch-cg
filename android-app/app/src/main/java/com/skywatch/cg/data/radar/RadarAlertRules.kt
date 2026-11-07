@@ -8,8 +8,18 @@ enum class RadarAlertType { ARRIVAL, DEPARTURE }
 data class RadarAlert(
     val type: RadarAlertType,
     val distanceNauticalMiles: Double,
-    val estimatedMinutes: Int?
-)
+    val estimatedMinutes: Int?,
+    val bearingDegrees: Double = 0.0
+) {
+    val lookDirection: String
+        get() = directionForBearing(bearingDegrees)
+}
+
+fun directionForBearing(bearingDegrees: Double): String {
+    val directions = listOf("N", "NE", "L", "SE", "S", "SO", "O", "NO")
+    val normalized = ((bearingDegrees % 360.0) + 360.0) % 360.0
+    return directions[((normalized + 22.5) / 45.0).toInt() % directions.size]
+}
 
 object RadarAlertRules {
     const val MAX_POSITION_AGE_SECONDS = 120.0
@@ -46,12 +56,22 @@ object RadarAlertRules {
             agl <= ARRIVAL_MAX_AGL_FEET &&
             headingPointsToAirport(aircraft)
         ) {
-            return RadarAlert(RadarAlertType.ARRIVAL, aircraft.distanceNauticalMiles, estimateMinutes(aircraft))
+            return RadarAlert(
+                RadarAlertType.ARRIVAL,
+                aircraft.distanceNauticalMiles,
+                estimateMinutes(aircraft),
+                aircraft.bearingDegrees
+            )
         }
         if (aircraft.distanceNauticalMiles <= DEPARTURE_MAX_DISTANCE_NM &&
             rate >= DEPARTURE_CLIMB_RATE_FPM && agl <= DEPARTURE_MAX_AGL_FEET
         ) {
-            return RadarAlert(RadarAlertType.DEPARTURE, aircraft.distanceNauticalMiles, null)
+            return RadarAlert(
+                RadarAlertType.DEPARTURE,
+                aircraft.distanceNauticalMiles,
+                null,
+                aircraft.bearingDegrees
+            )
         }
         return null
     }
@@ -66,6 +86,28 @@ object RadarAlertRules {
     private fun estimateMinutes(aircraft: RadarAircraft): Int? =
         aircraft.groundSpeedKnots?.takeIf { it > 0.0 }
             ?.let { (aircraft.distanceNauticalMiles / it * 60.0).toInt().coerceAtLeast(1) }
+}
+
+class RadarAlertHysteresis {
+    fun retain(
+        aircraft: RadarAircraft,
+        candidate: RadarAlert?,
+        previous: RadarAlert?
+    ): RadarAlert? {
+        if (candidate != null || previous == null) return candidate
+        val agl = (aircraft.altitudeFeet ?: return null) - RadarAirportConfig.ELEVATION_FEET
+        val (distanceLimit, altitudeLimit) = when (previous.type) {
+            RadarAlertType.ARRIVAL ->
+                RadarAlertRules.ARRIVAL_MAX_DISTANCE_NM + 2.0 to
+                    RadarAlertRules.ARRIVAL_MAX_AGL_FEET + 1_000
+            RadarAlertType.DEPARTURE ->
+                RadarAlertRules.DEPARTURE_MAX_DISTANCE_NM + 1.0 to
+                    RadarAlertRules.DEPARTURE_MAX_AGL_FEET + 1_000
+        }
+        return previous.takeIf {
+            aircraft.distanceNauticalMiles <= distanceLimit && agl <= altitudeLimit
+        }
+    }
 }
 
 class RadarAlertDeduplicator(private val clockMillis: () -> Long = System::currentTimeMillis) {

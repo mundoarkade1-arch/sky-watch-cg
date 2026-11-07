@@ -48,6 +48,7 @@ import com.skywatch.cg.notification.NotificationHelper
 import com.skywatch.cg.notification.FlightAlertScheduler
 import com.skywatch.cg.data.siros.OperationType
 import com.skywatch.cg.ui.viewmodel.RadarViewModel
+import com.skywatch.cg.data.radar.radarAlertHeadline
 import com.skywatch.cg.ui.components.DayStrip
 import com.skywatch.cg.ui.components.FlightCard
 import com.skywatch.cg.ui.components.SegmentedTabRow
@@ -77,6 +78,7 @@ fun MainScreen(viewModel: FlightListViewModel, radarViewModel: RadarViewModel) {
     val navController = rememberNavController()
     val radarState by radarViewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val radarAlertTitle = stringResource(R.string.radar_alert_detected)
     val updateChecker = remember { GitHubReleaseUpdateChecker() }
     val updateScope = rememberCoroutineScope()
     var updateResult by remember { mutableStateOf<UpdateCheckResult?>(null) }
@@ -95,6 +97,17 @@ fun MainScreen(viewModel: FlightListViewModel, radarViewModel: RadarViewModel) {
 
     LaunchedEffect(Unit) {
         checkForUpdate(manual = false)
+    }
+
+    LaunchedEffect(radarState.radarAnnouncement) {
+        radarState.radarAnnouncement?.let { alert ->
+            NotificationHelper.showTextAlert(
+                context = context,
+                title = radarAlertTitle,
+                text = "Olhe para ${alert.lookDirection} · ${alert.distanceNauticalMiles.toInt()} NM",
+                notificationId = 9_100 + alert.type.ordinal
+            )
+        }
     }
     
     Box(modifier = Modifier.fillMaxSize()) {
@@ -172,10 +185,15 @@ fun MainScreen(viewModel: FlightListViewModel, radarViewModel: RadarViewModel) {
             color = MaterialTheme.colorScheme.tertiaryContainer
         ) {
             Text(
-                text = stringResource(R.string.radar_alert_detected),
+                text = radarAlertHeadline(radarState.radarAlerts.size),
                 modifier = Modifier.padding(16.dp),
                 color = MaterialTheme.colorScheme.onTertiaryContainer,
                 fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "Olhe para ${alert.lookDirection} · ${alert.distanceNauticalMiles.toInt()} NM",
+                modifier = Modifier.padding(horizontal = 16.dp),
+                color = MaterialTheme.colorScheme.onTertiaryContainer
             )
             Text(
                 text = if (alert.type.name == "ARRIVAL") {

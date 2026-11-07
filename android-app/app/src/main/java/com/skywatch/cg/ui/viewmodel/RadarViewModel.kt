@@ -9,6 +9,7 @@ import com.skywatch.cg.data.radar.RadarUnavailableException
 import com.skywatch.cg.data.radar.RadarAlert
 import com.skywatch.cg.data.radar.RadarAlertDeduplicator
 import com.skywatch.cg.data.radar.RadarAlertRules
+import com.skywatch.cg.data.radar.RadarAlertHysteresis
 import com.skywatch.cg.data.radar.RadarAircraftHistory
 import com.skywatch.cg.data.radar.RadarSurveillance
 import com.skywatch.cg.data.prefs.AppPreferences
@@ -26,18 +27,23 @@ data class RadarUiState(
     val snapshot: RadarSnapshot? = null,
     val errorMessage: String? = null,
     val retryAfterSeconds: Long? = null,
-    val radarAlert: RadarAlert? = null
+    val radarAlert: RadarAlert? = null,
+    val radarAlerts: List<RadarAlert> = emptyList(),
+    val radarAnnouncement: RadarAlert? = null
 )
 
 class RadarViewModel(
     application: Application,
-    private val repository: RadarRepository = RadarRepository()
+    private val repository: RadarRepository = RadarRepository(),
+    private val snapshotProvider: suspend () -> RadarSnapshot = { repository.refresh() }
 ) : AndroidViewModel(application) {
     constructor(application: Application) : this(application, RadarRepository())
 
     private val mutableUiState = MutableStateFlow(RadarUiState())
     private val alertDeduplicator = RadarAlertDeduplicator()
+    private val alertHysteresis = RadarAlertHysteresis()
     private val aircraftHistory = RadarAircraftHistory()
+    private val activeAlerts = mutableMapOf<String, RadarAlert>()
     private var surveillanceJob: Job? = null
     val uiState: StateFlow<RadarUiState> = mutableUiState.asStateFlow()
 
@@ -50,7 +56,7 @@ class RadarViewModel(
         )
         viewModelScope.launch {
             try {
-                val snapshot = repository.refresh()
+                val snapshot = snapshotProvider()
                 applySnapshot(snapshot)
             } catch (e: CancellationException) {
                 throw e
@@ -89,12 +95,25 @@ class RadarViewModel(
     }
 
     private suspend fun applySnapshot(snapshot: RadarSnapshot) {
-        val detectedAlert = snapshot.aircraft.asSequence().mapNotNull { aircraft ->
+        val candidates = snapshot.aircraft.mapNotNull { aircraft ->
             val trend = aircraftHistory.observe(aircraft, snapshot.observedAtMillis)
-            RadarAlertRules.evaluate(aircraft, trend)?.takeIf {
-                alertDeduplicator.shouldAlert(aircraft.icaoHex, it.type)
-            }
-        }.firstOrNull()
-        mutableUiState.value = RadarUiState(snapshot = snapshot, radarAlert = detectedAlert)
+            val candidate = RadarAlertRules.evaluate(aircraft, trend)
+            val active = alertHysteresis.retain(aircraft, candidate, activeAlerts[aircraft.icaoHex])
+            active?.let { aircraft.icaoHex to (it to candidate) }
+        }
+        activeAlerts.clear()
+        activeAlerts.putAll(candidates.associate { it.first to it.second.first })
+        val active = activeAlerts.values.toList()
+        val announcement = candidates.asSequence()
+            .filter { it.second.second != null }
+            .map { (hex, pair) -> pair.second!!.takeIf { alertDeduplicator.shouldAlert(hex, it.type) } }
+            .filterNotNull()
+            .firstOrNull()
+        mutableUiState.value = RadarUiState(
+            snapshot = snapshot,
+            radarAlert = active.firstOrNull(),
+            radarAlerts = active,
+            radarAnnouncement = announcement
+        )
     }
 }

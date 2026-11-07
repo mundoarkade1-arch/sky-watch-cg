@@ -38,4 +38,29 @@ class RadarAlertRulesTest {
         assertTrue(dedup.shouldAlert("abc", RadarAlertType.ARRIVAL))
         assertTrue(dedup.shouldAlert("abc", RadarAlertType.DEPARTURE))
     }
+
+    @Test fun formatsDirectionForLookingTowardAircraft() {
+        assertEquals("N", directionForBearing(0.0))
+        assertEquals("L", directionForBearing(90.0))
+        assertEquals("SO", directionForBearing(225.0))
+    }
+
+    @Test fun hysteresisKeepsAlertInsideReleaseMargin() {
+        val previous = RadarAlert(RadarAlertType.ARRIVAL, 25.0, 2, 0.0)
+        val aircraft = aircraft(9_500, -100, 26.0)
+
+        assertEquals(previous, RadarAlertHysteresis().retain(aircraft, null, previous))
+    }
+
+    @Test fun hysteresisReleasesAlertOutsideReleaseMargin() {
+        val previous = RadarAlert(RadarAlertType.ARRIVAL, 25.0, 2, 0.0)
+        val aircraft = aircraft(9_500, -100, 28.0)
+
+        assertNull(RadarAlertHysteresis().retain(aircraft, null, previous))
+    }
+
+    @Test fun headlineShowsAdditionalAlertCount() {
+        assertEquals("VOO DETECTADO", radarAlertHeadline(1))
+        assertEquals("VOO DETECTADO · +2", radarAlertHeadline(3))
+    }
 }
