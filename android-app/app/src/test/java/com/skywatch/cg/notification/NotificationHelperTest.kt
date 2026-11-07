@@ -56,4 +56,12 @@ class NotificationHelperTest {
             shadowOf(notification.contentIntent).savedIntent.component?.className
         )
     }
+
+    @Test
+    fun notificationPermissionDeniedCannotConsumeAlertSent() {
+        assertFalse(FlightAlertReceiver.shouldRecordAlert(false, false))
+        assertFalse(FlightAlertReceiver.shouldRecordAlert(false, true))
+        assertFalse(FlightAlertReceiver.shouldRecordAlert(true, false))
+        assertTrue(FlightAlertReceiver.shouldRecordAlert(true, true))
+    }
 }

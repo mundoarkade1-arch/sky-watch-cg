@@ -11,11 +11,11 @@ import kotlinx.coroutines.launch
 
 class FlightAlertReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        if (!NotificationHelper.hasNotificationPermission(context)) return
         val pendingResult = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val alertId = intent.getStringExtra(EXTRA_ALERT_ID) ?: return@launch
-                if (!NotificationHelper.hasNotificationPermission(context)) return@launch
                 val database = AppDatabase.getDatabase(context.applicationContext)
                 NotificationHelper.createNotificationChannel(context)
                 val displayed = NotificationHelper.showTextAlert(
@@ -24,7 +24,7 @@ class FlightAlertReceiver : BroadcastReceiver() {
                     intent.getStringExtra(EXTRA_TEXT).orEmpty(),
                     alertId.hashCode()
                 )
-                if (displayed) {
+                if (shouldRecordAlert(true, displayed)) {
                     database.alertSentDao().insertIfAbsent(
                         AlertSent(alertId, intent.getStringExtra(EXTRA_FLIGHT_ID).orEmpty(), "SCHEDULED", "", 0, System.currentTimeMillis())
                     )
@@ -40,5 +40,8 @@ class FlightAlertReceiver : BroadcastReceiver() {
         const val EXTRA_FLIGHT_ID = "flight_id"
         const val EXTRA_TITLE = "title"
         const val EXTRA_TEXT = "text"
+
+        internal fun shouldRecordAlert(hasPermission: Boolean, notificationDisplayed: Boolean): Boolean =
+            hasPermission && notificationDisplayed
     }
 }
