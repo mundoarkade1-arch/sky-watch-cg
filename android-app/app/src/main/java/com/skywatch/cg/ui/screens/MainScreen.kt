@@ -3,6 +3,7 @@ package com.skywatch.cg.ui.screens
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
@@ -705,7 +706,11 @@ fun AboutScreen(
                             context, "Teste de notificação",
                             "Notificação de teste do SKY WATCH CG", 0x534B59
                         )
-                        notificationFeedback = NotificationHelper.testNotificationMessage(displayed)
+                        val feedback = NotificationHelper.testNotificationMessage(displayed)
+                        notificationFeedback = feedback
+                        if (!displayed) {
+                            Toast.makeText(context, feedback, Toast.LENGTH_LONG).show()
+                        }
                     }) { Text("Testar notificação") }
                     notificationFeedback?.let {
                         Text(it, style = MaterialTheme.typography.bodySmall)

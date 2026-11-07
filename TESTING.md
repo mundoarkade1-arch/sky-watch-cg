@@ -1,17 +1,17 @@
 # Plano de testes
 
-## Seção 4 — checklist de alertas locais (2026-11-06)
+## Seção 4 — checklist de alertas locais (2026-11-07)
 
-| Item | Situação | Commit | Teste/evidência |
+| Item | Situação | Commit | Teste que prova o comportamento |
 |---|---|---|---|
-| 1. Agendamento individual com alarme exato e fallback | Feito | `a019236` | `FlightAlertScheduleLogicTest.exactAlarmPolicyUsesExactBeforeAndroid12OrWhenAllowed` |
-| 2. Permissão, canal e deduplicação após publicação | Feito | `a019236`, `c0b74ee` | `FlightAlertWorkerTest.disabledAlertsAreNotProcessedByLegacyWorker` |
-| 3. Toque na notificação abre a atividade principal | Feito | `a019236` | `FlightIdKeyTest.distinctFlightIdsProduceDistinctAlertAndPendingIntentKeys` |
-| 4. Preferências, som/vibração, teste manual e alarmes exatos | Feito | `544617b`, `c0b74ee` | `FlightAlertScheduleLogicTest.doesNotScheduleWhenAlertsAreDisabled` |
-| 5. Cancelamento/reagendamento ao alterar `alertsEnabled` | Feito | `3bce7ba` | `FlightAlertScheduleLogicTest.alarmRequestCodeDependsOnTheCompleteFlightId` |
-| 6. Worker legado alinhado ao fluxo atual | Feito | `c0b74ee` | `FlightAlertWorkerTest.disabledAlertsAreNotProcessedByLegacyWorker` |
+| (a) Snackbar/Toast sem permissão e botão `ACTION_APP_NOTIFICATION_SETTINGS` | Feito | `dbd324c` | `NotificationHelperTest.notificationSettingsButtonTargetsThisApp` e `FlightAlertScheduleLogicTest.notificationTestExplainsWhenPermissionIsMissing` |
+| (b) `contentIntent` de `showTextAlert` abre `MainActivity` | Feito | `aeaa5d4` | `NotificationHelperTest.showTextAlertNotificationContentIntentOpensMainActivity` |
+| (c) Voo removido no sync cancela alarme e os atuais são reagendados | Feito | `b1005fb` | `FlightAlertScheduleLogicTest.syncRemovesMissingFlightFromScheduledAlarmState` |
+| (d) Switch Som e vibração usa canais separados | Feito | `dbd324c` | `NotificationHelperTest.createsSeparateSoundAndSilentChannels` |
+| (e) `FlightAlertWorker` e testes removidos; AlarmManager é a única via | Feito | `2f6cf5f` | Suíte completa sem referências ao worker; agendamento ativo passa por `FlightAlertScheduler` |
+| (f) Sem permissão, alerta não é consumido em `alert_sent` | Feito | `02b28b8` | `NotificationHelperTest.notificationPermissionDeniedCannotConsumeAlertSent` |
 
-Suíte completa: `testDebugUnitTest assembleDebug` — `BUILD SUCCESSFUL`; 98 testes, 0 falhas, 0 erros e 1 ignorado. `assembleDebug` também passou.
+Suíte completa: `testDebugUnitTest assembleDebug` — `BUILD SUCCESSFUL`; 101 testes, 0 falhas, 0 erros e 1 ignorado. `assembleDebug` também passou.
 
 ## 2026-11-06 - Verificador de atualizações
 

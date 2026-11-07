@@ -1,12 +1,13 @@
 # Roadmap
 
-## Revisão completa — seção 4 concluída (06/11/2026)
-- [x] Alarmes individuais exatos com fallback seguro.
-- [x] Permissão, canal, deduplicação e abertura da atividade pela notificação.
-- [x] Preferências de alertas, som/vibração, teste manual e configuração de alarmes exatos.
-- [x] Cancelamento e reagendamento ao alterar `alertsEnabled`.
-- [x] Worker legado alinhado ao fluxo atual.
-- [x] Suíte completa: 98 testes, 0 falhas, 0 erros, 1 ignorado; `assembleDebug` aprovado.
+## Revisão completa — seção 4 concluída (07/11/2026)
+- [x] (a) Feedback e botão para configurações de notificações sem permissão.
+- [x] (b) `contentIntent` da notificação abre `MainActivity`.
+- [x] (c) Sync cancela alarmes removidos e reagenda os movimentos atuais.
+- [x] (d) Switch Som e vibração com canais separados e teste Robolectric.
+- [x] (e) `FlightAlertWorker` e testes removidos; AlarmManager é a única via.
+- [x] (f) Permissão negada não consome `alert_sent`.
+- [x] Suíte completa: 101 testes, 0 falhas, 0 erros, 1 ignorado; `assembleDebug` aprovado.
 
 ## Verificador de atualizações — 06/11/2026
 - [x] Tornar o repositório público para consulta anônima e segura da API de releases.

@@ -1,11 +1,12 @@
 # Estado do projeto
 
-## Seção 4 — alertas locais concluída (06/11/2026)
-- Alarmes individuais usam modo exato quando permitido e fallback seguro quando necessário.
-- O receiver respeita permissão e só registra deduplicação após publicação confirmada; a notificação abre a atividade principal.
-- A tela Sobre expõe alertas locais, som/vibração, teste de notificação e configuração de alarmes exatos.
-- Alterar `alertsEnabled` cancela ou reagenda os alarmes persistidos; o worker legado segue a mesma preferência.
-- Suíte completa: 98 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+## Seção 4 — alertas locais concluída (07/11/2026)
+- A tela Sobre informa a ausência de permissão por Toast/feedback e oferece `ACTION_APP_NOTIFICATION_SETTINGS`.
+- `showTextAlert` publica com `contentIntent` para `MainActivity`; som e silêncio usam canais distintos.
+- O sync cancela alarmes de voos removidos e mantém apenas os alarmes dos movimentos atuais.
+- `FlightAlertWorker` e seus testes foram removidos; `AlarmManager`/receiver é a única via de alerta.
+- O receiver só grava `alert_sent` após permissão e publicação confirmada; `deleteOldAlerts` roda no sync ativo.
+- Suíte completa: 101 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
 
 ## Identidade SIROS e migração Room 6→7 (06/11/2026)
 - `sirosStage` agora é propagado de `SirosRecord.numeroEtapa` para `NormalizedFlight` e `FlightEntity`.
