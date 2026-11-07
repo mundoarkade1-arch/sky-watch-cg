@@ -56,6 +56,13 @@ class FlightDisplayUtilsTest {
     }
 
     @Test
+    fun formatAirportDisplayKeepsUnknownPatternWithoutInventingCity() {
+        val result = formatAirportDisplay("AEROPORTO REMOTO", "ZZZZ")
+
+        assertEquals("Aeroporto Remoto (ZZZZ)", result)
+    }
+
+    @Test
     fun arrivalAndDepartureDisplayTheAirportLocalTime() {
         val date = LocalDate.of(2026, 11, 4)
         val arrival = flight(
