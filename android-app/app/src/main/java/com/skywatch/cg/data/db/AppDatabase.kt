@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [FlightEntity::class, SyncMetadata::class, FollowedFlight::class, AlertSent::class], version = 6, exportSchema = true)
+@Database(entities = [FlightEntity::class, SyncMetadata::class, FollowedFlight::class, AlertSent::class], version = 7, exportSchema = true)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun flightDao(): FlightDao
@@ -154,6 +154,62 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE `flights` RENAME TO `flights_old`")
+                database.execSQL(
+                    """
+                    CREATE TABLE `flights` (
+                        `flightId` TEXT NOT NULL,
+                        `sirosRecordId` TEXT NOT NULL,
+                        `sirosStage` TEXT NOT NULL,
+                        `airline` TEXT NOT NULL,
+                        `flightNumber` TEXT NOT NULL,
+                        `equipment` TEXT,
+                        `origin` TEXT NOT NULL,
+                        `originName` TEXT,
+                        `originTimezone` TEXT NOT NULL,
+                        `destination` TEXT NOT NULL,
+                        `destinationName` TEXT,
+                        `destinationTimezone` TEXT NOT NULL,
+                        `operationType` TEXT NOT NULL,
+                        `scheduledDepartureUtc` TEXT NOT NULL,
+                        `scheduledArrivalUtc` TEXT NOT NULL,
+                        `flightDate` TEXT NOT NULL,
+                        `arrivalDate` TEXT NOT NULL,
+                        `validFrom` TEXT NOT NULL,
+                        `validTo` TEXT NOT NULL,
+                        `serviceType` TEXT,
+                        `sirosStatus` TEXT NOT NULL,
+                        `operationalStatus` TEXT NOT NULL,
+                        `delayMinutes` INTEGER,
+                        `lastSyncAt` INTEGER NOT NULL,
+                        `statusUpdatedAt` INTEGER,
+                        PRIMARY KEY(`flightId`)
+                    )
+                    """.trimIndent()
+                )
+                database.execSQL(
+                    """
+                    INSERT INTO `flights` (
+                        `flightId`, `sirosRecordId`, `sirosStage`, `airline`, `flightNumber`, `equipment`,
+                        `origin`, `originName`, `originTimezone`, `destination`, `destinationName`,
+                        `destinationTimezone`, `operationType`, `scheduledDepartureUtc`, `scheduledArrivalUtc`,
+                        `flightDate`, `arrivalDate`, `validFrom`, `validTo`, `serviceType`, `sirosStatus`,
+                        `operationalStatus`, `delayMinutes`, `lastSyncAt`, `statusUpdatedAt`
+                    )
+                    SELECT `flightId`, `sirosRecordId`, '', `airline`, `flightNumber`, `equipment`,
+                        `origin`, `originName`, `originTimezone`, `destination`, `destinationName`,
+                        `destinationTimezone`, `operationType`, `scheduledDepartureUtc`, `scheduledArrivalUtc`,
+                        `flightDate`, `arrivalDate`, `validFrom`, `validTo`, `serviceType`, `sirosStatus`,
+                        `operationalStatus`, `delayMinutes`, `lastSyncAt`, `statusUpdatedAt`
+                    FROM `flights_old`
+                    """.trimIndent()
+                )
+                database.execSQL("DROP TABLE `flights_old`")
+            }
+        }
+
         fun getDatabase(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -166,7 +222,8 @@ abstract class AppDatabase : RoomDatabase() {
                         MIGRATION_2_3,
                         MIGRATION_3_4,
                         MIGRATION_4_5,
-                        MIGRATION_5_6
+                        MIGRATION_5_6,
+                        MIGRATION_6_7
                     )
                     .addCallback(SYNC_METADATA_ID_CALLBACK)
                     .build()

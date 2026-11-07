@@ -12,6 +12,7 @@ data class FlightEntity(
     @PrimaryKey
     val flightId: String,          // Chave única composta: sirosRecordId + data específica do voo
     val sirosRecordId: String,     // Identificador original SIROS para deduplicação
+    val sirosStage: String = "0",  // Número da etapa original do registro SIROS
     val airline: String,
     val flightNumber: String,
     val equipment: String?,
@@ -41,6 +42,7 @@ data class FlightEntity(
         return NormalizedFlight(
             flightId = flightId,
             sirosRecordId = sirosRecordId,
+            sirosStage = sirosStage,
             airline = airline,
             flightNumber = flightNumber,
             equipment = equipment,
@@ -68,6 +70,7 @@ data class FlightEntity(
             return FlightEntity(
                 flightId = flight.flightId,
                 sirosRecordId = flight.sirosRecordId,
+                sirosStage = flight.sirosStage,
                 airline = flight.airline,
                 flightNumber = flight.flightNumber,
                 equipment = flight.equipment,

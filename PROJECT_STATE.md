@@ -1,5 +1,12 @@
 # Estado do projeto
 
+## Identidade SIROS e migração Room 6→7 (06/11/2026)
+- `sirosStage` agora é propagado de `SirosRecord.numeroEtapa` para `NormalizedFlight` e `FlightEntity`.
+- `flightId` usa registro SIROS, etapa, tipo de operação e data: `<siros>-E<etapa>-<ARRIVAL|DEPARTURE>-<yyyy-MM-dd>`.
+- `MIGRATION_6_7` recria somente o cache `flights`, preservando `sync_metadata` e `alert_sent`; o schema foi exportado em `android-app/app/schemas/com.skywatch.cg.data.db.AppDatabase/7.json`.
+- Fixture real reduzida e teste de identidade adicionados. Suíte final: 91 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` passou.
+- Teste instrumentado de migração compilado, mas não executado por ausência de `adb` nesta sessão.
+
 ## Revisão da sincronização excessiva (06/11/2026)
 - O ciclo de 60 segundos do `FlightListViewModel` não chama mais `syncFromRemote()`; ele atualiza apenas o relógio local e acompanha a virada do dia em `America/Campo_Grande`.
 - A abertura do app sincroniza somente com cache vazio ou quando a última sincronização bem-sucedida tem seis horas ou mais.

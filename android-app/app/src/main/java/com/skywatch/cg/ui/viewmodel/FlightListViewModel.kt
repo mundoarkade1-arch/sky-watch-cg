@@ -121,7 +121,10 @@ class FlightListViewModel(
         Log.d("FlightListViewModelDiag", "loadFlights called with date: $date. Previous job active: $previousJobActive")
         loadJob?.cancel()
         Log.d("FlightListViewModelDiag", "Previous job cancelled (if any). Updating selectedDate to: $date")
-        _selectedDate.value = date
+        if (_selectedDate.value != date) {
+            _uiState.value = FlightUiState.Loading
+            _selectedDate.value = date
+        }
     }
 
     fun loadFlightDetails(flightId: String) {

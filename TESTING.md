@@ -467,3 +467,15 @@ Comando executado em `android-app`:
 ```
 
 Resultado real: `BUILD SUCCESSFUL`; 5 testes executados, 0 falhas. O teste do checker de releases permaneceu verde. O build usou o SDK Android local e não acessou a rede durante a execução (`--offline`).
+## Seção 3 — identidade SIROS e migração Room 6→7 (2026-11-06)
+
+`NormalizedFlight` e `FlightEntity` passaram a preservar `sirosStage`. O identificador normalizado agora usa `sirosRecordId-E<etapa>-<ARRIVAL|DEPARTURE>-<yyyy-MM-dd>`, evitando que uma chegada e uma decolagem do mesmo registro SIROS se sobrescrevam.
+
+Foi adicionada `MIGRATION_6_7`, que recria somente a tabela de cache `flights` com a coluna `sirosStage`, preservando `sync_metadata` e `alert_sent`. O schema Room 7 foi exportado em `android-app/app/schemas/com.skywatch.cg.data.db.AppDatabase/7.json`.
+
+Validações realizadas:
+
+- `testDebugUnitTest assembleDebug`: `BUILD SUCCESSFUL`; 91 testes, 0 falhas, 0 erros e 1 ignorado (`SirosStreamParserRealFileTest`).
+- `SirosStageIdentityTest`: fixture derivada de linhas reais do CSV SIROS; chegada e decolagem com mesma identidade de registro e etapas distintas permanecem como dois voos.
+- `compileDebugAndroidTestKotlin`: aprovado, incluindo `AppDatabaseMigrationTest` para 6→7.
+- O teste instrumentado não foi executado porque `adb` não está disponível nesta sessão.

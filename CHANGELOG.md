@@ -218,6 +218,12 @@
 - Registradas limitações iniciais e necessidade de validação de cobertura.
 # Próxima versão
 
+## 2026-11-06 — Identidade dos voos SIROS
+- Incluída a etapa SIROS e o tipo de operação no `flightId`.
+- Adicionada migração Room 6→7 com schema exportado.
+- Adicionado teste de preservação de metadados/alertas e fixture baseada em CSV real.
+- Suíte Debug final: 91 testes, 0 falhas, 0 erros e 1 ignorado; `assembleDebug` aprovado.
+
 ## 2026-11-06 — Revisão da sincronização
 - Corrigida a sincronização excessiva: o relógio de 60 segundos não baixa mais o CSV SIROS.
 - A sincronização automática de abertura respeita cache vazio ou idade mínima de seis horas.

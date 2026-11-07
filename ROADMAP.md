@@ -89,6 +89,14 @@
 - Quando houver voo SIROS real na janela de 15–30 minutos, concluir o teste de entrega/deduplicação de alerta descrito em `TESTING.md`.
 # Próxima rodada — wip-fase3
 
+## Revisão completa — seção 3 concluída (06/11/2026)
+- [x] Propagar a etapa original do SIROS até o modelo persistido.
+- [x] Compor `flightId` com registro, etapa, operação e data.
+- [x] Adicionar migração Room 6→7 preservando metadados e alertas.
+- [x] Exportar schema Room 7 e adicionar teste de migração.
+- [x] Adicionar fixture reduzida baseada em CSV real e teste de chegada/decolagem sem colisão.
+- [ ] Executar os testes instrumentados em aparelho; `adb` não estava disponível localmente.
+
 ## Revisão completa — etapa 2 iniciada (06/11/2026)
 - [x] Remover a sincronização SIROS do ciclo de atualização de 60 segundos.
 - [x] Sincronizar na abertura somente com cache vazio ou dados com seis horas ou mais.

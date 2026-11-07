@@ -27,6 +27,7 @@ captures/
 *.tmp
 *.csv
 android-app/**/*.csv
+!android-app/app/src/test/resources/siros_cgr_real_sample.csv
 siros_temp_*.csv
 android-app/assemble_output.txt
 android-app/build_log.txt

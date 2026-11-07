@@ -103,14 +103,16 @@ object SirosNormalizer {
         val originTz = if (record.codigoOrigem == "SBCG") "America/Campo_Grande" else "America/Sao_Paulo"
         val destTz = if (record.codigoDestino == "SBCG") "America/Campo_Grande" else "America/Sao_Paulo"
         val sirosRecordId = record.numeroSiros ?: "${record.codigoEmpresa}-${record.numeroVoo}"
+        val sirosStage = record.numeroEtapa?.trim().takeUnless { it.isNullOrBlank() } ?: "0"
 
         // Se chegada UTC for antes da partida UTC, a chegada é no dia seguinte
         val arrivalDate = if (arrival.isBefore(departure)) flightDate.plusDays(1) else flightDate
 
         return listOf(
             NormalizedFlight(
-                flightId = "$sirosRecordId-$flightDate",
+                flightId = "$sirosRecordId-E$sirosStage-$operationType-$flightDate",
                 sirosRecordId = sirosRecordId,
+                sirosStage = sirosStage,
                 airline = record.empresa ?: "DESCONHECIDA",
                 flightNumber = record.numeroVoo ?: "0000",
                 equipment = record.equipamento,
