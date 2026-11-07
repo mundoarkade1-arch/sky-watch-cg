@@ -2,6 +2,7 @@ package com.skywatch.cg.ui.screens
 
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
@@ -41,6 +42,7 @@ import com.skywatch.cg.data.update.GitHubRelease
 import com.skywatch.cg.data.update.GitHubReleaseUpdateChecker
 import com.skywatch.cg.data.update.UpdateCheckResult
 import com.skywatch.cg.notification.NotificationHelper
+import com.skywatch.cg.notification.FlightAlertScheduler
 import com.skywatch.cg.data.siros.OperationType
 import com.skywatch.cg.ui.viewmodel.RadarViewModel
 import com.skywatch.cg.ui.components.DayStrip
@@ -625,7 +627,9 @@ fun AboutScreen(
 ) {
     val context = LocalContext.current
     val preferences = remember { AppPreferences.getInstance(context) }
+    var alertsEnabled by remember { mutableStateOf(preferences.alertsEnabled) }
     var soundVibration by remember { mutableStateOf(preferences.soundVibration) }
+    var notificationFeedback by remember { mutableStateOf<String?>(null) }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -661,6 +665,16 @@ fun AboutScreen(
             Card(modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("Alertas locais", modifier = Modifier.weight(1f))
+                        Switch(
+                            checked = alertsEnabled,
+                            onCheckedChange = {
+                                alertsEnabled = it
+                                preferences.alertsEnabled = it
+                            }
+                        )
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         Text("Som e vibração", modifier = Modifier.weight(1f))
                         Switch(
                             checked = soundVibration,
@@ -670,12 +684,27 @@ fun AboutScreen(
                             }
                         )
                     }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        OutlinedButton(onClick = {
+                            context.startActivity(FlightAlertScheduler.exactAlarmSettingsIntent(context))
+                        }) {
+                            Text("Configurar alarmes exatos")
+                        }
+                    }
                     Button(onClick = {
-                        NotificationHelper.showTextAlert(
+                        val displayed = NotificationHelper.showTextAlert(
                             context, "Teste de notificação",
                             "Notificação de teste do SKY WATCH CG", 0x534B59
                         )
+                        notificationFeedback = if (displayed) {
+                            "Notificação enviada."
+                        } else {
+                            "Permita notificações do app para receber alertas."
+                        }
                     }) { Text("Testar notificação") }
+                    notificationFeedback?.let {
+                        Text(it, style = MaterialTheme.typography.bodySmall)
+                    }
                     Text(
                         "Em alguns celulares (ex.: Xiaomi), libere o app em Bateria > Sem restrições.",
                         style = MaterialTheme.typography.bodySmall,
