@@ -12,31 +12,44 @@ data class RadarAlert(
 )
 
 object RadarAlertRules {
+    const val MAX_POSITION_AGE_SECONDS = 120.0
+    const val MIN_MOVING_GROUND_SPEED_KNOTS = 5.0
+    const val HELICOPTER_EMITTER_CATEGORY = "A7"
     const val ARRIVAL_MAX_DISTANCE_NM = 25.0
     const val DEPARTURE_MAX_DISTANCE_NM = 8.0
     const val ARRIVAL_HEADING_TOLERANCE_DEGREES = 60.0
     const val ARRIVAL_DESCENT_RATE_FPM = -300
-    const val ARRIVAL_MAX_ALTITUDE_FEET = 10_000
+    const val ARRIVAL_MAX_AGL_FEET = 10_000
     const val DEPARTURE_CLIMB_RATE_FPM = 500
-    const val DEPARTURE_MAX_ALTITUDE_FEET = 6_000
-    const val HIGH_PASSING_ALTITUDE_FEET = 20_000
+    const val DEPARTURE_MAX_AGL_FEET = 6_000
+    const val HIGH_PASSING_AGL_FEET = 20_000
     const val ALERT_COOLDOWN_MILLIS = 20 * 60 * 1_000L
 
-    fun evaluate(aircraft: RadarAircraft): RadarAlert? {
+    fun evaluate(aircraft: RadarAircraft, trend: RadarAircraftTrend? = null): RadarAlert? {
         val altitude = aircraft.altitudeFeet ?: return null
-        if (altitude > HIGH_PASSING_ALTITUDE_FEET) return null
-        val rate = aircraft.barometricRateFeetPerMinute ?: return null
-        if (aircraft.groundSpeedKnots == null || aircraft.groundSpeedKnots <= 0.0) return null
+        val agl = altitude - RadarAirportConfig.ELEVATION_FEET
+        if (agl > HIGH_PASSING_AGL_FEET || agl < 0) return null
+        if (aircraft.secondsSincePosition == null || aircraft.secondsSincePosition > MAX_POSITION_AGE_SECONDS) return null
+        if (!aircraft.latitude.isFinite() || aircraft.latitude !in -90.0..90.0 ||
+            !aircraft.longitude.isFinite() || aircraft.longitude !in -180.0..180.0 ||
+            !aircraft.distanceNauticalMiles.isFinite() || aircraft.distanceNauticalMiles < 0.0
+        ) return null
+        if (aircraft.emitterCategory == HELICOPTER_EMITTER_CATEGORY) return null
+        if (aircraft.groundSpeedKnots == null || aircraft.groundSpeedKnots < MIN_MOVING_GROUND_SPEED_KNOTS) return null
+        val rate = aircraft.barometricRateFeetPerMinute
+            ?: aircraft.geometricRateFeetPerMinute
+            ?: trend?.verticalRateFeetPerMinute
+            ?: return null
 
         if (aircraft.distanceNauticalMiles <= ARRIVAL_MAX_DISTANCE_NM &&
             rate <= ARRIVAL_DESCENT_RATE_FPM &&
-            altitude <= ARRIVAL_MAX_ALTITUDE_FEET &&
+            agl <= ARRIVAL_MAX_AGL_FEET &&
             headingPointsToAirport(aircraft)
         ) {
             return RadarAlert(RadarAlertType.ARRIVAL, aircraft.distanceNauticalMiles, estimateMinutes(aircraft))
         }
         if (aircraft.distanceNauticalMiles <= DEPARTURE_MAX_DISTANCE_NM &&
-            rate >= DEPARTURE_CLIMB_RATE_FPM && altitude <= DEPARTURE_MAX_ALTITUDE_FEET
+            rate >= DEPARTURE_CLIMB_RATE_FPM && agl <= DEPARTURE_MAX_AGL_FEET
         ) {
             return RadarAlert(RadarAlertType.DEPARTURE, aircraft.distanceNauticalMiles, null)
         }

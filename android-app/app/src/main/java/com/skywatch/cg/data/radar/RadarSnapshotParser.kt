@@ -64,7 +64,9 @@ internal object RadarSnapshotParser {
                             secondsSincePosition = item.optionalDouble("seen_pos")
                                 ?.takeIf { it >= 0.0 },
                             distanceNauticalMiles = distance,
-                            bearingDegrees = bearing
+                            bearingDegrees = bearing,
+                            geometricRateFeetPerMinute = item.optionalDouble("geom_rate")?.toInt(),
+                            emitterCategory = (item.opt("category") as? String)?.trim()?.uppercase()
                         )
                     )
                 }
