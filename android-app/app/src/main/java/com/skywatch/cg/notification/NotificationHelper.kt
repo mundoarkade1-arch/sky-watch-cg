@@ -122,8 +122,17 @@ object NotificationHelper {
         manager.cancel(notificationId)
     }
 
-    fun showTextAlert(context: Context, title: String, text: String, notificationId: Int) {
-        if (!hasNotificationPermission(context)) return
+    fun showTextAlert(context: Context, title: String, text: String, notificationId: Int): Boolean {
+        if (!hasNotificationPermission(context)) return false
+        val contentIntent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context,
+            notificationId,
+            contentIntent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification_flight)
             .setContentTitle(title)
@@ -131,9 +140,11 @@ object NotificationHelper {
             .setStyle(NotificationCompat.BigTextStyle().bigText(text))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .build()
         (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
             .notify(notificationId, notification)
+        return true
     }
 }

@@ -15,17 +15,18 @@ class FlightAlertReceiver : BroadcastReceiver() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val alertId = intent.getStringExtra(EXTRA_ALERT_ID) ?: return@launch
+                if (!NotificationHelper.hasNotificationPermission(context)) return@launch
                 val database = AppDatabase.getDatabase(context.applicationContext)
-                val inserted = database.alertSentDao().insertIfAbsent(
-                    AlertSent(alertId, intent.getStringExtra(EXTRA_FLIGHT_ID).orEmpty(), "SCHEDULED", "", 0, System.currentTimeMillis())
+                NotificationHelper.createNotificationChannel(context)
+                val displayed = NotificationHelper.showTextAlert(
+                    context,
+                    intent.getStringExtra(EXTRA_TITLE) ?: "Alerta de voo",
+                    intent.getStringExtra(EXTRA_TEXT).orEmpty(),
+                    alertId.hashCode()
                 )
-                if (inserted != -1L && NotificationHelper.hasNotificationPermission(context)) {
-                    NotificationHelper.createNotificationChannel(context)
-                    NotificationHelper.showTextAlert(
-                        context,
-                        intent.getStringExtra(EXTRA_TITLE) ?: "Alerta de voo",
-                        intent.getStringExtra(EXTRA_TEXT).orEmpty(),
-                        alertId.hashCode()
+                if (displayed) {
+                    database.alertSentDao().insertIfAbsent(
+                        AlertSent(alertId, intent.getStringExtra(EXTRA_FLIGHT_ID).orEmpty(), "SCHEDULED", "", 0, System.currentTimeMillis())
                     )
                 }
             } finally {

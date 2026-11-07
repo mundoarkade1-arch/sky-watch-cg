@@ -49,12 +49,27 @@ object FlightAlertScheduler {
             context, plan.flightId.hashCode(), intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && alarmManager.canScheduleExactAlarms()) {
+        val canScheduleExact = Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()
+        if (shouldUseExactAlarm(Build.VERSION.SDK_INT, canScheduleExact)) {
             alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmAtMillis, pendingIntent)
         } else {
             alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, alarmAtMillis, pendingIntent)
         }
     }
+
+    internal fun shouldUseExactAlarm(apiLevel: Int, canScheduleExactAlarms: Boolean): Boolean =
+        apiLevel < Build.VERSION_CODES.S || canScheduleExactAlarms
+
+    fun canScheduleExactAlarms(context: Context): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return true
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        return alarmManager.canScheduleExactAlarms()
+    }
+
+    fun exactAlarmSettingsIntent(context: Context): Intent =
+        Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+            data = android.net.Uri.parse("package:${context.packageName}")
+        }
 
     fun eventAtMillis(flight: FollowedFlight): Long {
         val isArrival = flight.operationType == "ARRIVAL"

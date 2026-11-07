@@ -8,6 +8,12 @@ import java.time.LocalDate
 import java.time.LocalTime
 
 class FlightAlertScheduleLogicTest {
+    @Test fun exactAlarmPolicyUsesExactBeforeAndroid12OrWhenAllowed() {
+        assertEquals(true, FlightAlertScheduler.shouldUseExactAlarm(30, false))
+        assertEquals(true, FlightAlertScheduler.shouldUseExactAlarm(31, true))
+        assertEquals(false, FlightAlertScheduler.shouldUseExactAlarm(31, false))
+    }
+
     @Test fun schedulesAtEventMinusSelectedMinutes() {
         val plan = FlightAlertScheduleLogic.plan("siros-2026-11-05", 1_000_000L, 15)
         assertEquals(100_000L, plan.triggerAtMillis)
