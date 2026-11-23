@@ -15,6 +15,7 @@ Exibir voos planejados para Campo Grande com fontes documentadas, distinguindo p
 - Prioridade: fontes gratuitas
 
 ## Estado atual
+Radar em desenvolvimento: a detecção usa a geometria das pistas 06/24 de SBCG, e a tela oferece escalas de 5, 15 e 50 NM. A versão de desenvolvimento atual é 1.0.24; consulte TESTING.md para os resultados reproduzíveis.
 Projeto em desenvolvimento ativo. O MVP inclui grade SIROS, sincronização periódica, alertas locais e radar ADS-B com consulta manual à API ADSB.lol (raio de 50 NM), atribuição ODbL e observações separadas do planejamento. A tela principal reúne pousos e decolagens numa agenda cronológica, oferece filtros e exibe horários locais de Campo Grande; uma faixa de 3 horas destaca a maior concentração prevista de movimentos. A lista inclui voos de passageiros ativos encontrados no SIROS para CGR e não representa necessariamente todos os movimentos reais do aeroporto. Os horários e a faixa recomendada são planejados, não confirmação operacional. Alertas SIROS usam a mesma conversão de horário local, com janela de 15–30 minutos e deduplicação.
 
 O repositório GitHub agora é público para permitir que o app consulte releases sem token. O verificador automático e o botão "Verificar atualização" consultam a release mais recente e abrem o APK publicado quando houver uma versão superior.

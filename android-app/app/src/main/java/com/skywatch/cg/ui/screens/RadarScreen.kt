@@ -149,11 +149,22 @@ private fun RadarContent(
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var rangeNm by remember { mutableStateOf(15.0) }
     LazyColumn(
         modifier = modifier,
         contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        item {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf(5.0, 15.0, 50.0).forEach { option ->
+                    Button(onClick = { rangeNm = option }) {
+                        Text(stringResource(R.string.radar_range_chip, option.toInt()))
+                    }
+                }
+            }
+        }
+
         item {
             Text(
                 text = stringResource(R.string.radar_disclaimer),
@@ -220,9 +231,10 @@ private fun RadarContent(
                 }
             }
         } else if (snapshot != null) {
-            item { RadarScope(snapshot) }
+            val visibleAircraft = snapshot.aircraft.filter { it.distanceNauticalMiles <= rangeNm }
+            item { RadarScope(snapshot.copy(aircraft = visibleAircraft), rangeNm) }
             item { SnapshotTime(snapshot) }
-            if (snapshot.aircraft.isEmpty()) {
+            if (visibleAircraft.isEmpty()) {
                 item {
                     Text(
                         text = stringResource(R.string.radar_empty),
@@ -234,12 +246,12 @@ private fun RadarContent(
             } else {
                 item {
                     Text(
-                        text = stringResource(R.string.radar_aircraft_count, snapshot.aircraft.size),
+                        text = stringResource(R.string.radar_aircraft_count, visibleAircraft.size),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
                 }
-                items(snapshot.aircraft, key = { it.icaoHex }) { aircraft ->
+                items(visibleAircraft, key = { it.icaoHex }) { aircraft ->
                     RadarAircraftCard(aircraft)
                 }
             }
@@ -262,7 +274,7 @@ private fun RadarContent(
 }
 
 @Composable
-private fun RadarScope(snapshot: RadarSnapshot) {
+private fun RadarScope(snapshot: RadarSnapshot, rangeNm: Double) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -307,7 +319,7 @@ private fun RadarScope(snapshot: RadarSnapshot) {
 
                 snapshot.aircraft.forEach { aircraft ->
                     val normalizedDistance =
-                        (aircraft.distanceNauticalMiles / RadarRemoteSource.RANGE_NAUTICAL_MILES)
+                        (aircraft.distanceNauticalMiles / rangeNm)
                             .coerceIn(0.0, 1.0)
                     val bearingRadians = Math.toRadians(aircraft.bearingDegrees)
                     val point = Offset(
@@ -319,8 +331,27 @@ private fun RadarScope(snapshot: RadarSnapshot) {
                         radius = 4.dp.toPx(),
                         center = point
                     )
+                    aircraft.trackDegrees?.let { track ->
+                        val headingRadians = Math.toRadians(track)
+                        drawLine(
+                            color = SkyWatchColors.ArrivalAccent,
+                            start = point,
+                            end = Offset(
+                                point.x + (sin(headingRadians) * 18f).toFloat(),
+                                point.y - (cos(headingRadians) * 18f).toFloat()
+                            ),
+                            strokeWidth = 2.dp.toPx(),
+                            cap = StrokeCap.Round
+                        )
+                    }
                 }
             }
+            Text(stringResource(R.string.radar_north), Modifier.align(Alignment.TopCenter), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 16.sp)
+            Text(stringResource(R.string.radar_east), Modifier.align(Alignment.CenterEnd), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 16.sp)
+            Text(stringResource(R.string.radar_south), Modifier.align(Alignment.BottomCenter), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 16.sp)
+            Text(stringResource(R.string.radar_west), Modifier.align(Alignment.CenterStart), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 16.sp)
+            Text(stringResource(R.string.radar_runway_06), Modifier.align(Alignment.BottomStart).padding(20.dp), color = SkyWatchColors.DepartureAccent, fontSize = 12.sp)
+            Text(stringResource(R.string.radar_runway_24), Modifier.align(Alignment.TopEnd).padding(20.dp), color = SkyWatchColors.DepartureAccent, fontSize = 12.sp)
         }
         Row(
             modifier = Modifier
@@ -328,13 +359,13 @@ private fun RadarScope(snapshot: RadarSnapshot) {
                 .padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("N", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+            Text(stringResource(R.string.radar_north), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 16.sp)
             Text(
                 text = stringResource(R.string.radar_center_marker),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontSize = 12.sp
             )
-            Text("50 NM", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
+            Text(stringResource(R.string.radar_range_chip, rangeNm.toInt()), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
         }
     }
 }

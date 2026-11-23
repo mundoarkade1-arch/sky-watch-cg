@@ -1,5 +1,11 @@
 # PENDENCIAS.md
 
+## Auditoria de radar - 2026-11-23
+
+- A orientação pelo sensor de rotação do celular e a validação em aparelho físico não foram concluídas nesta rodada.
+- O lintDebug existente falha com 200 erros e 81 avisos legados; o primeiro é `DayStrip.kt:30` usando `LocalDate.now` sem anotação de API. O `assembleDebug` e os 142 testes unitários passaram.
+- Não houve dados ADS-B reais suficientes para comprovar cobertura contínua nem alerta comercial em campo.
+
 Lista de pendências e itens futuros do projeto **SKY WATCH CG**:
 
 1. **Fase 0 Concluída**:

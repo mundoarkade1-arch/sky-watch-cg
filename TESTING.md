@@ -588,3 +588,23 @@ Suíte completa será revalidada após este ajuste de ciclo de vida. O teste foc
 | Tela Radar com área segura superior | `pendente neste commit` | Banner usa `statusBarsPadding`; tela Radar continua acessível pela navegação inferior |
 | Remoção do qualificador de protótipo da UI | `1901075` | Rótulo passou a ser `Radar`; atribuição não usa o termo removido |
 
+## 2026-11-22 - Radar e casamento SIROS
+
+Comando executado em `android-app` com Gradle 8.5 local:
+
+```powershell
+gradle.bat :app:testDebugUnitTest --tests com.skywatch.cg.data.radar.RadarAlertRulesTest --tests com.skywatch.cg.data.radar.RadarCommercialMatcherTest --console=plain
+```
+
+Resultado real: `BUILD SUCCESSFUL`; 12 testes focados, 0 falhas.
+
+Validação final executada em 2026-11-23:
+
+```powershell
+gradle.bat :app:testDebugUnitTest :app:assembleDebug :app:lintDebug --console=plain
+```
+
+- `:app:testDebugUnitTest`: `BUILD SUCCESSFUL`, 142 testes, 0 falhas.
+- `:app:assembleDebug`: concluído com sucesso; APK em `app/build/outputs/apk/debug/app-debug.apk`.
+- `:app:lintDebug`: falhou com 200 erros e 81 avisos já existentes no projeto; o primeiro aponta `DayStrip.kt:30` (`LocalDate.now` API 26 com minSdk 24). Nenhum erro de lint do radar foi isolado antes da interrupção do relatório.
+

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-22 - Radar: geometria de pista e casamento SIROS
+- Regras de pouso/decolagem passaram a exigir eixo das pistas 06/24, lado de aproximação, tendência de distância, AGL, velocidade e posição com até 60 segundos.
+- Alertas agora registram cabeceira, direção de observação, ETA calculada e resultado do casamento com planejamento SIROS.
+- Adicionado casamento conservador de callsign com companhias conhecidas e janela de 90 minutos; ausência de correspondência não bloqueia a geometria.
+- Radar ganhou seleção de escala de 5, 15 e 50 NM e filtra aeronaves fora da escala escolhida.
+- Teste focado executado com sucesso: 12 testes, 0 falhas.
+
 ## 2026-11-07 - Seção 7, etapa 2: pausa real por ciclo de vida
 - Extraído o vínculo de `RadarSurveillance` com `repeatOnLifecycle(STARTED)`.
 - Adicionado teste com `LifecycleRegistry` cobrindo `CREATED → STARTED → CREATED` e a pausa efetiva das consultas.

@@ -100,13 +100,13 @@ class RadarViewModelTest {
                     callsign = "TEST",
                     latitude = -20.4,
                     longitude = -54.6,
-                    altitudeFeet = 8_000,
+                    altitudeFeet = 4_500,
                     barometricRateFeetPerMinute = -500,
                     groundSpeedKnots = 200.0,
-                    trackDegrees = 180.0,
+                    trackDegrees = 222.26,
                     secondsSincePosition = 0.0,
                     distanceNauticalMiles = 12.0,
-                    bearingDegrees = 0.0
+                    bearingDegrees = 42.26
                 )
             )
         } else {
