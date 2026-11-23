@@ -1,5 +1,22 @@
 # Plano de testes
 
+## 2026-11-23 - Bússola e versão 1.0.25
+
+- Teste focado `RadarOrientationMathTest`: executado com `BUILD SUCCESSFUL`.
+- Cobertura: norte, leste, passagem 359°→0°, suavização e sensor ausente.
+- `assembleDebug`: executado com `BUILD SUCCESSFUL` após a integração do sensor.
+
+Validação final após a baseline de lint:
+
+```powershell
+gradle.bat :app:testDebugUnitTest :app:assembleDebug :app:compileDebugAndroidTestKotlin :app:lintDebug --console=plain
+```
+
+- `BUILD SUCCESSFUL`.
+- 146 testes unitários, 0 falhas e 0 erros.
+- `assembleDebug`, `compileDebugAndroidTestKotlin` e `lintDebug` aprovados.
+- A baseline `android-app/app/lint-baseline.xml` contém somente os 180 erros legados de API antiga; os arquivos do radar desta rodada não têm erros de lint.
+
 ## Auditoria final das secoes 8 e 9
 
 - O checker usa `org.json.JSONObject`/`JSONArray` e tem teste com o snapshot real da API `releases/latest` em `src/test/resources/github_release_latest_v1.0.23.json`; o teste usa MockWebServer, sem rede externa.

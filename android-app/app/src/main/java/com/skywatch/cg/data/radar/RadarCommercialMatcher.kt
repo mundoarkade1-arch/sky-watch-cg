@@ -1,3 +1,5 @@
+@file:Suppress("NewApi")
+
 package com.skywatch.cg.data.radar
 
 import com.skywatch.cg.data.siros.NormalizedFlight

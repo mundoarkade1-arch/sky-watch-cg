@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-23 - Bússola do radar e versão 1.0.25
+- Adicionado suporte ao sensor `TYPE_ROTATION_VECTOR`, com suavização do azimute e desligamento automático ao sair da tela.
+- Radar agora alterna entre norte fixo e rotação pelo celular; aparelhos sem sensor continuam funcionando em norte fixo.
+- Adicionados testes unitários de norte, leste, passagem 359°→0°, suavização e sensor ausente.
+- Versão atualizada para 1.0.25.
+
 ## 2026-11-22 - Radar: geometria de pista e casamento SIROS
 - Regras de pouso/decolagem passaram a exigir eixo das pistas 06/24, lado de aproximação, tendência de distância, AGL, velocidade e posição com até 60 segundos.
 - Alertas agora registram cabeceira, direção de observação, ETA calculada e resultado do casamento com planejamento SIROS.

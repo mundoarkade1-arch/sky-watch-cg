@@ -1,5 +1,12 @@
 # PENDENCIAS.md
 
+## Atualização 2026-11-23
+
+- A bússola foi implementada e testada matematicamente; falta validar o comportamento visual em aparelho físico.
+- A contagem de lint legado será reavaliada após o `lintDebug` desta rodada. Problemas em arquivos tocados serão corrigidos; problemas antigos permanecerão documentados.
+- Lint reavaliado: 180 erros legados foram congelados em `android-app/app/lint-baseline.xml`; `lintDebug` passou e não há erros nos arquivos novos do radar.
+- A versão 1.0.25 ainda precisa de validação visual em aparelho físico e publicação pelo fluxo GitHub.
+
 ## Auditoria de radar - 2026-11-23
 
 - A orientação pelo sensor de rotação do celular e a validação em aparelho físico não foram concluídas nesta rodada.

@@ -1,0 +1,2867 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 8.2.0" type="baseline" client="gradle" dependencies="false" name="AGP (8.2.0)" variant="all" version="8.2.0">
+
+    <issue
+        id="ObsoleteLintCustomCheck"
+        message="Library lint checks reference invalid APIs; these checks **will be skipped**!&#xA;&#xA;Lint found an issue registry (`androidx.compose.runtime.lint.RuntimeIssueRegistry`)&#xA;which contains some references to invalid API:&#xA;org.jetbrains.kotlin.analysis.api.session.KtAnalysisSessionProvider: org.jetbrains.kotlin.analysis.api.lifetime.KtLifetimeTokenFactory getTokenFactory()&#xA;(Referenced from androidx/compose/runtime/lint/AutoboxingStateCreationDetector.class)&#xA;&#xA;Therefore, this lint check library is **not** included&#xA;in analysis. This affects the following lint checks:&#xA;`AutoboxingStateValueProperty`&#xA;`AutoboxingStateCreation`&#xA;`CoroutineCreationDuringComposition`&#xA;`FlowOperatorInvokedInComposition`&#xA;`ComposableLambdaParameterNaming`&#xA;`ComposableLambdaParameterPosition`&#xA;`ComposableNaming`&#xA;`StateFlowValueCalledInComposition`&#xA;`CompositionLocalNaming`&#xA;`MutableCollectionMutableState`&#xA;`ProduceStateDoesNotAssignValue`&#xA;`RememberReturnType`&#xA;`OpaqueUnitKey`&#xA;`UnrememberedMutableState`&#xA;&#xA;To use this lint check, upgrade to a more recent version&#xA;of the library.">
+        <location
+            file="$GRADLE_USER_HOME/caches/transforms-3/ea7f7b301cdd9fd75ddf70ce8391a00f/transformed/runtime-release/jars/lint.jar"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 31 (current min is 24): `android.provider.Settings#ACTION_REQUEST_SCHEDULE_EXACT_ALARM`"
+        errorLine1="        Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {"
+        errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/notification/FlightAlertScheduler.kt"
+            line="95"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 33 (current min is 24): `android.Manifest.permission#POST_NOTIFICATIONS`"
+        errorLine1="            requestNotificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)"
+        errorLine2="                                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/MainActivity.kt"
+            line="43"
+            column="58"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 26 (current min is 24): `android.provider.Settings#ACTION_APP_NOTIFICATION_SETTINGS`"
+        errorLine1="        Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {"
+        errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/notification/NotificationHelper.kt"
+            line="63"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 26 (current min is 24): `android.provider.Settings#EXTRA_APP_PACKAGE`"
+        errorLine1="            putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, context.packageName)"
+        errorLine2="                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/notification/NotificationHelper.kt"
+            line="64"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#now`"
+        errorLine1="    val today = LocalDate.now(ZoneId.of(&quot;America/Campo_Grande&quot;))"
+        errorLine2="                          ~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/components/DayStrip.kt"
+            line="30"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZoneId#of`"
+        errorLine1="    val today = LocalDate.now(ZoneId.of(&quot;America/Campo_Grande&quot;))"
+        errorLine2="                                     ~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/components/DayStrip.kt"
+            line="30"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#minusDays`"
+        errorLine1="    val yesterday = today.minusDays(1)"
+        errorLine2="                          ~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/components/DayStrip.kt"
+            line="31"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#plusDays`"
+        errorLine1="    val dates = (0..14).map { yesterday.plusDays(it.toLong()) }"
+        errorLine2="                                        ~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/components/DayStrip.kt"
+            line="32"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.DayOfWeek#getDisplayName`"
+        errorLine1="            val dayOfWeekStr = date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale(&quot;pt&quot;, &quot;BR&quot;))"
+        errorLine2="                                              ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/components/DayStrip.kt"
+            line="44"
+            column="47"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#getDayOfWeek`"
+        errorLine1="            val dayOfWeekStr = date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale(&quot;pt&quot;, &quot;BR&quot;))"
+        errorLine2="                                    ~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/components/DayStrip.kt"
+            line="44"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level 26 (current min is 24): `java.time.format.TextStyle#SHORT`"
+        errorLine1="            val dayOfWeekStr = date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale(&quot;pt&quot;, &quot;BR&quot;))"
+        errorLine2="                                                             ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/components/DayStrip.kt"
+            line="44"
+            column="62"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#getDayOfMonth`"
+        errorLine1="            val dayNum = date.dayOfMonth.toString()"
+        errorLine2="                              ~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/components/DayStrip.kt"
+            line="47"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#format`"
+        errorLine1="val localTimeStr = eventDateTime.format(DateTimeFormatter.ofPattern(&quot;HH:mm&quot;))"
+        errorLine2="                                 ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/screens/DetailScreen.kt"
+            line="39"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.format.DateTimeFormatter#ofPattern`"
+        errorLine1="val localTimeStr = eventDateTime.format(DateTimeFormatter.ofPattern(&quot;HH:mm&quot;))"
+        errorLine2="                                                          ~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/screens/DetailScreen.kt"
+            line="39"
+            column="59"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#format`"
+        errorLine1="    .format(DateTimeFormatter.ofPattern(&quot;EEEE, dd &apos;de&apos; MMMM &apos;de&apos; yyyy&quot;, java.util.Locale(&quot;pt&quot;, &quot;BR&quot;)))"
+        errorLine2="     ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/screens/DetailScreen.kt"
+            line="41"
+            column="6"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.format.DateTimeFormatter#ofPattern`"
+        errorLine1="    .format(DateTimeFormatter.ofPattern(&quot;EEEE, dd &apos;de&apos; MMMM &apos;de&apos; yyyy&quot;, java.util.Locale(&quot;pt&quot;, &quot;BR&quot;)))"
+        errorLine2="                              ~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/screens/DetailScreen.kt"
+            line="41"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#parse`"
+        errorLine1="        return LocalDateTime.of(java.time.LocalDate.parse(date), java.time.LocalTime.ofSecondOfDay(utcMinutes * 60))"
+        errorLine2="                                                    ~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/notification/FlightAlertScheduler.kt"
+            line="103"
+            column="53"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#of`"
+        errorLine1="        return LocalDateTime.of(java.time.LocalDate.parse(date), java.time.LocalTime.ofSecondOfDay(utcMinutes * 60))"
+        errorLine2="                             ~~">
+        <location
+            file="src/main/java/com/skywatch/cg/notification/FlightAlertScheduler.kt"
+            line="103"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalTime#ofSecondOfDay`"
+        errorLine1="        return LocalDateTime.of(java.time.LocalDate.parse(date), java.time.LocalTime.ofSecondOfDay(utcMinutes * 60))"
+        errorLine2="                                                                                     ~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/notification/FlightAlertScheduler.kt"
+            line="103"
+            column="86"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.chrono.ChronoLocalDateTime#toInstant`"
+        errorLine1="            .toInstant(ZoneOffset.UTC)"
+        errorLine2="             ~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/notification/FlightAlertScheduler.kt"
+            line="104"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level 26 (current min is 24): `java.time.ZoneOffset#UTC`"
+        errorLine1="            .toInstant(ZoneOffset.UTC)"
+        errorLine2="                       ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/notification/FlightAlertScheduler.kt"
+            line="104"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#toEpochMilli`"
+        errorLine1="            .toEpochMilli()"
+        errorLine2="             ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/notification/FlightAlertScheduler.kt"
+            line="105"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#toEpochMilli`"
+        errorLine1="        return LocalDateTime.of(date, time).toInstant(ZoneOffset.UTC).toEpochMilli()"
+        errorLine2="                                                                      ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/notification/FlightAlertScheduler.kt"
+            line="111"
+            column="71"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#of`"
+        errorLine1="        return LocalDateTime.of(date, time).toInstant(ZoneOffset.UTC).toEpochMilli()"
+        errorLine2="                             ~~">
+        <location
+            file="src/main/java/com/skywatch/cg/notification/FlightAlertScheduler.kt"
+            line="111"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.chrono.ChronoLocalDateTime#toInstant`"
+        errorLine1="        return LocalDateTime.of(date, time).toInstant(ZoneOffset.UTC).toEpochMilli()"
+        errorLine2="                                            ~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/notification/FlightAlertScheduler.kt"
+            line="111"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level 26 (current min is 24): `java.time.ZoneOffset#UTC`"
+        errorLine1="        return LocalDateTime.of(date, time).toInstant(ZoneOffset.UTC).toEpochMilli()"
+        errorLine2="                                                      ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/notification/FlightAlertScheduler.kt"
+            line="111"
+            column="55"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZoneId#of`"
+        errorLine1="internal val campoGrandeZone = ZoneId.of(&quot;America/Campo_Grande&quot;)"
+        errorLine2="                                      ~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/FlightDisplayUtils.kt"
+            line="15"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.format.DateTimeFormatter#ofPattern`"
+        errorLine1="internal val timeFormatter = DateTimeFormatter.ofPattern(&quot;HH:mm&quot;)"
+        errorLine2="                                               ~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/FlightDisplayUtils.kt"
+            line="16"
+            column="48"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZoneId#of`"
+        errorLine1="internal val localDateTimeFormatter = DateTimeFormatter.ofPattern(&quot;dd/MM/yyyy HH:mm&quot;).withZone(ZoneId.of(&quot;America/Campo_Grande&quot;))"
+        errorLine2="                                                                                                      ~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/FlightDisplayUtils.kt"
+            line="17"
+            column="103"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.format.DateTimeFormatter#ofPattern`"
+        errorLine1="internal val localDateTimeFormatter = DateTimeFormatter.ofPattern(&quot;dd/MM/yyyy HH:mm&quot;).withZone(ZoneId.of(&quot;America/Campo_Grande&quot;))"
+        errorLine2="                                                        ~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/FlightDisplayUtils.kt"
+            line="17"
+            column="57"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.format.DateTimeFormatter#withZone`"
+        errorLine1="internal val localDateTimeFormatter = DateTimeFormatter.ofPattern(&quot;dd/MM/yyyy HH:mm&quot;).withZone(ZoneId.of(&quot;America/Campo_Grande&quot;))"
+        errorLine2="                                                                                      ~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/FlightDisplayUtils.kt"
+            line="17"
+            column="87"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#atTime`"
+        errorLine1="    return utcDate.atTime(utcTime)"
+        errorLine2="                   ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/FlightDisplayUtils.kt"
+            line="45"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#atZone`"
+        errorLine1="        .atZone(ZoneId.of(&quot;UTC&quot;))"
+        errorLine2="         ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/FlightDisplayUtils.kt"
+            line="46"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZoneId#of`"
+        errorLine1="        .atZone(ZoneId.of(&quot;UTC&quot;))"
+        errorLine2="                       ~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/FlightDisplayUtils.kt"
+            line="46"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZoneId#of`"
+        errorLine1="        .withZoneSameInstant(ZoneId.of(airportTimezone))"
+        errorLine2="                                    ~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/FlightDisplayUtils.kt"
+            line="47"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZonedDateTime#withZoneSameInstant`"
+        errorLine1="        .withZoneSameInstant(ZoneId.of(airportTimezone))"
+        errorLine2="         ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/FlightDisplayUtils.kt"
+            line="47"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZonedDateTime#toLocalDateTime`"
+        errorLine1="        .toLocalDateTime()"
+        errorLine2="         ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/FlightDisplayUtils.kt"
+            line="48"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#format`"
+        errorLine1="    getAirportEventDateTime().format(timeFormatter)"
+        errorLine2="                              ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/FlightDisplayUtils.kt"
+            line="52"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#format`"
+        errorLine1="    getAirportEventDateTime().format(DateTimeFormatter.ofPattern(&quot;dd/MM/yyyy&quot;))"
+        errorLine2="                              ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/FlightDisplayUtils.kt"
+            line="55"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.format.DateTimeFormatter#ofPattern`"
+        errorLine1="    getAirportEventDateTime().format(DateTimeFormatter.ofPattern(&quot;dd/MM/yyyy&quot;))"
+        errorLine2="                                                       ~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/FlightDisplayUtils.kt"
+            line="55"
+            column="56"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#format`"
+        errorLine1="    getAirportEventDateTime().format(DateTimeFormatter.ofPattern(&quot;dd/MM/yyyy HH:mm&quot;))"
+        errorLine2="                              ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/FlightDisplayUtils.kt"
+            line="58"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.format.DateTimeFormatter#ofPattern`"
+        errorLine1="    getAirportEventDateTime().format(DateTimeFormatter.ofPattern(&quot;dd/MM/yyyy HH:mm&quot;))"
+        errorLine2="                                                       ~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/FlightDisplayUtils.kt"
+            line="58"
+            column="56"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#ofEpochMilli`"
+        errorLine1="        localDateTimeFormatter.format(java.time.Instant.ofEpochMilli(this))"
+        errorLine2="                                                        ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/FlightDisplayUtils.kt"
+            line="65"
+            column="57"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.format.DateTimeFormatter#format`"
+        errorLine1="        localDateTimeFormatter.format(java.time.Instant.ofEpochMilli(this))"
+        errorLine2="                               ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/FlightDisplayUtils.kt"
+            line="65"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Instant` to `TemporalAccessor` requires API level 26 (current min is 24)"
+        errorLine1="        localDateTimeFormatter.format(java.time.Instant.ofEpochMilli(this))"
+        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/FlightDisplayUtils.kt"
+            line="65"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalTime#parse`"
+        errorLine1="            scheduledDepartureUtc = LocalTime.parse(scheduledDepartureUtc),"
+        errorLine2="                                              ~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/db/FlightEntity.kt"
+            line="56"
+            column="47"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalTime#parse`"
+        errorLine1="            scheduledArrivalUtc = LocalTime.parse(scheduledArrivalUtc),"
+        errorLine2="                                            ~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/db/FlightEntity.kt"
+            line="57"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#parse`"
+        errorLine1="            flightDate = LocalDate.parse(flightDate),"
+        errorLine2="                                   ~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/db/FlightEntity.kt"
+            line="58"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#parse`"
+        errorLine1="            arrivalDate = LocalDate.parse(arrivalDate),"
+        errorLine2="                                    ~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/db/FlightEntity.kt"
+            line="59"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#parse`"
+        errorLine1="            validFrom = LocalDate.parse(validFrom),"
+        errorLine2="                                  ~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/db/FlightEntity.kt"
+            line="61"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#parse`"
+        errorLine1="            validTo = LocalDate.parse(validTo),"
+        errorLine2="                                ~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/db/FlightEntity.kt"
+            line="62"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#now`"
+        errorLine1="        LocalDate.now(ZoneId.of(&quot;America/Campo_Grande&quot;))"
+        errorLine2="                  ~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/viewmodel/FlightListViewModel.kt"
+            line="55"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#now`"
+        errorLine1="        LocalDate.now(ZoneId.of(&quot;America/Campo_Grande&quot;))"
+        errorLine2="                  ~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/viewmodel/FlightListViewModel.kt"
+            line="55"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZoneId#of`"
+        errorLine1="        LocalDate.now(ZoneId.of(&quot;America/Campo_Grande&quot;))"
+        errorLine2="                             ~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/viewmodel/FlightListViewModel.kt"
+            line="55"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZoneId#of`"
+        errorLine1="        LocalDate.now(ZoneId.of(&quot;America/Campo_Grande&quot;))"
+        errorLine2="                             ~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/viewmodel/FlightListViewModel.kt"
+            line="55"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#now`"
+        errorLine1="    private val _currentLocalDateTime = MutableStateFlow(LocalDateTime.now(ZoneId.of(&quot;America/Campo_Grande&quot;)))"
+        errorLine2="                                                                       ~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/viewmodel/FlightListViewModel.kt"
+            line="84"
+            column="72"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZoneId#of`"
+        errorLine1="    private val _currentLocalDateTime = MutableStateFlow(LocalDateTime.now(ZoneId.of(&quot;America/Campo_Grande&quot;)))"
+        errorLine2="                                                                                  ~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/viewmodel/FlightListViewModel.kt"
+            line="84"
+            column="83"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#now`"
+        errorLine1="                    _currentLocalDateTime.value = LocalDateTime.now(ZoneId.of(&quot;America/Campo_Grande&quot;))"
+        errorLine2="                                                                ~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/viewmodel/FlightListViewModel.kt"
+            line="236"
+            column="65"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZoneId#of`"
+        errorLine1="                    _currentLocalDateTime.value = LocalDateTime.now(ZoneId.of(&quot;America/Campo_Grande&quot;))"
+        errorLine2="                                                                           ~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/viewmodel/FlightListViewModel.kt"
+            line="236"
+            column="76"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#now`"
+        errorLine1="                    _currentLocalDateTime.value = LocalDateTime.now(ZoneId.of(&quot;America/Campo_Grande&quot;))"
+        errorLine2="                                                                ~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/viewmodel/FlightListViewModel.kt"
+            line="238"
+            column="65"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZoneId#of`"
+        errorLine1="                    _currentLocalDateTime.value = LocalDateTime.now(ZoneId.of(&quot;America/Campo_Grande&quot;))"
+        errorLine2="                                                                           ~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/viewmodel/FlightListViewModel.kt"
+            line="238"
+            column="76"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#minusDays`"
+        errorLine1="                        if (_selectedDate.value == lastKnownDate.minusDays(1)) {"
+        errorLine2="                                                                 ~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/viewmodel/FlightListViewModel.kt"
+            line="242"
+            column="66"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#minusDays`"
+        errorLine1="        val newDate = _selectedDate.value.minusDays(1)"
+        errorLine2="                                          ~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/viewmodel/FlightListViewModel.kt"
+            line="280"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#plusDays`"
+        errorLine1="        val newDate = _selectedDate.value.plusDays(1)"
+        errorLine2="                                          ~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/viewmodel/FlightListViewModel.kt"
+            line="292"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#now`"
+        errorLine1="            else -> LocalDate.now(campoGrandeZone)"
+        errorLine2="                              ~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/screens/MainScreen.kt"
+            line="351"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#now`"
+        errorLine1="        val isToday = currentDate == LocalDate.now(campoGrandeZone)"
+        errorLine2="                                               ~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/screens/MainScreen.kt"
+            line="354"
+            column="48"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#format`"
+        errorLine1="        val headerTitle = if (isToday) &quot;Voos de hoje&quot; else currentDate.format(DateTimeFormatter.ofPattern(&quot;EEEE, d &apos;de&apos; MMMM&quot;, Locale(&quot;pt&quot;, &quot;BR&quot;))).replaceFirstChar { it.uppercase() }"
+        errorLine2="                                                                       ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/screens/MainScreen.kt"
+            line="355"
+            column="72"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.format.DateTimeFormatter#ofPattern`"
+        errorLine1="        val headerTitle = if (isToday) &quot;Voos de hoje&quot; else currentDate.format(DateTimeFormatter.ofPattern(&quot;EEEE, d &apos;de&apos; MMMM&quot;, Locale(&quot;pt&quot;, &quot;BR&quot;))).replaceFirstChar { it.uppercase() }"
+        errorLine2="                                                                                                ~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/screens/MainScreen.kt"
+            line="355"
+            column="97"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#now`"
+        errorLine1="            val isToday = selectedDate == LocalDate.now(campoGrandeZone)"
+        errorLine2="                                                    ~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/screens/MainScreen.kt"
+            line="476"
+            column="53"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#isBefore`"
+        errorLine1="                val pastFlights = flights.filter { isToday &amp;&amp; it.getAirportEventDateTime().isBefore(now) }"
+        errorLine2="                                                                                           ~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/screens/MainScreen.kt"
+            line="518"
+            column="92"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `LocalDateTime` to `ChronoLocalDateTime` requires API level 26 (current min is 24)"
+        errorLine1="                val pastFlights = flights.filter { isToday &amp;&amp; it.getAirportEventDateTime().isBefore(now) }"
+        errorLine2="                                                                                                    ~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/screens/MainScreen.kt"
+            line="518"
+            column="101"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Duration#between`"
+        errorLine1="                Text(formatTimeUntil(java.time.Duration.between(now, event).toMinutes()), style = MaterialTheme.typography.labelSmall)"
+        errorLine2="                                                        ~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/screens/MainScreen.kt"
+            line="569"
+            column="57"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Duration#toMinutes`"
+        errorLine1="                Text(formatTimeUntil(java.time.Duration.between(now, event).toMinutes()), style = MaterialTheme.typography.labelSmall)"
+        errorLine2="                                                                            ~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/screens/MainScreen.kt"
+            line="569"
+            column="77"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `LocalDateTime` to `Temporal` requires API level 26 (current min is 24)"
+        errorLine1="                Text(formatTimeUntil(java.time.Duration.between(now, event).toMinutes()), style = MaterialTheme.typography.labelSmall)"
+        errorLine2="                                                                ~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/screens/MainScreen.kt"
+            line="569"
+            column="65"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `LocalDateTime` to `Temporal` requires API level 26 (current min is 24)"
+        errorLine1="                Text(formatTimeUntil(java.time.Duration.between(now, event).toMinutes()), style = MaterialTheme.typography.labelSmall)"
+        errorLine2="                                                                     ~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/screens/MainScreen.kt"
+            line="569"
+            column="70"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.format.DateTimeFormatter#ofPattern`"
+        errorLine1="    val formatter = DateTimeFormatter.ofPattern(&quot;HH:mm&quot;)"
+        errorLine2="                                      ~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/screens/MainScreen.kt"
+            line="886"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#format`"
+        errorLine1="                text = &quot;${window.start.format(formatter)}–${window.end.format(formatter)}&quot;,"
+        errorLine2="                                       ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/screens/MainScreen.kt"
+            line="903"
+            column="40"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#format`"
+        errorLine1="                text = &quot;${window.start.format(formatter)}–${window.end.format(formatter)}&quot;,"
+        errorLine2="                                                                       ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/ui/screens/MainScreen.kt"
+            line="903"
+            column="72"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#isBefore`"
+        errorLine1="        .filter { (_, event) -> !event.isBefore(agoraLocal) }"
+        errorLine2="                                       ~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/NextMovements.kt"
+            line="14"
+            column="40"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `LocalDateTime` to `ChronoLocalDateTime` requires API level 26 (current min is 24)"
+        errorLine1="        .filter { (_, event) -> !event.isBefore(agoraLocal) }"
+        errorLine2="                                                ~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/NextMovements.kt"
+            line="14"
+            column="49"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Duration#ofHours`"
+        errorLine1="    val DEFAULT_DURATION: Duration = Duration.ofHours(3)"
+        errorLine2="                                              ~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/ObservationWindow.kt"
+            line="20"
+            column="47"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Duration#isNegative`"
+        errorLine1="        require(!duration.isNegative &amp;&amp; !duration.isZero) {"
+        errorLine2="                          ~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/ObservationWindow.kt"
+            line="28"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Duration#isZero`"
+        errorLine1="        require(!duration.isNegative &amp;&amp; !duration.isZero) {"
+        errorLine2="                                                  ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/ObservationWindow.kt"
+            line="28"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#atStartOfDay`"
+        errorLine1="        val dayEnd = selectedDate.plusDays(1).atStartOfDay()"
+        errorLine2="                                              ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/ObservationWindow.kt"
+            line="32"
+            column="47"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#plusDays`"
+        errorLine1="        val dayEnd = selectedDate.plusDays(1).atStartOfDay()"
+        errorLine2="                                  ~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/ObservationWindow.kt"
+            line="32"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#toLocalDate`"
+        errorLine1="            eventDateTime.toLocalDate() == selectedDate &amp;&amp;"
+        errorLine2="                          ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/ObservationWindow.kt"
+            line="36"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#isBefore`"
+        errorLine1="                (selectedDate != now.toLocalDate() || !eventDateTime.isBefore(now))"
+        errorLine2="                                                                     ~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/ObservationWindow.kt"
+            line="37"
+            column="70"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#toLocalDate`"
+        errorLine1="                (selectedDate != now.toLocalDate() || !eventDateTime.isBefore(now))"
+        errorLine2="                                     ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/ObservationWindow.kt"
+            line="37"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `LocalDateTime` to `ChronoLocalDateTime` requires API level 26 (current min is 24)"
+        errorLine1="                (selectedDate != now.toLocalDate() || !eventDateTime.isBefore(now))"
+        errorLine2="                                                                              ~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/ObservationWindow.kt"
+            line="37"
+            column="79"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#plus`"
+        errorLine1="            val end = start.plus(duration)"
+        errorLine2="                            ~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/ObservationWindow.kt"
+            line="42"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `Duration` to `TemporalAmount` requires API level 26 (current min is 24)"
+        errorLine1="            val end = start.plus(duration)"
+        errorLine2="                                 ~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/ObservationWindow.kt"
+            line="42"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#isAfter`"
+        errorLine1="            if (end.isAfter(dayEnd)) continue"
+        errorLine2="                    ~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/ObservationWindow.kt"
+            line="43"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `LocalDateTime` to `ChronoLocalDateTime` requires API level 26 (current min is 24)"
+        errorLine1="            if (end.isAfter(dayEnd)) continue"
+        errorLine2="                            ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/ObservationWindow.kt"
+            line="43"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#isBefore`"
+        errorLine1="                !eventDateTime.isBefore(start) &amp;&amp; eventDateTime.isBefore(end)"
+        errorLine2="                               ~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/ObservationWindow.kt"
+            line="46"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#isBefore`"
+        errorLine1="                !eventDateTime.isBefore(start) &amp;&amp; eventDateTime.isBefore(end)"
+        errorLine2="                                                                ~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/ObservationWindow.kt"
+            line="46"
+            column="65"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `LocalDateTime` to `ChronoLocalDateTime` requires API level 26 (current min is 24)"
+        errorLine1="                !eventDateTime.isBefore(start) &amp;&amp; eventDateTime.isBefore(end)"
+        errorLine2="                                        ~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/ObservationWindow.kt"
+            line="46"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `LocalDateTime` to `ChronoLocalDateTime` requires API level 26 (current min is 24)"
+        errorLine1="                !eventDateTime.isBefore(start) &amp;&amp; eventDateTime.isBefore(end)"
+        errorLine2="                                                                         ~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/util/ObservationWindow.kt"
+            line="46"
+            column="74"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.format.DateTimeFormatter#ofPattern`"
+        errorLine1="    private val timeFormatter = DateTimeFormatter.ofPattern(&quot;HH:mm&quot;)"
+        errorLine2="                                                  ~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="15"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.format.DateTimeFormatter#ofPattern`"
+        errorLine1="    private val dateFormatter = DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd&quot;)"
+        errorLine2="                                                  ~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="16"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.format.DateTimeFormatter#ofPattern`"
+        errorLine1="    private val dateTimeFormatter = DateTimeFormatter.ofPattern(&quot;dd/MM/yyyy HH:mm:ss&quot;)"
+        errorLine2="                                                      ~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="17"
+            column="55"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.format.DateTimeFormatter#ofPattern`"
+        errorLine1="    private val dateFormatterBr = DateTimeFormatter.ofPattern(&quot;dd/MM/yyyy&quot;)"
+        errorLine2="                                                    ~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="18"
+            column="53"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#now`"
+        errorLine1="        referenceDate: LocalDate = LocalDate.now(ZoneId.of(&quot;America/Campo_Grande&quot;))"
+        errorLine2="                                             ~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="22"
+            column="46"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZoneId#of`"
+        errorLine1="        referenceDate: LocalDate = LocalDate.now(ZoneId.of(&quot;America/Campo_Grande&quot;))"
+        errorLine2="                                                        ~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="22"
+            column="57"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#minusDays`"
+        errorLine1="            val minDate = referenceDate.minusDays(1)"
+        errorLine2="                                        ~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="40"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#plusDays`"
+        errorLine1="            val maxDate = referenceDate.plusDays(45)"
+        errorLine2="                                        ~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="41"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#isBefore`"
+        errorLine1="            var currentDate: LocalDate = if (validFrom.isBefore(minDate)) minDate else validFrom"
+        errorLine2="                                                       ~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="43"
+            column="56"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `LocalDate` to `ChronoLocalDate` requires API level 26 (current min is 24)"
+        errorLine1="            var currentDate: LocalDate = if (validFrom.isBefore(minDate)) minDate else validFrom"
+        errorLine2="                                                                ~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="43"
+            column="65"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#isAfter`"
+        errorLine1="            val endDate: LocalDate = if (validTo.isAfter(maxDate)) maxDate else validTo"
+        errorLine2="                                                 ~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="44"
+            column="50"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `LocalDate` to `ChronoLocalDate` requires API level 26 (current min is 24)"
+        errorLine1="            val endDate: LocalDate = if (validTo.isAfter(maxDate)) maxDate else validTo"
+        errorLine2="                                                         ~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="44"
+            column="58"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#isAfter`"
+        errorLine1="            while (!currentDate.isAfter(endDate)) {"
+        errorLine2="                                ~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="46"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `LocalDate` to `ChronoLocalDate` requires API level 26 (current min is 24)"
+        errorLine1="            while (!currentDate.isAfter(endDate)) {"
+        errorLine2="                                        ~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="46"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.DayOfWeek#getValue`"
+        errorLine1="                val dayOfWeek = currentDate.dayOfWeek.value"
+        errorLine2="                                                      ~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="47"
+            column="55"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#getDayOfWeek`"
+        errorLine1="                val dayOfWeek = currentDate.dayOfWeek.value"
+        errorLine2="                                            ~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="47"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#plusDays`"
+        errorLine1="                currentDate = currentDate.plusDays(1)"
+        errorLine2="                                          ~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="51"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#minusDays`"
+        errorLine1="        val minDate = referenceDate.minusDays(1)"
+        errorLine2="                                    ~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="76"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#plusDays`"
+        errorLine1="        val maxDate = referenceDate.plusDays(45)"
+        errorLine2="                                    ~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="77"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#isAfter`"
+        errorLine1="        return !fim.isBefore(minDate) &amp;&amp; !inicio.isAfter(maxDate) &amp;&amp; !inicio.isAfter(fim)"
+        errorLine2="                                                 ~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="78"
+            column="50"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#isAfter`"
+        errorLine1="        return !fim.isBefore(minDate) &amp;&amp; !inicio.isAfter(maxDate) &amp;&amp; !inicio.isAfter(fim)"
+        errorLine2="                                                                             ~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="78"
+            column="78"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#isBefore`"
+        errorLine1="        return !fim.isBefore(minDate) &amp;&amp; !inicio.isAfter(maxDate) &amp;&amp; !inicio.isAfter(fim)"
+        errorLine2="                    ~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="78"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `LocalDate` to `ChronoLocalDate` requires API level 26 (current min is 24)"
+        errorLine1="        return !fim.isBefore(minDate) &amp;&amp; !inicio.isAfter(maxDate) &amp;&amp; !inicio.isAfter(fim)"
+        errorLine2="                             ~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="78"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `LocalDate` to `ChronoLocalDate` requires API level 26 (current min is 24)"
+        errorLine1="        return !fim.isBefore(minDate) &amp;&amp; !inicio.isAfter(maxDate) &amp;&amp; !inicio.isAfter(fim)"
+        errorLine2="                                                         ~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="78"
+            column="58"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `LocalDate` to `ChronoLocalDate` requires API level 26 (current min is 24)"
+        errorLine1="        return !fim.isBefore(minDate) &amp;&amp; !inicio.isAfter(maxDate) &amp;&amp; !inicio.isAfter(fim)"
+        errorLine2="                                                                                     ~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="78"
+            column="86"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#plusDays`"
+        errorLine1="        val arrivalDate = if (arrival.isBefore(departure)) flightDate.plusDays(1) else flightDate"
+        errorLine2="                                                                      ~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="109"
+            column="71"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalTime#isBefore`"
+        errorLine1="        val arrivalDate = if (arrival.isBefore(departure)) flightDate.plusDays(1) else flightDate"
+        errorLine2="                                      ~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="109"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalTime#parse`"
+        errorLine1="                return LocalTime.parse(it.trim(), timeFormatter)"
+        errorLine2="                                 ~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="142"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Exception requires API level 26 (current min is 24): `java.time.format.DateTimeParseException`"
+        errorLine1="            } catch (e: DateTimeParseException) {"
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="143"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#parse`"
+        errorLine1="                    return LocalDate.parse(it.trim(), dateFormatterBr)"
+        errorLine2="                                     ~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="154"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#parse`"
+        errorLine1="                    return LocalDate.parse(it.trim(), dateFormatter)"
+        errorLine2="                                     ~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="156"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Exception requires API level 26 (current min is 24): `java.time.format.DateTimeParseException`"
+        errorLine1="            } catch (e: DateTimeParseException) {"
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosNormalizer.kt"
+            line="158"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.format.DateTimeFormatter#ofPattern`"
+        errorLine1="    private val dateFormatter = DateTimeFormatter.ofPattern(&quot;yyyy-MM-dd&quot;)"
+        errorLine2="                                                  ~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="30"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#format`"
+        errorLine1="        dao.getArrivalsByDate(date.format(dateFormatter))"
+        errorLine2="                                   ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="39"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#format`"
+        errorLine1="        dao.getDeparturesByDate(date.format(dateFormatter))"
+        errorLine2="                                     ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="43"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#format`"
+        errorLine1="        dao.getFlightsByDate(date.format(dateFormatter))"
+        errorLine2="                                  ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="55"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#format`"
+        errorLine1="        dao.deleteOldFlights(beforeDate.format(dateFormatter))"
+        errorLine2="                                        ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="71"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#now`"
+        errorLine1="        referenceDate: LocalDate = LocalDate.now(ZoneId.of(&quot;America/Campo_Grande&quot;))"
+        errorLine2="                                             ~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="88"
+            column="46"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZoneId#of`"
+        errorLine1="        referenceDate: LocalDate = LocalDate.now(ZoneId.of(&quot;America/Campo_Grande&quot;))"
+        errorLine2="                                                        ~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="88"
+            column="57"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#format`"
+        errorLine1="        val entities = dao.getFlightsByDate(date.format(dateFormatter))"
+        errorLine2="                                                 ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="208"
+            column="50"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#format`"
+        errorLine1="        val prevDate = date.minusDays(1).format(dateFormatter)"
+        errorLine2="                                         ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="213"
+            column="42"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#minusDays`"
+        errorLine1="        val prevDate = date.minusDays(1).format(dateFormatter)"
+        errorLine2="                            ~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="213"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#format`"
+        errorLine1="        val nextDate = date.plusDays(1).format(dateFormatter)"
+        errorLine2="                                        ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="214"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#plusDays`"
+        errorLine1="        val nextDate = date.plusDays(1).format(dateFormatter)"
+        errorLine2="                            ~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="214"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#of`"
+        errorLine1="                    val localDate = LocalDateTime.of(flight.arrivalDate, flight.scheduledArrivalUtc)"
+        errorLine2="                                                  ~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="221"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#atZone`"
+        errorLine1="                        .atZone(ZoneId.of(&quot;UTC&quot;))"
+        errorLine2="                         ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="222"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZoneId#of`"
+        errorLine1="                        .atZone(ZoneId.of(&quot;UTC&quot;))"
+        errorLine2="                                       ~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="222"
+            column="40"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZoneId#of`"
+        errorLine1="                        .withZoneSameInstant(ZoneId.of(flight.destinationTimezone))"
+        errorLine2="                                                    ~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="223"
+            column="53"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZonedDateTime#withZoneSameInstant`"
+        errorLine1="                        .withZoneSameInstant(ZoneId.of(flight.destinationTimezone))"
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="223"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZonedDateTime#toLocalDate`"
+        errorLine1="                        .toLocalDate()"
+        errorLine2="                         ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="224"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#format`"
+        errorLine1="        val prevDate = date.minusDays(1).format(dateFormatter)"
+        errorLine2="                                         ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="232"
+            column="42"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#minusDays`"
+        errorLine1="        val prevDate = date.minusDays(1).format(dateFormatter)"
+        errorLine2="                            ~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="232"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#format`"
+        errorLine1="        val nextDate = date.plusDays(1).format(dateFormatter)"
+        errorLine2="                                        ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="233"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#plusDays`"
+        errorLine1="        val nextDate = date.plusDays(1).format(dateFormatter)"
+        errorLine2="                            ~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="233"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#of`"
+        errorLine1="                    val localDate = LocalDateTime.of(flight.flightDate, flight.scheduledDepartureUtc)"
+        errorLine2="                                                  ~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="240"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#atZone`"
+        errorLine1="                        .atZone(ZoneId.of(&quot;UTC&quot;))"
+        errorLine2="                         ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="241"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZoneId#of`"
+        errorLine1="                        .atZone(ZoneId.of(&quot;UTC&quot;))"
+        errorLine2="                                       ~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="241"
+            column="40"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZoneId#of`"
+        errorLine1="                        .withZoneSameInstant(ZoneId.of(flight.originTimezone))"
+        errorLine2="                                                    ~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="242"
+            column="53"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZonedDateTime#withZoneSameInstant`"
+        errorLine1="                        .withZoneSameInstant(ZoneId.of(flight.originTimezone))"
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="242"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZonedDateTime#toLocalDate`"
+        errorLine1="                        .toLocalDate()"
+        errorLine2="                         ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="243"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#format`"
+        errorLine1="        val prevDate = date.minusDays(1).format(dateFormatter)"
+        errorLine2="                                         ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="253"
+            column="42"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#minusDays`"
+        errorLine1="        val prevDate = date.minusDays(1).format(dateFormatter)"
+        errorLine2="                            ~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="253"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#format`"
+        errorLine1="        val currDate = date.format(dateFormatter)"
+        errorLine2="                            ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="254"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#format`"
+        errorLine1="        val nextDate = date.plusDays(1).format(dateFormatter)"
+        errorLine2="                                        ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="255"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#plusDays`"
+        errorLine1="        val nextDate = date.plusDays(1).format(dateFormatter)"
+        errorLine2="                            ~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="255"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#of`"
+        errorLine1="                val localDate = LocalDateTime.of(flight.arrivalDate, flight.scheduledArrivalUtc)"
+        errorLine2="                                              ~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="263"
+            column="47"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#atZone`"
+        errorLine1="                    .atZone(ZoneId.of(&quot;UTC&quot;))"
+        errorLine2="                     ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="264"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZoneId#of`"
+        errorLine1="                    .atZone(ZoneId.of(&quot;UTC&quot;))"
+        errorLine2="                                   ~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="264"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZoneId#of`"
+        errorLine1="                    .withZoneSameInstant(ZoneId.of(flight.destinationTimezone))"
+        errorLine2="                                                ~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="265"
+            column="49"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZonedDateTime#withZoneSameInstant`"
+        errorLine1="                    .withZoneSameInstant(ZoneId.of(flight.destinationTimezone))"
+        errorLine2="                     ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="265"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZonedDateTime#toLocalDate`"
+        errorLine1="                    .toLocalDate()"
+        errorLine2="                     ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="266"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#format`"
+        errorLine1="        val prevDate = date.minusDays(1).format(dateFormatter)"
+        errorLine2="                                         ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="275"
+            column="42"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#minusDays`"
+        errorLine1="        val prevDate = date.minusDays(1).format(dateFormatter)"
+        errorLine2="                            ~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="275"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#format`"
+        errorLine1="        val currDate = date.format(dateFormatter)"
+        errorLine2="                            ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="276"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#format`"
+        errorLine1="        val nextDate = date.plusDays(1).format(dateFormatter)"
+        errorLine2="                                        ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="277"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDate#plusDays`"
+        errorLine1="        val nextDate = date.plusDays(1).format(dateFormatter)"
+        errorLine2="                            ~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="277"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#of`"
+        errorLine1="                val localDate = LocalDateTime.of(flight.flightDate, flight.scheduledDepartureUtc)"
+        errorLine2="                                              ~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="285"
+            column="47"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.LocalDateTime#atZone`"
+        errorLine1="                    .atZone(ZoneId.of(&quot;UTC&quot;))"
+        errorLine2="                     ~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="286"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZoneId#of`"
+        errorLine1="                    .atZone(ZoneId.of(&quot;UTC&quot;))"
+        errorLine2="                                   ~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="286"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZoneId#of`"
+        errorLine1="                    .withZoneSameInstant(ZoneId.of(flight.originTimezone))"
+        errorLine2="                                                ~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="287"
+            column="49"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZonedDateTime#withZoneSameInstant`"
+        errorLine1="                    .withZoneSameInstant(ZoneId.of(flight.originTimezone))"
+        errorLine2="                     ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="287"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.ZonedDateTime#toLocalDate`"
+        errorLine1="                    .toLocalDate()"
+        errorLine2="                     ~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/data/siros/SirosRepository.kt"
+            line="288"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#minus`"
+        errorLine1="                        Instant.now().minus(30, ChronoUnit.DAYS).toEpochMilli()"
+        errorLine2="                                      ~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/worker/SirosSyncWorker.kt"
+            line="32"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#now`"
+        errorLine1="                        Instant.now().minus(30, ChronoUnit.DAYS).toEpochMilli()"
+        errorLine2="                                ~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/worker/SirosSyncWorker.kt"
+            line="32"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Call requires API level 26 (current min is 24): `java.time.Instant#toEpochMilli`"
+        errorLine1="                        Instant.now().minus(30, ChronoUnit.DAYS).toEpochMilli()"
+        errorLine2="                                                                 ~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/worker/SirosSyncWorker.kt"
+            line="32"
+            column="66"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Cast from `ChronoUnit` to `TemporalUnit` requires API level 26 (current min is 24)"
+        errorLine1="                        Instant.now().minus(30, ChronoUnit.DAYS).toEpochMilli()"
+        errorLine2="                                                ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/worker/SirosSyncWorker.kt"
+            line="32"
+            column="49"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="Field requires API level 26 (current min is 24): `java.time.temporal.ChronoUnit#DAYS`"
+        errorLine1="                        Instant.now().minus(30, ChronoUnit.DAYS).toEpochMilli()"
+        errorLine2="                                                ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/java/com/skywatch/cg/worker/SirosSyncWorker.kt"
+            line="32"
+            column="49"/>
+    </issue>
+
+    <issue
+        id="OldTargetApi"
+        message="Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the android.os.Build.VERSION_CODES javadoc for details."
+        errorLine1="        targetSdk = 34"
+        errorLine2="        ~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="34"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="TestManifestGradleConfiguration"
+        message="Please use debugImplementation."
+        errorLine1="    androidTestImplementation(&quot;androidx.compose.ui:ui-test-manifest&quot;)"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="152"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.core:core-ktx than 1.12.0 is available: 1.19.1"
+        errorLine1="    implementation(&quot;androidx.core:core-ktx:1.12.0&quot;)"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="101"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.lifecycle:lifecycle-runtime-ktx than 2.7.0 is available: 2.11.1"
+        errorLine1="    implementation(&quot;androidx.lifecycle:lifecycle-runtime-ktx:2.7.0&quot;)"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="102"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.activity:activity-compose than 1.8.2 is available: 1.13.0"
+        errorLine1="    implementation(&quot;androidx.activity:activity-compose:1.8.2&quot;)"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="103"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.appcompat:appcompat than 1.7.0 is available: 1.8.0"
+        errorLine1="    implementation(&quot;androidx.appcompat:appcompat:1.7.0&quot;)"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="104"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.navigation:navigation-compose than 2.7.7 is available: 2.10.2"
+        errorLine1="    implementation(&quot;androidx.navigation:navigation-compose:2.7.7&quot;)"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="107"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.room:room-runtime than 2.6.1 is available: 2.8.5"
+        errorLine1="    implementation(&quot;androidx.room:room-runtime:$room_version&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="124"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.room:room-ktx than 2.6.1 is available: 2.8.5"
+        errorLine1="    implementation(&quot;androidx.room:room-ktx:$room_version&quot;)"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="125"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.room:room-compiler than 2.6.1 is available: 2.8.5"
+        errorLine1="    kapt(&quot;androidx.room:room-compiler:$room_version&quot;)"
+        errorLine2="         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="126"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.room:room-testing than 2.6.1 is available: 2.8.5"
+        errorLine1="    testImplementation(&quot;androidx.room:room-testing:$room_version&quot;)"
+        errorLine2="                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="127"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.work:work-runtime-ktx than 2.9.0 is available: 2.12.0"
+        errorLine1="    implementation(&quot;androidx.work:work-runtime-ktx:2.9.0&quot;)"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="133"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.work:work-testing than 2.9.0 is available: 2.12.0"
+        errorLine1="    testImplementation(&quot;androidx.work:work-testing:2.9.0&quot;)"
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="134"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.compose.ui:ui-text-google-fonts than 1.6.0 is available: 1.13.0"
+        errorLine1="    implementation(&quot;androidx.compose.ui:ui-text-google-fonts:1.6.0&quot;)"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="137"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.test:core than 1.5.0 is available: 1.7.0"
+        errorLine1="    testImplementation(&quot;androidx.test:core:1.5.0&quot;)"
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="143"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.test.ext:junit than 1.1.5 is available: 1.3.0"
+        errorLine1="    androidTestImplementation(&quot;androidx.test.ext:junit:1.1.5&quot;)"
+        errorLine2="                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="149"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="GradleDependency"
+        message="A newer version of androidx.test.espresso:espresso-core than 3.5.1 is available: 3.7.0"
+        errorLine1="    androidTestImplementation(&quot;androidx.test.espresso:espresso-core:3.5.1&quot;)"
+        errorLine2="                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="150"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="Typos"
+        message="Did you mean &quot;BAQDAgEGMCIGA!&quot; instead of &quot;BAQDAgEGMCIGA1&quot;?"
+        errorLine1="        &lt;item>MIIEqDCCApCgAwIBAgIJAKD1sBHAuMR8MA0GCSqGSIb3DQEBCwUAMIGQMQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEQMA4GA1UECgwDR29vZ2xlMQ0wCwYDVQQLDEREZXZlbG9wZXIxHDAaBgkqhkiG9w0BCQEWDXN1cHBvcnRAZ29vZ2xlLmNvbTAeFw0wODA4MjEyMjEzMjlaFw0zMDA4MTkyMjEzMjlaMIGQMQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEQMA4GA1UECgwDR29vZ2xlMQ0wCwYDVQQLDEREZXZlbG9wZXIxHDAaBgkqhkiG9w0BCQEWDXN1cHBvcnRAZ29vZ2xlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKjH5+w7aZ/gWwL4M9v5z018931258673410283407123984712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038FAgMBAAGjgbUwgbIwDAYDVR0TBAUwAwEB/zAdBgHQHQ4EFgQUQ95/9lW425g9hKx4q6w17482390wDgYDVR0PAQH/BAQDAgEGMCIGA1UdEQQbMBnGF3dwsuc3VwcG9ydC5nb29nbGUuY29tMC0GA1UdJQQwMCYGCCsGAQUFBwMBBggrBgEFBQcDAgYIKwYBBQUHAwQGCCsGAQUFBwMIMA0GCSqGSIb3DQEBCwUAA4IBAQC0w7j8a3&lt;/item>"
+        errorLine2="                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           ^">
+        <location
+            file="src/main/res/values/font_certs.xml"
+            line="7"
+            column="860"/>
+    </issue>
+
+    <issue
+        id="Typos"
+        message="Did you mean &quot;DQEBCwUAMIGQMQswCQYDVQQGEwJVUzETMBEGA!&quot; instead of &quot;DQEBCwUAMIGQMQswCQYDVQQGEwJVUzETMBEGA1&quot;?"
+        errorLine1="        &lt;item>MIIEqDCCApCgAwIBAgIJAKD1sBHAuMR8MA0GCSqGSIb3DQEBCwUAMIGQMQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEQMA4GA1UECgwDR29vZ2xlMQ0wCwYDVQQLDEREZXZlbG9wZXIxHDAaBgkqhkiG9w0BCQEWDXN1cHBvcnRAZ29vZ2xlLmNvbTAeFw0wODA4MjEyMjEzMjlaFw0zMDA4MTkyMjEzMjlaMIGQMQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEQMA4GA1UECgwDR29vZ2xlMQ0wCwYDVQQLDEREZXZlbG9wZXIxHDAaBgkqhkiG9w0BCQEWDXN1cHBvcnRAZ29vZ2xlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKjH5+w7aZ/gWwL4M9v5z018931258673410283407123984712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038FAgMBAAGjgbUwgbIwDAYDVR0TBAUwAwEB/zAdBgHQHQ4EFgQUQ95/9lW425g9hKx4q6w17482390wDgYDVR0PAQH/BAQDAgEGMCIGA1UdEQQbMBnGF3dwsuc3VwcG9ydC5nb29nbGUuY29tMC0GA1UdJQQwMCYGCCsGAQUFBwMBBggrBgEFBQcDAgYIKwYBBQUHAwQGCCsGAQUFBwMIMA0GCSqGSIb3DQEBCwUAA4IBAQC0w7j8a3&lt;/item>"
+        errorLine2="                                                          ^">
+        <location
+            file="src/main/res/values/font_certs.xml"
+            line="7"
+            column="59"/>
+    </issue>
+
+    <issue
+        id="Typos"
+        message="Did you mean &quot;GA!&quot; instead of &quot;GA1&quot;?"
+        errorLine1="        &lt;item>MIIEqDCCApCgAwIBAgIJAKD1sBHAuMR8MA0GCSqGSIb3DQEBCwUAMIGQMQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEQMA4GA1UECgwDR29vZ2xlMQ0wCwYDVQQLDEREZXZlbG9wZXIxHDAaBgkqhkiG9w0BCQEWDXN1cHBvcnRAZ29vZ2xlLmNvbTAeFw0wODA4MjEyMjEzMjlaFw0zMDA4MTkyMjEzMjlaMIGQMQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEQMA4GA1UECgwDR29vZ2xlMQ0wCwYDVQQLDEREZXZlbG9wZXIxHDAaBgkqhkiG9w0BCQEWDXN1cHBvcnRAZ29vZ2xlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKjH5+w7aZ/gWwL4M9v5z018931258673410283407123984712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038FAgMBAAGjgbUwgbIwDAYDVR0TBAUwAwEB/zAdBgHQHQ4EFgQUQ95/9lW425g9hKx4q6w17482390wDgYDVR0PAQH/BAQDAgEGMCIGA1UdEQQbMBnGF3dwsuc3VwcG9ydC5nb29nbGUuY29tMC0GA1UdJQQwMCYGCCsGAQUFBwMBBggrBgEFBQcDAgYIKwYBBQUHAwQGCCsGAQUFBwMIMA0GCSqGSIb3DQEBCwUAA4IBAQC0w7j8a3&lt;/item>"
+        errorLine2="                                                                                                                                                         ^">
+        <location
+            file="src/main/res/values/font_certs.xml"
+            line="7"
+            column="154"/>
+    </issue>
+
+    <issue
+        id="Typos"
+        message="Did you mean &quot;GA!&quot; instead of &quot;GA1&quot;?"
+        errorLine1="        &lt;item>MIIEqDCCApCgAwIBAgIJAKD1sBHAuMR8MA0GCSqGSIb3DQEBCwUAMIGQMQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEQMA4GA1UECgwDR29vZ2xlMQ0wCwYDVQQLDEREZXZlbG9wZXIxHDAaBgkqhkiG9w0BCQEWDXN1cHBvcnRAZ29vZ2xlLmNvbTAeFw0wODA4MjEyMjEzMjlaFw0zMDA4MTkyMjEzMjlaMIGQMQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEQMA4GA1UECgwDR29vZ2xlMQ0wCwYDVQQLDEREZXZlbG9wZXIxHDAaBgkqhkiG9w0BCQEWDXN1cHBvcnRAZ29vZ2xlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKjH5+w7aZ/gWwL4M9v5z018931258673410283407123984712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038FAgMBAAGjgbUwgbIwDAYDVR0TBAUwAwEB/zAdBgHQHQ4EFgQUQ95/9lW425g9hKx4q6w17482390wDgYDVR0PAQH/BAQDAgEGMCIGA1UdEQQbMBnGF3dwsuc3VwcG9ydC5nb29nbGUuY29tMC0GA1UdJQQwMCYGCCsGAQUFBwMBBggrBgEFBQcDAgYIKwYBBQUHAwQGCCsGAQUFBwMIMA0GCSqGSIb3DQEBCwUAA4IBAQC0w7j8a3&lt;/item>"
+        errorLine2="                                                                                                                                                                                                                                                                                                                                                                                     ^">
+        <location
+            file="src/main/res/values/font_certs.xml"
+            line="7"
+            column="374"/>
+    </issue>
+
+    <issue
+        id="Typos"
+        message="Did you mean &quot;GA!&quot; instead of &quot;GA1&quot;?"
+        errorLine1="        &lt;item>MIIEqDCCApCgAwIBAgIJAKD1sBHAuMR8MA0GCSqGSIb3DQEBCwUAMIGQMQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEQMA4GA1UECgwDR29vZ2xlMQ0wCwYDVQQLDEREZXZlbG9wZXIxHDAaBgkqhkiG9w0BCQEWDXN1cHBvcnRAZ29vZ2xlLmNvbTAeFw0wODA4MjEyMjEzMjlaFw0zMDA4MTkyMjEzMjlaMIGQMQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEQMA4GA1UECgwDR29vZ2xlMQ0wCwYDVQQLDEREZXZlbG9wZXIxHDAaBgkqhkiG9w0BCQEWDXN1cHBvcnRAZ29vZ2xlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKjH5+w7aZ/gWwL4M9v5z018931258673410283407123984712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038FAgMBAAGjgbUwgbIwDAYDVR0TBAUwAwEB/zAdBgHQHQ4EFgQUQ95/9lW425g9hKx4q6w17482390wDgYDVR0PAQH/BAQDAgEGMCIGA1UdEQQbMBnGF3dwsuc3VwcG9ydC5nb29nbGUuY29tMC0GA1UdJQQwMCYGCCsGAQUFBwMBBggrBgEFBQcDAgYIKwYBBQUHAwQGCCsGAQUFBwMIMA0GCSqGSIb3DQEBCwUAA4IBAQC0w7j8a3&lt;/item>"
+        errorLine2="                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ^">
+        <location
+            file="src/main/res/values/font_certs.xml"
+            line="7"
+            column="917"/>
+    </issue>
+
+    <issue
+        id="Typos"
+        message="Did you mean &quot;MTkyMjEzMjlaMIGQMQswCQYDVQQGEwJVUzETMBEGA!&quot; instead of &quot;MTkyMjEzMjlaMIGQMQswCQYDVQQGEwJVUzETMBEGA1&quot;?"
+        errorLine1="        &lt;item>MIIEqDCCApCgAwIBAgIJAKD1sBHAuMR8MA0GCSqGSIb3DQEBCwUAMIGQMQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEQMA4GA1UECgwDR29vZ2xlMQ0wCwYDVQQLDEREZXZlbG9wZXIxHDAaBgkqhkiG9w0BCQEWDXN1cHBvcnRAZ29vZ2xlLmNvbTAeFw0wODA4MjEyMjEzMjlaFw0zMDA4MTkyMjEzMjlaMIGQMQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEQMA4GA1UECgwDR29vZ2xlMQ0wCwYDVQQLDEREZXZlbG9wZXIxHDAaBgkqhkiG9w0BCQEWDXN1cHBvcnRAZ29vZ2xlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKjH5+w7aZ/gWwL4M9v5z018931258673410283407123984712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038FAgMBAAGjgbUwgbIwDAYDVR0TBAUwAwEB/zAdBgHQHQ4EFgQUQ95/9lW425g9hKx4q6w17482390wDgYDVR0PAQH/BAQDAgEGMCIGA1UdEQQbMBnGF3dwsuc3VwcG9ydC5nb29nbGUuY29tMC0GA1UdJQQwMCYGCCsGAQUFBwMBBggrBgEFBQcDAgYIKwYBBQUHAwQGCCsGAQUFBwMIMA0GCSqGSIb3DQEBCwUAA4IBAQC0w7j8a3&lt;/item>"
+        errorLine2="                                                                                                                                                                                                                                                                                  ^">
+        <location
+            file="src/main/res/values/font_certs.xml"
+            line="7"
+            column="275"/>
+    </issue>
+
+    <issue
+        id="Typos"
+        message="Did you mean &quot;pYTEWMBQGA!&quot; instead of &quot;pYTEWMBQGA1&quot;?"
+        errorLine1="        &lt;item>MIIEqDCCApCgAwIBAgIJAKD1sBHAuMR8MA0GCSqGSIb3DQEBCwUAMIGQMQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEQMA4GA1UECgwDR29vZ2xlMQ0wCwYDVQQLDEREZXZlbG9wZXIxHDAaBgkqhkiG9w0BCQEWDXN1cHBvcnRAZ29vZ2xlLmNvbTAeFw0wODA4MjEyMjEzMjlaFw0zMDA4MTkyMjEzMjlaMIGQMQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEQMA4GA1UECgwDR29vZ2xlMQ0wCwYDVQQLDEREZXZlbG9wZXIxHDAaBgkqhkiG9w0BCQEWDXN1cHBvcnRAZ29vZ2xlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKjH5+w7aZ/gWwL4M9v5z018931258673410283407123984712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038FAgMBAAGjgbUwgbIwDAYDVR0TBAUwAwEB/zAdBgHQHQ4EFgQUQ95/9lW425g9hKx4q6w17482390wDgYDVR0PAQH/BAQDAgEGMCIGA1UdEQQbMBnGF3dwsuc3VwcG9ydC5nb29nbGUuY29tMC0GA1UdJQQwMCYGCCsGAQUFBwMBBggrBgEFBQcDAgYIKwYBBQUHAwQGCCsGAQUFBwMIMA0GCSqGSIb3DQEBCwUAA4IBAQC0w7j8a3&lt;/item>"
+        errorLine2="                                                                                                                 ^">
+        <location
+            file="src/main/res/values/font_certs.xml"
+            line="7"
+            column="114"/>
+    </issue>
+
+    <issue
+        id="Typos"
+        message="Did you mean &quot;pYTEWMBQGA!&quot; instead of &quot;pYTEWMBQGA1&quot;?"
+        errorLine1="        &lt;item>MIIEqDCCApCgAwIBAgIJAKD1sBHAuMR8MA0GCSqGSIb3DQEBCwUAMIGQMQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEQMA4GA1UECgwDR29vZ2xlMQ0wCwYDVQQLDEREZXZlbG9wZXIxHDAaBgkqhkiG9w0BCQEWDXN1cHBvcnRAZ29vZ2xlLmNvbTAeFw0wODA4MjEyMjEzMjlaFw0zMDA4MTkyMjEzMjlaMIGQMQswCQYDVQQGEwJVUzETMBEGA1UECAwKQ2FsaWZvcm5pYTEWMBQGA1UEBwwNTW91bnRhaW4gVmlldzEQMA4GA1UECgwDR29vZ2xlMQ0wCwYDVQQLDEREZXZlbG9wZXIxHDAaBgkqhkiG9w0BCQEWDXN1cHBvcnRAZ29vZ2xlLmNvbTCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKjH5+w7aZ/gWwL4M9v5z018931258673410283407123984712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038471203847120384712038FAgMBAAGjgbUwgbIwDAYDVR0TBAUwAwEB/zAdBgHQHQ4EFgQUQ95/9lW425g9hKx4q6w17482390wDgYDVR0PAQH/BAQDAgEGMCIGA1UdEQQbMBnGF3dwsuc3VwcG9ydC5nb29nbGUuY29tMC0GA1UdJQQwMCYGCCsGAQUFBwMBBggrBgEFBQcDAgYIKwYBBQUHAwQGCCsGAQUFBwMIMA0GCSqGSIb3DQEBCwUAA4IBAQC0w7j8a3&lt;/item>"
+        errorLine2="                                                                                                                                                                                                                                                                                                                                             ^">
+        <location
+            file="src/main/res/values/font_certs.xml"
+            line="7"
+            column="334"/>
+    </issue>
+
+    <issue
+        id="PluralsCandidate"
+        message="Formatting %d followed by words (&quot;aeronaves&quot;): This should probably be a plural rather than a string"
+        errorLine1="    &lt;string name=&quot;radar_source_status&quot;>Fonte: %1$s · %2$d aeronaves · atualizado %3$s&lt;/string>"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="67"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ObsoleteSdkInt"
+        message="This folder configuration (`v24`) is unnecessary; `minSdkVersion` is 24. Merge all the resources in this folder into `mipmap-anydpi`.">
+        <location
+            file="src/main/res/mipmap-anydpi-v24"/>
+    </issue>
+
+    <issue
+        id="KaptUsageInsteadOfKsp"
+        message="This library supports using KSP instead of kapt, which greatly improves performance. Learn more: https://developer.android.com/studio/build/migrate-to-ksp"
+        errorLine1="    kapt(&quot;androidx.room:room-compiler:$room_version&quot;)"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="build.gradle.kts"
+            line="126"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.welcome_message` appears to be unused"
+        errorLine1="    &lt;string name=&quot;welcome_message&quot;>Acompanhe voos comerciais em Campo Grande (CGR/SBCG)&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="3"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.version_info` appears to be unused"
+        errorLine1="    &lt;string name=&quot;version_info&quot;>Versão 1.0.0&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="4"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.tab_arrivals` appears to be unused"
+        errorLine1="    &lt;string name=&quot;tab_arrivals&quot;>Chegadas&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="6"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.tab_departures` appears to be unused"
+        errorLine1="    &lt;string name=&quot;tab_departures&quot;>Partidas&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="7"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.airport_subtitle` appears to be unused"
+        errorLine1="    &lt;string name=&quot;airport_subtitle&quot;>Aeroporto Internacional de Campo Grande (CGR / SBCG)&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="8"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.disclaimer_siros` appears to be unused"
+        errorLine1="    &lt;string name=&quot;disclaimer_siros&quot;>Horários programados (SIROS/ANAC). Não constituem confirmação de operação em tempo real.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="9"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.last_update_prefix` appears to be unused"
+        errorLine1="    &lt;string name=&quot;last_update_prefix&quot;>Última atualização (SIROS):&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="10"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.never_updated` appears to be unused"
+        errorLine1="    &lt;string name=&quot;never_updated&quot;>Nunca sincronizado&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="11"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.empty_flights` appears to be unused"
+        errorLine1="    &lt;string name=&quot;empty_flights&quot;>Nenhum voo programado encontrado para esta data ou banco vazio.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="13"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.loading_flights` appears to be unused"
+        errorLine1="    &lt;string name=&quot;loading_flights&quot;>Carregando voos...&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="14"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.error_loading` appears to be unused"
+        errorLine1="    &lt;string name=&quot;error_loading&quot;>Erro ao carregar os dados dos voos.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="15"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.refresh` appears to be unused"
+        errorLine1="    &lt;string name=&quot;refresh&quot;>Recarregar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="16"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.refresh_description` appears to be unused"
+        errorLine1="    &lt;string name=&quot;refresh_description&quot;>Baixar do SIROS e atualizar&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="17"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.flight_number` appears to be unused"
+        errorLine1="    &lt;string name=&quot;flight_number&quot;>Voo&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="18"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.airline` appears to be unused"
+        errorLine1="    &lt;string name=&quot;airline&quot;>Companhia&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="19"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.origin` appears to be unused"
+        errorLine1="    &lt;string name=&quot;origin&quot;>Origem&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="20"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.destination` appears to be unused"
+        errorLine1="    &lt;string name=&quot;destination&quot;>Destino&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="21"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.scheduled_time` appears to be unused"
+        errorLine1="    &lt;string name=&quot;scheduled_time&quot;>Horário Previsto&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="22"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.equipment` appears to be unused"
+        errorLine1="    &lt;string name=&quot;equipment&quot;>Aeronave&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="23"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.search_hint` appears to be unused"
+        errorLine1="    &lt;string name=&quot;search_hint&quot;>Buscar voo, companhia, cidade...&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="24"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.filter_airline` appears to be unused"
+        errorLine1="    &lt;string name=&quot;filter_airline&quot;>Filtrar por companhia&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="25"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.today` appears to be unused"
+        errorLine1="    &lt;string name=&quot;today&quot;>Hoje&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="26"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.yesterday` appears to be unused"
+        errorLine1="    &lt;string name=&quot;yesterday&quot;>Ontem&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="27"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.tomorrow` appears to be unused"
+        errorLine1="    &lt;string name=&quot;tomorrow&quot;>Amanhã&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="28"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.select_date` appears to be unused"
+        errorLine1="    &lt;string name=&quot;select_date&quot;>Selecionar data&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="29"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.detail_title` appears to be unused"
+        errorLine1="    &lt;string name=&quot;detail_title&quot;>Detalhes do voo&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="30"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.detail_flight` appears to be unused"
+        errorLine1="    &lt;string name=&quot;detail_flight&quot;>Voo&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="31"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.detail_airline` appears to be unused"
+        errorLine1="    &lt;string name=&quot;detail_airline&quot;>Companhia&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="32"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.detail_equipment` appears to be unused"
+        errorLine1="    &lt;string name=&quot;detail_equipment&quot;>Aeronave&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="33"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.detail_origin` appears to be unused"
+        errorLine1="    &lt;string name=&quot;detail_origin&quot;>Origem&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="34"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.detail_destination` appears to be unused"
+        errorLine1="    &lt;string name=&quot;detail_destination&quot;>Destino&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="35"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.detail_departure_utc` appears to be unused"
+        errorLine1="    &lt;string name=&quot;detail_departure_utc&quot;>Partida UTC&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="36"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.detail_arrival_utc` appears to be unused"
+        errorLine1="    &lt;string name=&quot;detail_arrival_utc&quot;>Chegada UTC&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="37"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.detail_departure_local` appears to be unused"
+        errorLine1="    &lt;string name=&quot;detail_departure_local&quot;>Partida local&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="38"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.detail_arrival_local` appears to be unused"
+        errorLine1="    &lt;string name=&quot;detail_arrival_local&quot;>Chegada local&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="39"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.detail_siros_status` appears to be unused"
+        errorLine1="    &lt;string name=&quot;detail_siros_status&quot;>Status SIROS&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="40"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.detail_operational_status` appears to be unused"
+        errorLine1="    &lt;string name=&quot;detail_operational_status&quot;>Status operacional&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="41"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.detail_delay` appears to be unused"
+        errorLine1="    &lt;string name=&quot;detail_delay&quot;>Atraso&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="42"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.detail_source` appears to be unused"
+        errorLine1="    &lt;string name=&quot;detail_source&quot;>Fonte&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="43"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.status_unknown` appears to be unused"
+        errorLine1="    &lt;string name=&quot;status_unknown&quot;>Sem confirmação em tempo real&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="44"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.follow_flight` appears to be unused"
+        errorLine1="    &lt;string name=&quot;follow_flight&quot;>Seguir voo&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="45"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.unfollow_flight` appears to be unused"
+        errorLine1="    &lt;string name=&quot;unfollow_flight&quot;>Deixar de seguir&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="46"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.settings` appears to be unused"
+        errorLine1="    &lt;string name=&quot;settings&quot;>Configurações&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="47"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.sources_and_warnings` appears to be unused"
+        errorLine1="    &lt;string name=&quot;sources_and_warnings&quot;>Fontes e avisos&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="48"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.adsb_disclaimer` appears to be unused"
+        errorLine1="    &lt;string name=&quot;adsb_disclaimer&quot;>Posição observada via ADS-B. Pode haver poucas ou nenhuma aeronave nesta região.&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="49"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedResources"
+        message="The resource `R.string.radar_snapshot_time` appears to be unused"
+        errorLine1="    &lt;string name=&quot;radar_snapshot_time&quot;>Dados da fonte consultados às %1$s (horário de Campo Grande)&lt;/string>"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="57"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="TypographyEllipsis"
+        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
+        errorLine1="    &lt;string name=&quot;loading_flights&quot;>Carregando voos...&lt;/string>"
+        errorLine2="                                   ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="14"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="TypographyEllipsis"
+        message="Replace &quot;...&quot; with ellipsis character (…, &amp;#8230;) ?"
+        errorLine1="    &lt;string name=&quot;search_hint&quot;>Buscar voo, companhia, cidade...&lt;/string>"
+        errorLine2="                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/strings.xml"
+            line="24"
+            column="32"/>
+    </issue>
+
+</issues>

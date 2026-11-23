@@ -78,4 +78,8 @@
     <string name="radar_west">O</string>
     <string name="radar_runway_06">06</string>
     <string name="radar_runway_24">24</string>
+    <string name="radar_orientation_north">Norte para cima</string>
+    <string name="radar_orientation_device">Girar com o celular</string>
+    <string name="radar_orientation_unavailable">Sensor de rotação ausente; usando norte para cima.</string>
+    <string name="radar_look_arrow">↑ Você olha para cá</string>
 </resources>

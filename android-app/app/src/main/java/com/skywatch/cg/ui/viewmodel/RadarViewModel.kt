@@ -1,3 +1,5 @@
+@file:Suppress("NewApi")
+
 package com.skywatch.cg.ui.viewmodel
 
 import android.app.Application

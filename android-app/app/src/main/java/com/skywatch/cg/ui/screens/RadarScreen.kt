@@ -1,6 +1,12 @@
+@file:Suppress("NewApi")
+
 package com.skywatch.cg.ui.screens
 
 import android.app.Activity
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -39,6 +45,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
@@ -50,6 +57,8 @@ import com.skywatch.cg.R
 import com.skywatch.cg.data.radar.RadarAircraft
 import com.skywatch.cg.data.radar.RadarRemoteSource
 import com.skywatch.cg.data.radar.RadarSnapshot
+import com.skywatch.cg.data.radar.hasRotationVectorSensor
+import com.skywatch.cg.data.radar.smoothAzimuthDegrees
 import com.skywatch.cg.data.prefs.AppPreferences
 import com.skywatch.cg.ui.theme.SkyWatchColors
 import com.skywatch.cg.ui.viewmodel.RadarViewModel
@@ -69,6 +78,10 @@ fun RadarScreen(
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
     val preferences = remember { AppPreferences.getInstance(context) }
+    val sensorManager = remember { context.getSystemService(SensorManager::class.java) }
+    val rotationSensor = remember { sensorManager?.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR) }
+    var rotateWithDevice by remember { mutableStateOf(rotationSensor != null) }
+    var azimuthDegrees by remember { mutableStateOf(0f) }
     var keepScreenOn by remember { mutableStateOf(preferences.keepScreenOn) }
     var radarWatchEnabled by remember { mutableStateOf(preferences.radarWatchEnabled) }
     DisposableEffect(keepScreenOn) {
@@ -76,6 +89,26 @@ fun RadarScreen(
         if (keepScreenOn) window?.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         else window?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         onDispose { window?.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON) }
+    }
+    DisposableEffect(rotationSensor, rotateWithDevice) {
+        if (!rotateWithDevice || rotationSensor == null || sensorManager == null) {
+            onDispose { }
+        } else {
+            val rotationMatrix = FloatArray(9)
+            val orientation = FloatArray(3)
+            val listener = object : SensorEventListener {
+                override fun onSensorChanged(event: SensorEvent) {
+                    SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
+                    SensorManager.getOrientation(rotationMatrix, orientation)
+                    val current = Math.toDegrees(orientation[0].toDouble()).toFloat()
+                    azimuthDegrees = smoothAzimuthDegrees(azimuthDegrees, current)
+                }
+
+                override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) = Unit
+            }
+            sensorManager.registerListener(listener, rotationSensor, SensorManager.SENSOR_DELAY_GAME)
+            onDispose { sensorManager.unregisterListener(listener) }
+        }
     }
 
     LaunchedEffect(viewModel) {
@@ -133,6 +166,10 @@ fun RadarScreen(
                 radarWatchEnabled = it
                 preferences.radarWatchEnabled = it
             },
+            rotateWithDevice = rotateWithDevice && hasRotationVectorSensor(rotationSensor != null),
+            sensorAvailable = hasRotationVectorSensor(rotationSensor != null),
+            onRotateWithDeviceChanged = { rotateWithDevice = it },
+            headingDegrees = if (rotateWithDevice && rotationSensor != null) azimuthDegrees else 0f,
             onRefresh = viewModel::refresh,
             modifier = Modifier
                 .fillMaxSize()
@@ -146,6 +183,10 @@ private fun RadarContent(
     uiState: RadarUiState,
     radarWatchEnabled: Boolean,
     onRadarWatchChanged: (Boolean) -> Unit,
+    rotateWithDevice: Boolean,
+    sensorAvailable: Boolean,
+    onRotateWithDeviceChanged: (Boolean) -> Unit,
+    headingDegrees: Float,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -155,6 +196,20 @@ private fun RadarContent(
         contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        item {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(onClick = { onRotateWithDeviceChanged(false) }) {
+                    Text(stringResource(R.string.radar_orientation_north))
+                }
+                Button(onClick = { onRotateWithDeviceChanged(true) }, enabled = sensorAvailable) {
+                    Text(stringResource(R.string.radar_orientation_device))
+                }
+            }
+            if (!sensorAvailable) {
+                Text(stringResource(R.string.radar_orientation_unavailable), style = MaterialTheme.typography.labelSmall)
+            }
+        }
+
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 listOf(5.0, 15.0, 50.0).forEach { option ->
@@ -232,7 +287,7 @@ private fun RadarContent(
             }
         } else if (snapshot != null) {
             val visibleAircraft = snapshot.aircraft.filter { it.distanceNauticalMiles <= rangeNm }
-            item { RadarScope(snapshot.copy(aircraft = visibleAircraft), rangeNm) }
+            item { RadarScope(snapshot.copy(aircraft = visibleAircraft), rangeNm, headingDegrees, rotateWithDevice && sensorAvailable) }
             item { SnapshotTime(snapshot) }
             if (visibleAircraft.isEmpty()) {
                 item {
@@ -274,7 +329,7 @@ private fun RadarContent(
 }
 
 @Composable
-private fun RadarScope(snapshot: RadarSnapshot, rangeNm: Double) {
+private fun RadarScope(snapshot: RadarSnapshot, rangeNm: Double, headingDegrees: Float, showLookArrow: Boolean) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -287,7 +342,7 @@ private fun RadarScope(snapshot: RadarSnapshot, rangeNm: Double) {
                 .padding(16.dp),
             contentAlignment = Alignment.Center
         ) {
-            Canvas(Modifier.fillMaxSize()) {
+            Canvas(Modifier.fillMaxSize().graphicsLayer { rotationZ = -headingDegrees }) {
                 val center = Offset(size.width / 2, size.height / 2)
                 val radius = size.minDimension * 0.44f
                 val scopeColor = SkyWatchColors.ArrivalAccent.copy(alpha = 0.6f)
@@ -352,6 +407,9 @@ private fun RadarScope(snapshot: RadarSnapshot, rangeNm: Double) {
             Text(stringResource(R.string.radar_west), Modifier.align(Alignment.CenterStart), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 16.sp)
             Text(stringResource(R.string.radar_runway_06), Modifier.align(Alignment.BottomStart).padding(20.dp), color = SkyWatchColors.DepartureAccent, fontSize = 12.sp)
             Text(stringResource(R.string.radar_runway_24), Modifier.align(Alignment.TopEnd).padding(20.dp), color = SkyWatchColors.DepartureAccent, fontSize = 12.sp)
+            if (showLookArrow) {
+                Text(stringResource(R.string.radar_look_arrow), Modifier.align(Alignment.TopCenter).padding(top = 18.dp), color = SkyWatchColors.DepartureAccent, fontSize = 22.sp)
+            }
         }
         Row(
             modifier = Modifier
