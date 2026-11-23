@@ -1,5 +1,16 @@
 # Estado do projeto
 
+## Bússola do radar - 2026-11-23
+- `RadarScreen` registra `TYPE_ROTATION_VECTOR` somente enquanto a tela está ativa e cancela o listener no descarte do composable.
+- O desenho gira pelo azimute suavizado; o usuário pode escolher norte fixo ou girar com o celular. Sem sensor, o botão fica desabilitado e o radar permanece estável.
+- Versão de desenvolvimento: 1.0.25.
+
+## Atualização do radar - 2026-11-22
+- Regras de alerta usam as cabeceiras 06/24 de SBCG, distância máxima de 15 NM para pouso e 6 NM para decolagem, AGL, eixo aproximado e idade máxima de 60 s.
+- `RadarCommercialMatcher` compara callsigns reconhecidos com voos SIROS em cache em janela UTC de +/-90 minutos; não transforma uma observação sem correspondência em voo identificado.
+- A tela permite escala de 5/15/50 NM. Orientação por sensor e representação completa de pista/cabeceiras ainda não foram validadas nesta rodada.
+- Teste focado: `RadarAlertRulesTest` e `RadarCommercialMatcherTest`, 12 testes, 0 falhas; build completo ainda pendente.
+
 ## Auditoria final das secoes 8 e 9
 
 - Checker de release migrado para parser `org.json`, validado contra snapshot real de `releases/latest` (`v1.0.23`).

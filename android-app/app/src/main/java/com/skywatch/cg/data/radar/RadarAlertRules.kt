@@ -9,10 +9,14 @@ data class RadarAlert(
     val type: RadarAlertType,
     val distanceNauticalMiles: Double,
     val estimatedMinutes: Int?,
-    val bearingDegrees: Double = 0.0
+    val bearingDegrees: Double = 0.0,
+    val runway: String? = null,
+    val directionDegrees: Double = bearingDegrees,
+    val commercialMatch: CommercialMatchStatus = CommercialMatchStatus.UNKNOWN,
+    val plannedRoute: String? = null
 ) {
     val lookDirection: String
-        get() = directionForBearing(bearingDegrees)
+        get() = directionForBearing(directionDegrees)
 }
 
 fun directionForBearing(bearingDegrees: Double): String {
@@ -22,16 +26,17 @@ fun directionForBearing(bearingDegrees: Double): String {
 }
 
 object RadarAlertRules {
-    const val MAX_POSITION_AGE_SECONDS = 120.0
-    const val MIN_MOVING_GROUND_SPEED_KNOTS = 5.0
+    const val MAX_POSITION_AGE_SECONDS = 60.0
+    const val MIN_MOVING_GROUND_SPEED_KNOTS = 60.0
     const val HELICOPTER_EMITTER_CATEGORY = "A7"
-    const val ARRIVAL_MAX_DISTANCE_NM = 25.0
-    const val DEPARTURE_MAX_DISTANCE_NM = 8.0
-    const val ARRIVAL_HEADING_TOLERANCE_DEGREES = 60.0
+    const val ARRIVAL_MAX_DISTANCE_NM = 15.0
+    const val DEPARTURE_MAX_DISTANCE_NM = 6.0
+    const val RUNWAY_HEADING_TOLERANCE_DEGREES = 25.0
+    const val APPROACH_AXIS_TOLERANCE_DEGREES = 35.0
     const val ARRIVAL_DESCENT_RATE_FPM = -300
-    const val ARRIVAL_MAX_AGL_FEET = 10_000
+    const val ARRIVAL_MAX_AGL_FEET = 5_000
     const val DEPARTURE_CLIMB_RATE_FPM = 500
-    const val DEPARTURE_MAX_AGL_FEET = 6_000
+    const val DEPARTURE_MAX_AGL_FEET = 3_500
     const val HIGH_PASSING_AGL_FEET = 20_000
     const val ALERT_COOLDOWN_MILLIS = 20 * 60 * 1_000L
 
@@ -45,7 +50,7 @@ object RadarAlertRules {
             !aircraft.distanceNauticalMiles.isFinite() || aircraft.distanceNauticalMiles < 0.0
         ) return null
         if (aircraft.emitterCategory == HELICOPTER_EMITTER_CATEGORY) return null
-        if (aircraft.groundSpeedKnots == null || aircraft.groundSpeedKnots < MIN_MOVING_GROUND_SPEED_KNOTS) return null
+        val speed = aircraft.groundSpeedKnots ?: return null
         val rate = aircraft.barometricRateFeetPerMinute
             ?: aircraft.geometricRateFeetPerMinute
             ?: trend?.verticalRateFeetPerMinute
@@ -54,33 +59,63 @@ object RadarAlertRules {
         if (aircraft.distanceNauticalMiles <= ARRIVAL_MAX_DISTANCE_NM &&
             rate <= ARRIVAL_DESCENT_RATE_FPM &&
             agl <= ARRIVAL_MAX_AGL_FEET &&
-            headingPointsToAirport(aircraft)
+            speed >= MIN_MOVING_GROUND_SPEED_KNOTS &&
+            trendAllowsArrival(trend)
         ) {
+            val runway = matchingRunway(aircraft, arrival = true) ?: return@evaluate null
             return RadarAlert(
                 RadarAlertType.ARRIVAL,
                 aircraft.distanceNauticalMiles,
                 estimateMinutes(aircraft),
+                aircraft.bearingDegrees,
+                runway,
                 aircraft.bearingDegrees
             )
         }
         if (aircraft.distanceNauticalMiles <= DEPARTURE_MAX_DISTANCE_NM &&
-            rate >= DEPARTURE_CLIMB_RATE_FPM && agl <= DEPARTURE_MAX_AGL_FEET
+            agl <= DEPARTURE_MAX_AGL_FEET &&
+            (rate >= DEPARTURE_CLIMB_RATE_FPM ||
+                (agl <= 100 && speed >= 80.0 && (aircraft.groundSpeedChangeKnotsPerMinute ?: 0.0) > 0.0))
         ) {
+            val runway = matchingRunway(aircraft, arrival = false) ?: return@evaluate null
+            val direction = aircraft.trackDegrees ?: return@evaluate null
+            val movingAway = trend == null || trend.samples.size < 2 || trend.distanceTrend == RadarDistanceTrend.RECEDING
+            val onRunway = agl <= 100 && isOnRunwayAxis(aircraft, direction)
+            if (!movingAway && !onRunway) return null
             return RadarAlert(
                 RadarAlertType.DEPARTURE,
                 aircraft.distanceNauticalMiles,
-                null,
-                aircraft.bearingDegrees
+                estimateMinutes(aircraft),
+                aircraft.bearingDegrees,
+                runway,
+                direction
             )
         }
         return null
     }
 
-    private fun headingPointsToAirport(aircraft: RadarAircraft): Boolean {
-        val track = aircraft.trackDegrees ?: return false
-        val target = (aircraft.bearingDegrees + 180.0) % 360.0
-        val delta = abs(track - target)
-        return min(delta, 360.0 - delta) <= ARRIVAL_HEADING_TOLERANCE_DEGREES
+    private fun matchingRunway(aircraft: RadarAircraft, arrival: Boolean): String? {
+        val track = aircraft.trackDegrees ?: return null
+        val candidates = listOf(
+            "06" to RadarAirportConfig.RUNWAY_06_TRUE_HEADING_DEGREES,
+            "24" to RadarAirportConfig.RUNWAY_24_TRUE_HEADING_DEGREES
+        )
+        return candidates.firstOrNull { (_, heading) ->
+            val aligned = angularDistance(track, heading) <= RUNWAY_HEADING_TOLERANCE_DEGREES
+            val expectedBearing = if (arrival) (heading + 180.0) % 360.0 else (track + 180.0) % 360.0
+            aligned && angularDistance(aircraft.bearingDegrees, expectedBearing) <= APPROACH_AXIS_TOLERANCE_DEGREES
+        }?.first
+    }
+
+    private fun isOnRunwayAxis(aircraft: RadarAircraft, track: Double): Boolean =
+        angularDistance(aircraft.bearingDegrees, (track + 180.0) % 360.0) <= APPROACH_AXIS_TOLERANCE_DEGREES
+
+    private fun trendAllowsArrival(trend: RadarAircraftTrend?): Boolean =
+        trend == null || (trend.samples.size < 2 && trend.distanceTrend == RadarDistanceTrend.UNKNOWN) || trend.distanceTrend == RadarDistanceTrend.APPROACHING
+
+    private fun angularDistance(first: Double, second: Double): Double {
+        val delta = abs(first - second) % 360.0
+        return min(delta, 360.0 - delta)
     }
 
     private fun estimateMinutes(aircraft: RadarAircraft): Int? =

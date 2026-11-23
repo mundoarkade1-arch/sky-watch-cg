@@ -178,3 +178,8 @@
 - [x] Abrir a tela Radar ao tocar no alerta.
 - [x] Aplicar `statusBarsPadding` e remover o qualificador de protótipo da UI.
 
+# Atualização 2026-11-23
+
+- [x] Orientação opcional do radar pela bússola do celular, com fallback sem sensor e testes matemáticos.
+- [ ] Validar a orientação visual em aparelho físico Android.
+

@@ -71,4 +71,15 @@
     <string name="radar_title">Radar</string>
     <string name="radar_attribution_plain">Fontes ADS-B: adsb.lol, airplanes.live e adsb.fi. São observações, não horários nem confirmação operacional.</string>
     <string name="radar_alert_detected">VOO DETECTADO</string>
+    <string name="radar_range_chip">%1$d NM</string>
+    <string name="radar_north">N</string>
+    <string name="radar_east">L</string>
+    <string name="radar_south">S</string>
+    <string name="radar_west">O</string>
+    <string name="radar_runway_06">06</string>
+    <string name="radar_runway_24">24</string>
+    <string name="radar_orientation_north">Norte para cima</string>
+    <string name="radar_orientation_device">Girar com o celular</string>
+    <string name="radar_orientation_unavailable">Sensor de rotação ausente; usando norte para cima.</string>
+    <string name="radar_look_arrow">↑ Você olha para cá</string>
 </resources>

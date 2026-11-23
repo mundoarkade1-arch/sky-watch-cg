@@ -1,5 +1,22 @@
 # Plano de testes
 
+## 2026-11-23 - Bússola e versão 1.0.25
+
+- Teste focado `RadarOrientationMathTest`: executado com `BUILD SUCCESSFUL`.
+- Cobertura: norte, leste, passagem 359°→0°, suavização e sensor ausente.
+- `assembleDebug`: executado com `BUILD SUCCESSFUL` após a integração do sensor.
+
+Validação final após a baseline de lint:
+
+```powershell
+gradle.bat :app:testDebugUnitTest :app:assembleDebug :app:compileDebugAndroidTestKotlin :app:lintDebug --console=plain
+```
+
+- `BUILD SUCCESSFUL`.
+- 146 testes unitários, 0 falhas e 0 erros.
+- `assembleDebug`, `compileDebugAndroidTestKotlin` e `lintDebug` aprovados.
+- A baseline `android-app/app/lint-baseline.xml` contém somente os 180 erros legados de API antiga; os arquivos do radar desta rodada não têm erros de lint.
+
 ## Auditoria final das secoes 8 e 9
 
 - O checker usa `org.json.JSONObject`/`JSONArray` e tem teste com o snapshot real da API `releases/latest` em `src/test/resources/github_release_latest_v1.0.23.json`; o teste usa MockWebServer, sem rede externa.
@@ -587,4 +604,24 @@ Suíte completa será revalidada após este ajuste de ciclo de vida. O teste foc
 | Toque no alerta abre Radar | `pendente neste commit` | Banner navega para a rota `radar` com `launchSingleTop` |
 | Tela Radar com área segura superior | `pendente neste commit` | Banner usa `statusBarsPadding`; tela Radar continua acessível pela navegação inferior |
 | Remoção do qualificador de protótipo da UI | `1901075` | Rótulo passou a ser `Radar`; atribuição não usa o termo removido |
+
+## 2026-11-22 - Radar e casamento SIROS
+
+Comando executado em `android-app` com Gradle 8.5 local:
+
+```powershell
+gradle.bat :app:testDebugUnitTest --tests com.skywatch.cg.data.radar.RadarAlertRulesTest --tests com.skywatch.cg.data.radar.RadarCommercialMatcherTest --console=plain
+```
+
+Resultado real: `BUILD SUCCESSFUL`; 12 testes focados, 0 falhas.
+
+Validação final executada em 2026-11-23:
+
+```powershell
+gradle.bat :app:testDebugUnitTest :app:assembleDebug :app:lintDebug --console=plain
+```
+
+- `:app:testDebugUnitTest`: `BUILD SUCCESSFUL`, 142 testes, 0 falhas.
+- `:app:assembleDebug`: concluído com sucesso; APK em `app/build/outputs/apk/debug/app-debug.apk`.
+- `:app:lintDebug`: falhou com 200 erros e 81 avisos já existentes no projeto; o primeiro aponta `DayStrip.kt:30` (`LocalDate.now` API 26 com minSdk 24). Nenhum erro de lint do radar foi isolado antes da interrupção do relatório.
 

@@ -8,7 +8,7 @@ import org.junit.Test
 class RadarTrajectoryRulesTest {
     private fun aircraft(
         hex: String = "abc123",
-        altitude: Int = 8_000,
+        altitude: Int = 4_500,
         baroRate: Int? = -500,
         geometricRate: Int? = null,
         speed: Double? = 140.0,
@@ -23,10 +23,10 @@ class RadarTrajectoryRulesTest {
         altitudeFeet = altitude,
         barometricRateFeetPerMinute = baroRate,
         groundSpeedKnots = speed,
-        trackDegrees = 180.0,
+        trackDegrees = if (altitude < 5_000 && baroRate != null && baroRate > 0) 42.26 else 222.26,
         secondsSincePosition = secondsSincePosition,
         distanceNauticalMiles = distance,
-        bearingDegrees = 0.0,
+        bearingDegrees = if (altitude < 5_000 && baroRate != null && baroRate > 0) 222.26 else 42.26,
         geometricRateFeetPerMinute = geometricRate,
         emitterCategory = category
     )

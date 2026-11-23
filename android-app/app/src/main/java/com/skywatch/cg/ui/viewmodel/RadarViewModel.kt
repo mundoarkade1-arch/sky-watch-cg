@@ -1,3 +1,5 @@
+@file:Suppress("NewApi")
+
 package com.skywatch.cg.ui.viewmodel
 
 import android.app.Application
@@ -12,6 +14,8 @@ import com.skywatch.cg.data.radar.RadarAlertRules
 import com.skywatch.cg.data.radar.RadarAlertHysteresis
 import com.skywatch.cg.data.radar.RadarAircraftHistory
 import com.skywatch.cg.data.radar.RadarSurveillance
+import com.skywatch.cg.data.radar.RadarCommercialMatcher
+import com.skywatch.cg.data.siros.NormalizedFlight
 import com.skywatch.cg.data.prefs.AppPreferences
 import androidx.lifecycle.Lifecycle
 import kotlinx.coroutines.Job
@@ -21,6 +25,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.IOException
+import java.time.Instant
 
 data class RadarUiState(
     val isLoading: Boolean = false,
@@ -44,8 +49,13 @@ class RadarViewModel(
     private val alertHysteresis = RadarAlertHysteresis()
     private val aircraftHistory = RadarAircraftHistory()
     private val activeAlerts = mutableMapOf<String, RadarAlert>()
+    @Volatile private var plannedFlights: List<NormalizedFlight> = emptyList()
     private var surveillanceJob: Job? = null
     val uiState: StateFlow<RadarUiState> = mutableUiState.asStateFlow()
+
+    fun setPlannedFlights(flights: List<NormalizedFlight>) {
+        plannedFlights = flights
+    }
 
     fun refresh() {
         if (mutableUiState.value.isLoading) return
@@ -98,7 +108,9 @@ class RadarViewModel(
         val candidates = snapshot.aircraft.mapNotNull { aircraft ->
             val trend = aircraftHistory.observe(aircraft, snapshot.observedAtMillis)
             val candidate = RadarAlertRules.evaluate(aircraft, trend)
-            val active = alertHysteresis.retain(aircraft, candidate, activeAlerts[aircraft.icaoHex])
+            val match = RadarCommercialMatcher.match(aircraft.callsign, Instant.ofEpochMilli(snapshot.observedAtMillis), plannedFlights)
+            val enriched = candidate?.copy(commercialMatch = match.status, plannedRoute = match.description)
+            val active = alertHysteresis.retain(aircraft, enriched, activeAlerts[aircraft.icaoHex])
             active?.let { aircraft.icaoHex to (it to candidate) }
         }
         activeAlerts.clear()

@@ -54,6 +54,25 @@ class GitHubReleaseUpdateCheckerTest {
     }
 
     @Test
+    fun realLatestV1024IsAvailableForV1023AndUpToDateForV1024() = runTest {
+        val latestJson = requireNotNull(javaClass.classLoader?.getResourceAsStream("github_release_latest_v1.0.24.json"))
+            .bufferedReader()
+            .use { it.readText() }
+        server.enqueue(MockResponse().setResponseCode(200).setBody(latestJson))
+        server.enqueue(MockResponse().setResponseCode(200).setBody(latestJson))
+
+        val available = checker(installedVersion = "1.0.23").check()
+        val upToDate = checker(installedVersion = "1.0.24").check()
+
+        assertTrue(available is UpdateCheckResult.Available)
+        val availableRelease = (available as UpdateCheckResult.Available).release
+        println("installedVersion=1.0.23 result=Available version=${availableRelease.version} apkUrl=${availableRelease.apkUrl}")
+        println("installedVersion=1.0.24 result=$upToDate")
+        assertTrue(availableRelease.apkUrl?.isNotBlank() == true)
+        assertEquals(UpdateCheckResult.UpToDate, upToDate)
+    }
+
+    @Test
     fun reportsUpToDateWhenPublishedVersionIsNotNewer() = runTest {
         server.enqueue(MockResponse().setResponseCode(200).setBody(releaseJson("1.0.9")))
 
