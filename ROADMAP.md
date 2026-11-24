@@ -1,5 +1,11 @@
 # Roadmap
 
+## Melhoria de orientação e leitura do radar - 2026-11-23
+- [x] Unificar a rotação dos pontos, cardeais e cabeceiras.
+- [x] Identificar o aeroporto CGR/SBCG no centro e explicar o ponto amarelo.
+- [x] Preservar a distinção entre posição ADS-B observada e aeroporto.
+- [ ] Validar em aparelho Android e executar build/testes após configurar o Android SDK.
+
 ## Auditoria final das secoes 8 e 9
 
 - [x] Parser de release em `org.json` com fixture real de `releases/latest`.

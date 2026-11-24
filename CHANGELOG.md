@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-23 - Clareza visual do radar
+- Pontos ADS-B, cardeais e cabeceiras agora giram juntos no modo “Girar com o celular”.
+- A seta de referência do aparelho permanece fixa na tela.
+- O centro foi identificado como “AEROPORTO CGR / SBCG”, com legenda explícita de que o ponto amarelo é o aeroporto.
+- Diagnóstico do editor sem erros; build/testes pendentes por falta de Android SDK configurado.
+
 ## 2026-11-23 - Bússola do radar e versão 1.0.25
 - Adicionado suporte ao sensor `TYPE_ROTATION_VECTOR`, com suavização do azimute e desligamento automático ao sair da tela.
 - Radar agora alterna entre norte fixo e rotação pelo celular; aparelhos sem sensor continuam funcionando em norte fixo.

@@ -1,5 +1,11 @@
 # Estado do projeto
 
+## Clareza visual do radar - 2026-11-23
+- Desenho, pontos ADS-B, cardeais e cabeceiras 06/24 usam a mesma rotação no modo celular.
+- A seta “Você olha para cá” fica fixa como referência física da tela.
+- O centro é identificado como `AEROPORTO CGR / SBCG`; não representa uma aeronave.
+- Diagnóstico do editor sem erros. Build/testes pendentes por falta de Android SDK configurado.
+
 ## Bússola do radar - 2026-11-23
 - `RadarScreen` registra `TYPE_ROTATION_VECTOR` somente enquanto a tela está ativa e cancela o listener no descarte do composable.
 - O desenho gira pelo azimute suavizado; o usuário pode escolher norte fixo ou girar com o celular. Sem sensor, o botão fica desabilitado e o radar permanece estável.

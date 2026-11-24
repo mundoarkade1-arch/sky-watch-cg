@@ -625,3 +625,23 @@ gradle.bat :app:testDebugUnitTest :app:assembleDebug :app:lintDebug --console=pl
 - `:app:assembleDebug`: concluído com sucesso; APK em `app/build/outputs/apk/debug/app-debug.apk`.
 - `:app:lintDebug`: falhou com 200 erros e 81 avisos já existentes no projeto; o primeiro aponta `DayStrip.kt:30` (`LocalDate.now` API 26 com minSdk 24). Nenhum erro de lint do radar foi isolado antes da interrupção do relatório.
 
+## 2026-11-23 - Clareza visual do radar
+
+Inspeção do código e diagnóstico do editor:
+
+- `RadarScreen.kt`: rosa, pontos ADS-B, cardeais e cabeceiras giram em conjunto; o marcador central identifica `AEROPORTO CGR / SBCG`.
+- `strings.xml`: adicionados estado do modo de orientação e legenda do ponto amarelo.
+- Diagnóstico do editor: nenhum erro encontrado em `RadarScreen.kt`.
+
+Tentativa de validação automatizada:
+
+```powershell
+.\gradlew.bat :app:testDebugUnitTest --tests com.skywatch.cg.data.radar.RadarOrientationMathTest --tests com.skywatch.cg.ui.viewmodel.RadarViewModelTest :app:assembleDebug --console=plain --no-daemon
+```
+
+Resultado: a compilação não começou porque o ambiente não tem Android SDK configurado; `ANDROID_HOME`/`local.properties` não apontam para um SDK válido. Build e testes permanecem pendentes.
+
+## 2026-11-23 - Tentativa de teste em aparelho USB
+
+O APK Debug existente foi localizado em `android-app/app/build/outputs/apk/debug/app-debug.apk`, mas o teste no aparelho não foi iniciado porque o comando `adb` e o Android Platform-Tools não estão instalados ou disponíveis no PATH desta sessão. Nenhuma instalação foi feita no celular e nenhum log do aparelho foi coletado.
+

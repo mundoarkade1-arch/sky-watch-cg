@@ -205,6 +205,18 @@ private fun RadarContent(
                     Text(stringResource(R.string.radar_orientation_device))
                 }
             }
+            Text(
+                text = stringResource(
+                    if (rotateWithDevice && sensorAvailable) {
+                        R.string.radar_orientation_device_active
+                    } else {
+                        R.string.radar_orientation_north_active
+                    }
+                ),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp)
+            )
             if (!sensorAvailable) {
                 Text(stringResource(R.string.radar_orientation_unavailable), style = MaterialTheme.typography.labelSmall)
             }
@@ -288,6 +300,13 @@ private fun RadarContent(
         } else if (snapshot != null) {
             val visibleAircraft = snapshot.aircraft.filter { it.distanceNauticalMiles <= rangeNm }
             item { RadarScope(snapshot.copy(aircraft = visibleAircraft), rangeNm, headingDegrees, rotateWithDevice && sensorAvailable) }
+            item {
+                Text(
+                    text = stringResource(R.string.radar_airport_legend),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = SkyWatchColors.DepartureAccent
+                )
+            }
             item { SnapshotTime(snapshot) }
             if (visibleAircraft.isEmpty()) {
                 item {
@@ -342,7 +361,14 @@ private fun RadarScope(snapshot: RadarSnapshot, rangeNm: Double, headingDegrees:
                 .padding(16.dp),
             contentAlignment = Alignment.Center
         ) {
-            Canvas(Modifier.fillMaxSize().graphicsLayer { rotationZ = -headingDegrees }) {
+            // A rosa inteira gira junto: desenho, pontos, cardeais e cabeceiras.
+            // Isso evita que os rótulos fiquem presos à tela enquanto o radar gira.
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer { rotationZ = -headingDegrees }
+            ) {
+            Canvas(Modifier.fillMaxSize()) {
                 val center = Offset(size.width / 2, size.height / 2)
                 val radius = size.minDimension * 0.44f
                 val scopeColor = SkyWatchColors.ArrivalAccent.copy(alpha = 0.6f)
@@ -407,6 +433,14 @@ private fun RadarScope(snapshot: RadarSnapshot, rangeNm: Double, headingDegrees:
             Text(stringResource(R.string.radar_west), Modifier.align(Alignment.CenterStart), color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 16.sp)
             Text(stringResource(R.string.radar_runway_06), Modifier.align(Alignment.BottomStart).padding(20.dp), color = SkyWatchColors.DepartureAccent, fontSize = 12.sp)
             Text(stringResource(R.string.radar_runway_24), Modifier.align(Alignment.TopEnd).padding(20.dp), color = SkyWatchColors.DepartureAccent, fontSize = 12.sp)
+            Text(
+                text = stringResource(R.string.radar_airport_marker),
+                modifier = Modifier.align(Alignment.Center).padding(top = 28.dp),
+                color = SkyWatchColors.DepartureAccent,
+                fontSize = 10.sp,
+                fontWeight = FontWeight.Bold
+            )
+            }
             if (showLookArrow) {
                 Text(stringResource(R.string.radar_look_arrow), Modifier.align(Alignment.TopCenter).padding(top = 18.dp), color = SkyWatchColors.DepartureAccent, fontSize = 22.sp)
             }

@@ -69,6 +69,8 @@
     <string name="radar_load">Carregar radar</string>
     <string name="radar_watch_label">Vigília automática (a cada 10 s)</string>
     <string name="radar_title">Radar</string>
+    <string name="radar_airport_marker">AEROPORTO CGR / SBCG</string>
+    <string name="radar_airport_legend">Ponto amarelo: aeroporto CGR / SBCG (centro do radar)</string>
     <string name="radar_attribution_plain">Fontes ADS-B: adsb.lol, airplanes.live e adsb.fi. São observações, não horários nem confirmação operacional.</string>
     <string name="radar_alert_detected">VOO DETECTADO</string>
     <string name="radar_range_chip">%1$d NM</string>
@@ -80,6 +82,8 @@
     <string name="radar_runway_24">24</string>
     <string name="radar_orientation_north">Norte para cima</string>
     <string name="radar_orientation_device">Girar com o celular</string>
+    <string name="radar_orientation_north_active">Modo norte fixo: os pontos mantêm o rumo geográfico.</string>
+    <string name="radar_orientation_device_active">Modo celular: cardeais e pontos giram juntos com a orientação.</string>
     <string name="radar_orientation_unavailable">Sensor de rotação ausente; usando norte para cima.</string>
     <string name="radar_look_arrow">↑ Você olha para cá</string>
 </resources>
